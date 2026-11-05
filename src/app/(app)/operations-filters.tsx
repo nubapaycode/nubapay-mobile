@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -15,6 +15,9 @@ import {
   STATUS_FILTER_LABEL,
   useOperationFilters,
 } from '@/features/operations/operations';
+import { useSelectedEventId } from '@/features/dashboard/selected-event';
+import { purgeTestOrders } from '@/lib/api/organizer';
+import { invalidate } from '@/lib/query';
 import { makeStyles } from '@/theme';
 
 const keys = <T extends string>(o: Record<T, string>) => Object.keys(o) as T[];
@@ -35,6 +38,40 @@ function FiltersContent() {
   const [status, setStatus] = useState<RetrievalFilter>(current.status);
   const [payment, setPayment] = useState<PaymentStatusFilter>(current.payment);
   const [channel, setChannel] = useState<ChannelFilter>(current.channel);
+  const eventId = useSelectedEventId();
+
+  // Pedidos de prueba (cargas de QA) que nunca se pagaron: el backend borra solo esos.
+  const purge = () =>
+    Alert.alert(
+      'Borrar pedidos de prueba',
+      'Se eliminan los pedidos marcados como prueba que siguen sin pagar. Los pedidos reales no se tocan.',
+      [
+        { text: 'Volver', style: 'cancel' },
+        {
+          text: 'Borrar',
+          style: 'destructive',
+          onPress: async () => {
+            if (!eventId) return;
+            const res = await purgeTestOrders(eventId);
+            if (!res.ok) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              Alert.alert('No se pudo borrar', res.error);
+              return;
+            }
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            invalidate(`orders:${eventId}`);
+            dismiss(() =>
+              Alert.alert(
+                'Listo',
+                res.data.deleted
+                  ? `Se borraron ${res.data.deleted} pedido${res.data.deleted === 1 ? '' : 's'} de prueba.`
+                  : 'No había pedidos de prueba sin pagar.',
+              ),
+            );
+          },
+        },
+      ],
+    );
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -65,6 +102,9 @@ function FiltersContent() {
         accessibilityRole="button"
         style={({ pressed }) => [styles.apply, pressed && { opacity: 0.85 }]}>
         <Text style={styles.applyText}>Aplicar</Text>
+      </Pressable>
+      <Pressable onPress={purge} hitSlop={6} accessibilityRole="button" style={({ pressed }) => [styles.purge, pressed && { opacity: 0.5 }]}>
+        <Text style={styles.purgeText}>Borrar pedidos de prueba sin pagar</Text>
       </Pressable>
     </ScrollView>
   );
@@ -124,6 +164,8 @@ const useStyles = makeStyles((c) =>
     chipOn: { backgroundColor: '#000000' },
     chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
     chipTextOn: { color: '#ffffff' },
+    purge: { alignItems: 'center', paddingVertical: 6 },
+    purgeText: { color: c.danger, fontSize: 14, fontWeight: '600' },
     apply: {
       height: 54,
       borderRadius: Radius.xl,

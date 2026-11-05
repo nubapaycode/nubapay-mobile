@@ -23,6 +23,7 @@ import { Sheet, useSheet } from "@/components/ui/sheet";
 import { DisplayFont, Radius, Spacing } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import {
+  comboPickerMode,
   comboPickerSelection,
   finishComboPicker,
 } from "@/features/manage/combo-picker";
@@ -32,7 +33,7 @@ import { makeStyles, useTheme } from "@/theme";
 const NO_CATEGORY = "Sin categoría";
 
 /**
- * Elegir los productos de un combo, en una hoja: buscador y los productos simples del catálogo
+ * Elegir los productos de un combo (o de un bloque de la tienda), en una hoja: buscador y los productos simples del catálogo
  * agrupados por categoría (foto, nombre y precio). Se marcan/desmarcan varios; el pie muestra
  * cuántos van y "Listo" devuelve la selección al formulario (las cantidades se ajustan allá).
  */
@@ -51,11 +52,13 @@ function ComboProductsContent() {
   const { height } = useWindowDimensions();
   const { products } = useProducts();
   const [selected, setSelected] = useState<string[]>(comboPickerSelection);
+  const [mode] = useState(comboPickerMode);
+  const isBlock = mode === "block";
   const [query, setQuery] = useState("");
 
   const singles = useMemo(
-    () => (products ?? []).filter((p) => p.type === "single"),
-    [products],
+    () => (products ?? []).filter((p) => isBlock || p.type === "single"),
+    [products, isBlock],
   );
   const q = query.trim().toLowerCase();
   const groups = useMemo(() => {
@@ -87,9 +90,13 @@ function ComboProductsContent() {
     <View style={[styles.root, { height: height * 0.82 }]}>
       <View style={styles.head}>
         <View style={{ gap: 2, paddingHorizontal: 4 }}>
-          <Text style={styles.title}>Productos del combo</Text>
+          <Text style={styles.title}>
+            {isBlock ? "Productos del bloque" : "Productos del combo"}
+          </Text>
           <Text style={styles.subtitle}>
-            Marcá lo que incluye. Las cantidades las ajustás después.
+            {isBlock
+              ? "Marcá los que se muestran en el bloque, en el orden en que los elegís."
+              : "Marcá lo que incluye. Las cantidades las ajustás después."}
           </Text>
         </View>
         <View style={{ flexDirection: "row" }}>
@@ -112,7 +119,11 @@ function ComboProductsContent() {
           <EmptyState
             icon="store"
             title="Sin productos"
-            text="Todavía no hay productos en el catálogo para armar el combo."
+            text={
+              isBlock
+                ? "Todavía no hay productos en el catálogo."
+                : "Todavía no hay productos en el catálogo para armar el combo."
+            }
           />
         ) : groups.length === 0 ? (
           <EmptyState

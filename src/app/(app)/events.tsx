@@ -13,10 +13,11 @@ import { eventPhase } from '@/features/dashboard/format';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import type { EventPhase, EventSummary } from '@/features/dashboard/types';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
-import { openAddEvent, WEB_URL } from '@/features/events/add-event';
+import { useEventAccess } from '@/features/access/access';
+import { openAddEvent } from '@/features/events/add-event';
 import { confirmDeleteEvent } from '@/features/events/event-actions';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { makeStyles, useTheme } from '@/theme';
+import { makeStyles } from '@/theme';
 
 const GROUPS: { phase: EventPhase; title: string }[] = [
   { phase: 'live', title: 'En vivo' },
@@ -27,14 +28,14 @@ const GROUPS: { phase: EventPhase; title: string }[] = [
 
 /**
  * Página de eventos: todos los eventos agrupados por estado, crear uno nuevo y deslizar a la
- * izquierda para eliminar (solo la UI por ahora). Tocar un evento lo selecciona y vuelve al home.
+ * izquierda para editar o eliminar. Tocar un evento lo selecciona y vuelve al home.
  */
 export default function EventsScreen() {
   const styles = useStyles();
-  const { colors } = useTheme();
   const { events } = useEvents();
   const selectedId = useSelectedEventId();
   const [openId, setOpenId] = useState<string | null>(null);
+  const { canCreateEvents } = useEventAccess();
   useFocusStatusBar('dark');
 
   const all = events ?? [];
@@ -54,20 +55,18 @@ export default function EventsScreen() {
     <>
       <Stack.Screen
         options={{
-          headerRight: () => (
-            <Pressable
-              onPress={() => openAddEvent(colors.primary)}
-              disabled={!WEB_URL}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Agregar evento"
-              style={({ pressed }) => [
-                styles.headerAdd,
-                (pressed || !WEB_URL) && { opacity: 0.5 },
-              ]}>
-              <Icon name="plus" size={14} color="#000000" />
-            </Pressable>
-          ),
+          headerRight: canCreateEvents
+            ? () => (
+                <Pressable
+                  onPress={openAddEvent}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="Agregar evento"
+                  style={({ pressed }) => [styles.headerAdd, pressed && { opacity: 0.5 }]}>
+                  <Icon name="plus" size={14} color="#000000" />
+                </Pressable>
+              )
+            : undefined,
         }}
       />
       <ScrollView

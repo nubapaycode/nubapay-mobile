@@ -10,6 +10,8 @@ import { BentoGrid } from '@/components/dashboard/bento-grid';
 import { HeroSection } from '@/components/dashboard/hero-section';
 import { DashboardSkeleton } from '@/components/dashboard/skeleton';
 import { Button } from '@/components/ui';
+import { NoAccess } from '@/components/ui/no-access';
+import { useEventAccess } from '@/features/access/access';
 import { Spacing } from '@/constants/theme';
 import {
   activeFilterCount,
@@ -23,7 +25,7 @@ import {
 import { eventPhase } from '@/features/dashboard/format';
 import { eventOffer, singleOffer } from '@/features/dashboard/offer';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
-import { USE_MOCK, useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
+import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useAuth } from '@/providers/auth-provider';
 import { light, makeStyles, PaletteScope, useTheme } from '@/theme';
@@ -73,7 +75,10 @@ function HomeContent() {
     setDashboardFilters(null);
   }, [selectedId]);
 
-  const { state, refreshing, refresh } = useEventDashboard(selectedId, filters);
+  // Sin permiso de métricas no se piden (el backend respondería 403 en cada actualización).
+  const { can } = useEventAccess();
+  const canView = can('dashboard');
+  const { state, refreshing, refresh } = useEventDashboard(canView ? selectedId : null, filters);
   const data = state.status === 'ready' ? state.data : null;
   // Si se filtró por tipo, ese; si el evento vende una sola cosa, la recaudación se titula con eso.
   const only = data ? singleOffer(eventOffer(data.insights)) : null;
@@ -109,6 +114,8 @@ function HomeContent() {
 
         {eventsError ? (
           <ErrorState message={eventsError} />
+        ) : !canView ? (
+          <NoAccess text="Tu rol en este evento no incluye ver las métricas. Usá el escáner o las otras herramientas que tengas habilitadas." />
         ) : state.status === 'error' ? (
           <ErrorState message={state.error} onRetry={refresh} />
         ) : !data || !event ? (
@@ -130,7 +137,6 @@ function HomeContent() {
 
             <BentoGrid data={data} />
 
-            {USE_MOCK ? <Text style={styles.mockNote}>Datos de demostración</Text> : null}
           </Animated.View>
         )}
       </ScrollView>
@@ -163,7 +169,6 @@ const useStyles = makeStyles((c) =>
     },
     content: { paddingHorizontal: Spacing.three, gap: Spacing.four },
     sections: { gap: Spacing.five - 4 },
-    mockNote: { color: c.textMuted, fontSize: 11, textAlign: 'center' },
     error: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
     errorTitle: { color: c.text, fontSize: 16, fontWeight: '600' },
     errorText: { color: c.textSecondary, fontSize: 14, textAlign: 'center' },

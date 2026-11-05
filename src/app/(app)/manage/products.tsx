@@ -28,6 +28,7 @@ import {
   Card,
   CardList,
   GroupHeader,
+  HeaderAction,
   ProductThumb,
   SearchField,
 } from "@/components/manage/catalog-kit";
@@ -268,7 +269,19 @@ export default function ProductsScreen() {
             />
           </Animated.View>
         ) : (
-          groups.map(([name, items]) => (
+          <>
+          {!narrowed ? (
+            <Animated.View entering={FadeIn.duration(300)} style={styles.tools}>
+              <HeaderAction label="Categorías" onPress={() => router.push("/manage/categories")} />
+              {products.length > 1 ? (
+                <HeaderAction
+                  label="Ordenar"
+                  onPress={() => router.push({ pathname: "/manage/reorder", params: { kind: "products" } })}
+                />
+              ) : null}
+            </Animated.View>
+          ) : null}
+          {groups.map(([name, items]) => (
             <Animated.View
               key={name}
               entering={FadeIn.duration(300)}
@@ -292,7 +305,8 @@ export default function ProductsScreen() {
                 ))}
               </CardList>
             </Animated.View>
-          ))
+          ))}
+          </>
         )}
       </ScrollView>
     </>
@@ -580,5 +594,6 @@ const useStyles = makeStyles((c) =>
     },
     off: { color: c.textMuted },
     meta: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
+    tools: { flexDirection: "row", justifyContent: "flex-end", gap: 20, paddingHorizontal: 4 },
   }),
 );

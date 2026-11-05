@@ -83,6 +83,60 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen
+        name="deliver/[id]"
+        options={{
+          title: 'Entregar',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="new-event"
+        options={{
+          title: 'Nuevo evento',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/blocks"
+        options={{
+          title: 'Bloques de la tienda',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/block/[id]"
+        options={{
+          title: 'Bloque',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/categories"
+        options={{
+          title: 'Categorías',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/reorder"
+        options={{
+          title: 'Ordenar',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
         name="member/[id]"
         options={{
           title: 'Equipo',

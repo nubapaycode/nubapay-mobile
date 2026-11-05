@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { apiFetch, authPaths, setApiToken } from '@/lib/api';
+import { apiFetch, authPaths, setApiToken, setUnauthorizedHandler } from '@/lib/api';
 import { clearQueries } from '@/lib/query';
 import {
   type AuthUser,
@@ -85,6 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setApiToken(token);
   }, [token]);
+
+  // Si el token vence mientras se usa la app, el backend responde 401: se cierra la sesión y el
+  // layout manda al login.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      signOut();
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [signOut]);
 
   const value = useMemo(
     () => ({ isLoading, token, user, signIn, signOut }),

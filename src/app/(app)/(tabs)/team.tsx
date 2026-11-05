@@ -8,6 +8,8 @@ import { enter } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { MemberCard } from '@/components/team/member-card';
+import { NoAccess } from '@/components/ui/no-access';
+import { useEventAccess } from '@/features/access/access';
 import { Radius } from '@/constants/theme';
 import {
   activeTeamFilters,
@@ -24,6 +26,18 @@ import { makeStyles, useTheme } from '@/theme';
  * rol y permisos. Las estadísticas de cada uno están en su detalle.
  */
 export default function TeamScreen() {
+  const { isStaff } = useEventAccess();
+  if (isStaff) {
+    return (
+      <TabPage title="Equipo">
+        <NoAccess text="Solo el organizador del evento puede ver y administrar el equipo." />
+      </TabPage>
+    );
+  }
+  return <TeamContent />;
+}
+
+function TeamContent() {
   const styles = useStyles();
   const { colors } = useTheme();
   const { members: team, error } = useTeam();

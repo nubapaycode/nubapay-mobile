@@ -3,8 +3,22 @@ import { useMemo, useSyncExternalStore } from 'react';
 import { useDashboardSnapshot } from '@/features/dashboard/dashboard-store';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import {
+  type CatalogBlock,
   type Category,
+  createBlock,
   createCategory,
+  deleteBlock as apiDeleteBlock,
+  deleteBlockBanner,
+  deleteCategory as apiDeleteCategory,
+  deleteTicket as apiDeleteTicket,
+  listBlocks,
+  patchBlock,
+  putBlockProducts,
+  renameCategory as apiRenameCategory,
+  reorderBlocks,
+  reorderProducts,
+  reorderTickets,
+  uploadBlockBanner,
   createPickupPoint,
   createProduct,
   createTicket,
@@ -35,10 +49,11 @@ import { parsePromo, type Promo, promoLabel, type PromoInput, promoPriceFor } fr
 
 /**
  * Gestión del evento conectada al backend (routes/event_workspace.py, event_regrets.py):
- * catálogo (productos + categorías), entradas, puntos de retiro y arrepentimientos.
+ * catálogo (productos + categorías), entradas, bloques de la tienda, puntos de retiro y
+ * arrepentimientos.
  */
 
-export type { Regret };
+export type { CatalogBlock, Regret };
 export type ManageKind = 'product' | 'ticket' | 'pickup';
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -173,9 +188,16 @@ export function usePickupPoints() {
   return { pickups, error: pickups ? null : q.error, eventId };
 }
 
-export function useRegrets() {
+export function useBlocks() {
   const eventId = useSelectedEventId();
-  const q = useQuery<Regret[]>(key('regrets', eventId), () => listRegrets(eventId!));
+  const q = useQuery<CatalogBlock[]>(key('blocks', eventId), () => listBlocks(eventId!));
+  return { blocks: q.data, error: q.data ? null : q.error, eventId };
+}
+
+/** `enabled: false` no pide nada (p. ej. si el rol no puede ver pedidos). */
+export function useRegrets(enabled = true) {
+  const eventId = useSelectedEventId();
+  const q = useQuery<Regret[]>(enabled ? key('regrets', eventId) : null, () => listRegrets(eventId!));
   return { regrets: q.data, error: q.data ? null : q.error, eventId };
 }
 
@@ -323,6 +345,101 @@ export async function setTicketActive(eventId: string, id: string, isActive: boo
   const res = await patchTicket(eventId, id, { is_active: isActive });
   if (!res.ok) await invalidate(`tickets:${eventId}`);
   return res.ok ? { ok: true } : res;
+}
+
+export async function removeTicket(eventId: string, id: string): Promise<Result> {
+  const res = await apiDeleteTicket(eventId, id);
+  if (!res.ok) return res;
+  await invalidate(`tickets:${eventId}`);
+  return { ok: true };
+}
+
+/* ── Orden (entradas, productos, bloques) ── */
+
+export type ReorderKind = 'tickets' | 'products' | 'blocks';
+
+export async function saveOrder(eventId: string, kind: ReorderKind, ids: string[]): Promise<Result> {
+  const call = kind === 'tickets' ? reorderTickets : kind === 'products' ? reorderProducts : reorderBlocks;
+  const res = await call(eventId, ids);
+  await invalidate(`${kind}:${eventId}`);
+  return res.ok ? { ok: true } : res;
+}
+
+/* ── Categorías ── */
+
+export async function renameCategory(eventId: string, id: string, name: string): Promise<Result> {
+  const res = await apiRenameCategory(eventId, id, name.trim());
+  if (!res.ok) return res;
+  await Promise.all([invalidate(`categories:${eventId}`), invalidate(`products:${eventId}`)]);
+  return { ok: true };
+}
+
+/** El backend no deja borrar una categoría con productos. */
+export async function removeCategory(eventId: string, id: string): Promise<Result> {
+  const res = await apiDeleteCategory(eventId, id);
+  if (!res.ok) return res;
+  await invalidate(`categories:${eventId}`);
+  return { ok: true };
+}
+
+/* ── Bloques de la tienda ── */
+
+export type BlockInput = { title: string; isActive: boolean; productIds: string[]; bannerUri: string | null };
+
+/**
+ * Crea o actualiza un bloque: título, si se muestra, sus productos (en orden) y el banner
+ * (`file://…` se sube; null lo quita).
+ */
+export async function saveBlock(eventId: string, input: BlockInput, existing?: CatalogBlock): Promise<Result> {
+  let block: CatalogBlock;
+  if (existing) {
+    const res = await patchBlock(eventId, existing.id, { title: input.title.trim(), is_active: input.isActive });
+    if (!res.ok) return res;
+    const same =
+      existing.products.length === input.productIds.length &&
+      existing.products.every((p, i) => p.product_id === input.productIds[i]);
+    if (!same) {
+      const prods = await putBlockProducts(eventId, existing.id, input.productIds);
+      if (!prods.ok) return prods;
+    }
+    block = res.data;
+  } else {
+    const res = await createBlock(eventId, {
+      title: input.title.trim(),
+      is_active: input.isActive,
+      product_ids: input.productIds,
+    });
+    if (!res.ok) return res;
+    block = res.data;
+  }
+  let bannerError: string | null = null;
+  if (input.bannerUri && !/^https?:\/\//.test(input.bannerUri)) {
+    const up = await uploadBlockBanner(eventId, block.id, input.bannerUri);
+    if (!up.ok) bannerError = up.error;
+  } else if (!input.bannerUri && existing?.banner_image_url) {
+    const del = await deleteBlockBanner(eventId, block.id);
+    if (!del.ok) bannerError = del.error;
+  }
+  await invalidate(`blocks:${eventId}`);
+  if (bannerError) return { ok: false, error: `El bloque se guardó, pero no el banner: ${bannerError}` };
+  return { ok: true };
+}
+
+export async function setBlockActive(eventId: string, id: string, isActive: boolean): Promise<Result> {
+  setQueryData<CatalogBlock[]>(
+    `blocks:${eventId}`,
+    (l) => l?.map((b) => (b.id === id ? { ...b, is_active: isActive } : b)) ?? null,
+  );
+  const res = await patchBlock(eventId, id, { is_active: isActive });
+  if (!res.ok) await invalidate(`blocks:${eventId}`);
+  return res.ok ? { ok: true } : res;
+}
+
+export async function removeBlock(eventId: string, id: string): Promise<Result> {
+  const res = await apiDeleteBlock(eventId, id);
+  if (!res.ok) return res;
+  await invalidate(`blocks:${eventId}`);
+  return { ok: true };
 }
 
 export async function addPickupPoint(

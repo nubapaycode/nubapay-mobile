@@ -1,6 +1,9 @@
 export { apiUrl, getApiOrigin } from './api/url';
 
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; status?: number };
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  /** `body`: el JSON de error tal cual (algunos endpoints mandan datos extra, p. ej. el pedido ya escaneado). */
+  | { ok: false; error: string; status?: number; body?: Record<string, any> };
 
 /**
  * Token de la sesión actual. Lo fija el AuthProvider; así cada llamada no tiene que recibirlo.
@@ -11,10 +14,17 @@ export function setApiToken(token: string | null) {
   sessionToken = token;
 }
 
-async function parse<T>(res: Response): Promise<ApiResult<T>> {
+/** Se llama cuando el backend rechaza el token de la sesión (vencido o revocado). */
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(fn: (() => void) | null) {
+  onUnauthorized = fn;
+}
+
+async function parse<T>(res: Response, authed: boolean): Promise<ApiResult<T>> {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { ok: false, status: res.status, error: body?.error ?? `Error ${res.status}` };
+    if (res.status === 401 && authed) onUnauthorized?.();
+    return { ok: false, status: res.status, error: body?.error ?? `Error ${res.status}`, body };
   }
   return { ok: true, data: body as T };
 }
@@ -35,7 +45,7 @@ export async function apiFetch<T>(
         ...(headers as Record<string, string> | undefined),
       },
     });
-    return await parse<T>(res);
+    return await parse<T>(res, !!auth && auth === sessionToken);
   } catch {
     return { ok: false, error: 'No se pudo conectar con el servidor' };
   }
@@ -56,7 +66,7 @@ export async function apiUpload<T>(
       headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : undefined,
       body: form,
     });
-    return await parse<T>(res);
+    return await parse<T>(res, !!sessionToken);
   } catch {
     return { ok: false, error: 'No se pudo subir el archivo' };
   }

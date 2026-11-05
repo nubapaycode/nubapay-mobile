@@ -1,15 +1,8 @@
 import * as Haptics from 'expo-haptics';
-import * as WebBrowser from 'expo-web-browser';
+import { router } from 'expo-router';
 
-/** Web de Nubapay: ahí se crean los eventos (la app todavía no tiene ese flujo). */
-export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL;
-
-/** Abre la web de Nubapay en una hoja del navegador para crear un evento. */
-export function openAddEvent(tint: string) {
+/** Abre el formulario para crear un evento (POST /api/events). */
+export function openAddEvent() {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  if (!WEB_URL) return;
-  WebBrowser.openBrowserAsync(WEB_URL, {
-    presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
-    controlsColor: tint,
-  });
+  router.push('/new-event');
 }

@@ -40,7 +40,14 @@
         "expo-image-picker",
         {
           "photosPermission": "Nubapay usa tus fotos para que puedas subir la imagen de tus productos.",
-          "cameraPermission": "Nubapay usa la cámara para que puedas sacarle una foto a tus productos."
+          "cameraPermission": "Nubapay usa la cámara para escanear los QR de entradas y pedidos, y para sacarle fotos a tus productos."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Nubapay usa la cámara para escanear los QR de entradas y pedidos, y para sacarle fotos a tus productos.",
+          "recordAudioAndroid": false
         }
       ]
     ],

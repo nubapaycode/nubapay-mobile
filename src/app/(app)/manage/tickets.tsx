@@ -18,6 +18,7 @@ import {
   CatalogSkeleton,
   EmptyState,
   GroupHeader,
+  HeaderAction,
 } from "@/components/manage/catalog-kit";
 import { DisplayFont, Radius, Spacing } from "@/constants/theme";
 import {
@@ -198,7 +199,18 @@ export default function TicketsAdminScreen() {
             </Animated.View>
 
             <Animated.View entering={enter(1)} style={styles.section}>
-              <GroupHeader title="Tipos de entrada" count={tickets.length} />
+              <GroupHeader
+                title="Tipos de entrada"
+                count={tickets.length}
+                action={
+                  tickets.length > 1 ? (
+                    <HeaderAction
+                      label="Ordenar"
+                      onPress={() => router.push({ pathname: "/manage/reorder", params: { kind: "tickets" } })}
+                    />
+                  ) : undefined
+                }
+              />
               <View style={styles.list}>
                 {tickets.map((t, i) => (
                   <TicketCard

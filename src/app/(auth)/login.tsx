@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -60,6 +61,11 @@ export default function LoginScreen() {
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <Button title="Ingresar" onPress={onSubmit} loading={loading} />
+          <Button
+            title="Olvidé mi contraseña"
+            variant="ghost"
+            onPress={() => router.push({ pathname: '/forgot-password', params: { email: email.trim() } })}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

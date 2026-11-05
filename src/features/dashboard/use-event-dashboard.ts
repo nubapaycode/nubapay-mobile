@@ -7,29 +7,17 @@ import { useAuth } from '@/providers/auth-provider';
 
 import { publishDashboardSnapshot } from './dashboard-store';
 import { type DashboardFilters, filtersQuery } from './filters';
-import { applyLiveTick, mockDashboard, mockEvents } from './mock';
 import type { DashboardData, DashboardInsights, DashboardSummary, EventSummary } from './types';
 
-/** Mientras el home se diseña con datos simulados. En `false` usa el backend real. */
-export const USE_MOCK = false;
-
-const MOCK_LATENCY_MS = 650;
 /** Actualización automática: rápida con el evento en curso, más espaciada el resto del tiempo. */
 const LIVE_REFRESH_MS = 4000;
 const IDLE_REFRESH_MS = 30_000;
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function fetchDashboard(
   eventId: string,
   filters: DashboardFilters,
   token: string | null,
 ): Promise<{ ok: true; data: DashboardData } | { ok: false; error: string }> {
-  if (USE_MOCK) {
-    await sleep(MOCK_LATENCY_MS);
-    const data = mockDashboard(eventId, filters);
-    return data ? { ok: true, data } : { ok: false, error: 'Evento no encontrado' };
-  }
   const [summary, insights] = await Promise.all([
     apiFetch<DashboardSummary>(eventPaths.dashboard(eventId, filtersQuery(filters)), { token }),
     apiFetch<DashboardInsights>(eventPaths.dashboardInsights(eventId), { token }),
@@ -43,10 +31,6 @@ async function fetchDashboard(
 export function useEvents() {
   const { token } = useAuth();
   const q = useQuery<EventSummary[]>(token ? 'events' : null, async () => {
-    if (USE_MOCK) {
-      await sleep(250);
-      return { ok: true, data: mockEvents() };
-    }
     const res = await apiFetch<{ events: EventSummary[] }>(`${eventPaths.list()}?page_size=100`);
     return res.ok ? { ok: true, data: res.data.events } : res;
   });
@@ -72,7 +56,6 @@ export function useEventDashboard(
   const [refreshing, setRefreshing] = useState(false);
   const [fetching, setFetching] = useState(false);
   const requestId = useRef(0);
-  const tick = useRef(0);
   const loadedEventId = useRef<string | null>(null);
 
   const load = useCallback(
@@ -100,23 +83,12 @@ export function useEventDashboard(
   }, [load, eventId]);
 
   // Actualización automática siempre (sin tirar para refrescar). Se pausa con la app en segundo
-  // plano y refresca apenas vuelve. En mock, el evento en curso recibe ventas e ingresos simulados.
+  // plano y refresca apenas vuelve.
   const phase = state.status === 'ready' ? state.data.insights.event.phase : null;
   useEffect(() => {
     if (!eventId || !phase) return;
     const live = phase === 'live';
-    const poll = () => {
-      if (USE_MOCK && live) {
-        tick.current += 1;
-        setState((s) =>
-          s.status === 'ready'
-            ? { status: 'ready', data: applyLiveTick(s.data, tick.current), updatedAt: Date.now() }
-            : s,
-        );
-      } else {
-        load('silent');
-      }
-    };
+    const poll = () => load('silent');
     let timer: ReturnType<typeof setInterval> | null = null;
     const start = () => {
       if (!timer) timer = setInterval(poll, live ? LIVE_REFRESH_MS : IDLE_REFRESH_MS);

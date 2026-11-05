@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,7 +21,9 @@ import { StatusChip } from '@/components/operations/operation-card';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { formatMoney, PAYMENT_LABEL, relativeTime } from '@/features/dashboard/format';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
+import { useEventAccess } from '@/features/access/access';
 import { canCancel, canConfirmCash } from '@/features/operations/operations';
+import { awaitingCash, hasPending } from '@/features/operations/scan';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useNow } from '@/hooks/use-now';
 import { cancelOrder, confirmCash, getOrder, type Order } from '@/lib/api/organizer';
@@ -48,8 +50,8 @@ const PAYMENT_STATUS: Record<string, string> = {
 
 /**
  * Detalle de un pedido (GET /api/events/<id>/orders/<order_id>): monto y estado, cliente, ítems
- * con su entrega, pago e historial. Acciones: aprobar el pago en efectivo (confirm-cash) y
- * cancelar el pedido (invalida el QR).
+ * con su entrega, pago e historial. Acciones: aprobar el pago en efectivo (confirm-cash),
+ * entregar sin escanear (abre /deliver) y cancelar el pedido (invalida el QR).
  */
 export default function OperationScreen() {
   const styles = useStyles();
@@ -59,6 +61,7 @@ export default function OperationScreen() {
   const eventId = useSelectedEventId();
   const now = useNow(15_000);
   const [busy, setBusy] = useState<null | 'approve' | 'cancel'>(null);
+  const { can } = useEventAccess();
   const cacheKey = eventId && orderId ? `order:${eventId}:${orderId}` : null;
   const q = useQuery<Order>(cacheKey, () => getOrder(eventId!, orderId));
   useFocusStatusBar('dark');
@@ -117,9 +120,12 @@ export default function OperationScreen() {
       ],
     );
 
-  const showApprove = canConfirmCash(o);
-  const showCancel = canCancel(o);
-  const showActions = showApprove || showCancel;
+  // Cobrar efectivo y entregar son del escáner; cancelar, de quien gestiona pedidos.
+  const showApprove = canConfirmCash(o) && can('scanner');
+  const showDeliver = !showApprove && hasPending(o) && !awaitingCash(o) && can('scanner');
+  const showCancel = canCancel(o) && can('orders');
+  const showActions = showApprove || showCancel || showDeliver;
+  const primary = showApprove || showDeliver;
   const products = o.items.filter((i) => !i.isTicket);
   const tickets = o.items.filter((i) => i.isTicket);
 
@@ -192,11 +198,11 @@ export default function OperationScreen() {
           style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           {showCancel ? (
             <ActionButton
-              label={showApprove ? 'Cancelar' : 'Cancelar pedido'}
+              label={primary ? 'Cancelar' : 'Cancelar pedido'}
               tone="danger"
               loading={busy === 'cancel'}
               disabled={!!busy}
-              grow={!showApprove}
+              grow={!primary}
               onPress={cancel}
             />
           ) : null}
@@ -208,6 +214,15 @@ export default function OperationScreen() {
               disabled={!!busy}
               grow
               onPress={approve}
+            />
+          ) : null}
+          {showDeliver ? (
+            <ActionButton
+              label={o.items.every((i) => i.isTicket) ? 'Registrar ingreso' : 'Entregar'}
+              tone="primary"
+              disabled={!!busy}
+              grow
+              onPress={() => router.push({ pathname: '/deliver/[id]', params: { id: o.id } })}
             />
           ) : null}
         </Animated.View>

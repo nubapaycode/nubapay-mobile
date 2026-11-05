@@ -64,12 +64,19 @@ export type EventDetail = {
   has_mp_public_key: boolean;
   mp_card_enabled: boolean;
   has_sipago_credentials: boolean;
+  show_category_shortcuts?: boolean;
   membership?: 'owner' | 'staff';
   tools?: StaffTools;
 };
 
+export type EventStatus = 'draft' | 'active' | 'paused' | 'finished' | 'cancelled';
+
 export type EventPatch = Partial<{
   name: string;
+  slug: string;
+  status: EventStatus;
+  cover_image_url: string | null;
+  show_category_shortcuts: boolean;
   description: string | null;
   starts_at: string | null;
   ends_at: string | null;
@@ -88,6 +95,31 @@ export const getEvent = async (id: string) =>
 export const patchEvent = async (id: string, payload: EventPatch) =>
   unwrap(await apiFetch<{ event: EventDetail }>(eventPaths.detail(id), json('PATCH', payload)), 'event');
 export const deleteEvent = (id: string) => apiFetch<{ ok: true }>(eventPaths.detail(id), json('DELETE'));
+export type EventCreate = {
+  name: string;
+  slug?: string;
+  description?: string | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  status?: EventStatus;
+  is_active?: boolean;
+};
+export const createEvent = async (payload: EventCreate) =>
+  unwrap(await apiFetch<{ event: EventDetail }>(eventPaths.list(), json('POST', payload)), 'event');
+
+/** Tipo MIME a partir de la extensión de un archivo local. */
+export function imageFile(uri: string, base = 'foto') {
+  const ext = (uri.split('.').pop() ?? 'jpg').toLowerCase().split('?')[0];
+  const type = ext === 'png' ? 'image/png' : ext === 'heic' ? 'image/heic' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+  return { uri, name: `${base}.${ext}`, type };
+}
+
+/** Sube la portada (`file://…`) y la guarda en el evento. Devuelve el evento actualizado. */
+export async function uploadEventCover(eventId: string, uri: string) {
+  const up = await apiUpload<{ publicUrl: string }>(ws(eventId, 'cover'), imageFile(uri, 'portada'));
+  if (!up.ok) return up;
+  return patchEvent(eventId, { cover_image_url: up.data.publicUrl });
+}
 
 /* ───────────── Pedidos (operaciones) ───────────── */
 
@@ -137,6 +169,23 @@ export const getOrder = async (eventId: string, orderId: string) =>
   unwrap(await apiFetch<{ order: Order }>(ws(eventId, `orders/${orderId}`)), 'order');
 export const cancelOrder = async (eventId: string, orderId: string) =>
   unwrap(await apiFetch<{ order: Order }>(ws(eventId, `orders/${orderId}`), json('PATCH', { status: 'cancelled' })), 'order');
+/** Valida un QR (o el ID de un pedido) sin registrar nada. Si ya se usó, el backend manda el pedido igual. */
+export type ScanResult =
+  | { ok: true; data: Order }
+  | { ok: false; error: string; status?: number; alreadyScanned?: boolean; order?: Order };
+async function scanCall(url: string, body: unknown): Promise<ScanResult> {
+  const res = await apiFetch<{ order?: Order; error?: string }>(url, json('POST', body));
+  if (res.ok) return res.data.order ? { ok: true, data: res.data.order } : { ok: false, error: 'Respuesta inválida' };
+  return { ...res, alreadyScanned: res.error === 'Este QR ya fue escaneado', order: res.body?.order };
+}
+export const previewScan = (eventId: string, orderId: string) =>
+  scanCall(ws(eventId, 'scan-qr/preview'), { order_id: orderId });
+/** Registra la entrega (productos) o el ingreso (entradas): `{ [itemId]: cantidad }`. */
+export const redeemItems = (eventId: string, orderId: string, itemQuantities: Record<string, number>) =>
+  scanCall(ws(eventId, 'scan-qr'), { order_id: orderId, item_quantities: itemQuantities });
+/** Borra los pedidos de prueba que siguen sin pagar. */
+export const purgeTestOrders = (eventId: string) =>
+  apiFetch<{ ok: true; deleted: number }>(ws(eventId, 'orders/purge-test'), json('POST'));
 export const confirmCash = async (eventId: string, orderId: string) =>
   unwrap(await apiFetch<{ order: Order }>(ws(eventId, `orders/${orderId}/confirm-cash`), json('POST')), 'order');
 
@@ -189,6 +238,11 @@ export const listCategories = (eventId: string) =>
 export const createCategory = async (eventId: string, name: string) =>
   unwrap(await apiFetch<{ category: Category }>(ws(eventId, 'categories'), json('POST', { name })), 'category');
 
+export const renameCategory = async (eventId: string, id: string, name: string) =>
+  unwrap(await apiFetch<{ category: Category }>(ws(eventId, `categories/${id}`), json('PATCH', { name })), 'category');
+export const deleteCategory = (eventId: string, id: string) =>
+  apiFetch<{ ok: true }>(ws(eventId, `categories/${id}`), json('DELETE'));
+
 export const listProducts = (eventId: string) =>
   allPages<Product>((page) => ws(eventId, 'products', { page, page_size: 100 }), (b) => (b.products as Product[]) ?? []);
 export const createProduct = async (eventId: string, payload: ProductPayload) =>
@@ -197,6 +251,9 @@ export const patchProduct = async (eventId: string, id: string, payload: Partial
   unwrap(await apiFetch<{ product: Product }>(ws(eventId, `products/${id}`), json('PATCH', payload)), 'product');
 export const deleteProduct = (eventId: string, id: string) =>
   apiFetch<{ paused_combos?: string[] }>(ws(eventId, `products/${id}`), json('DELETE'));
+/** Guarda el orden de los productos recibidos (se reparten las posiciones que ya ocupaban). */
+export const reorderProducts = (eventId: string, ids: string[]) =>
+  apiFetch<{ ok: true }>(ws(eventId, 'products/reorder'), json('POST', { ids }));
 
 /* ───────────── Promociones (una por producto o combo) ───────────── */
 
@@ -239,12 +296,7 @@ export const deleteProductPromotion = (eventId: string, productId: string) =>
 
 /** Sube la foto elegida (`file://…`) y devuelve el producto con su `image_url` nueva. */
 export async function uploadProductImage(eventId: string, id: string, uri: string) {
-  const ext = (uri.split('.').pop() ?? 'jpg').toLowerCase().split('?')[0];
-  const type = ext === 'png' ? 'image/png' : ext === 'heic' ? 'image/heic' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
-  return unwrap(
-    await apiUpload<{ product: Product }>(ws(eventId, `products/${id}/image`), { uri, name: `foto.${ext}`, type }),
-    'product',
-  );
+  return unwrap(await apiUpload<{ product: Product }>(ws(eventId, `products/${id}/image`), imageFile(uri)), 'product');
 }
 export const deleteProductImage = (eventId: string, id: string) =>
   apiFetch<{ product: Product }>(ws(eventId, `products/${id}/image`), json('DELETE'));
@@ -271,6 +323,44 @@ export const createTicket = async (eventId: string, payload: { name: string; pri
   unwrap(await apiFetch<{ ticket: Ticket }>(ws(eventId, 'tickets'), json('POST', payload)), 'ticket');
 export const patchTicket = async (eventId: string, id: string, payload: Partial<{ is_active: boolean; name: string; price: number; stock: number | null }>) =>
   unwrap(await apiFetch<{ ticket: Ticket }>(ws(eventId, `tickets/${id}`), json('PATCH', payload)), 'ticket');
+
+export const deleteTicket = (eventId: string, id: string) =>
+  apiFetch<{ ok: true }>(ws(eventId, `tickets/${id}`), json('DELETE'));
+/** Orden de las entradas (tiene que incluir todas las del evento). */
+export const reorderTickets = (eventId: string, ids: string[]) =>
+  apiFetch<{ ok: true }>(ws(eventId, 'tickets/reorder'), json('POST', { ids }));
+
+/* ───────────── Bloques de la tienda ───────────── */
+
+export type CatalogBlock = {
+  id: string;
+  title: string;
+  banner_image_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+  products: { product_id: string; name: string; type: 'single' | 'combo'; is_active: boolean }[];
+};
+
+export const listBlocks = async (eventId: string) =>
+  unwrap(await apiFetch<{ blocks: CatalogBlock[] }>(ws(eventId, 'blocks')), 'blocks');
+export const createBlock = async (eventId: string, payload: { title: string; is_active?: boolean; product_ids?: string[] }) =>
+  unwrap(await apiFetch<{ block: CatalogBlock }>(ws(eventId, 'blocks'), json('POST', payload)), 'block');
+export const patchBlock = async (eventId: string, id: string, payload: Partial<{ title: string; is_active: boolean }>) =>
+  unwrap(await apiFetch<{ block: CatalogBlock }>(ws(eventId, `blocks/${id}`), json('PATCH', payload)), 'block');
+export const deleteBlock = (eventId: string, id: string) =>
+  apiFetch<{ ok: true }>(ws(eventId, `blocks/${id}`), json('DELETE'));
+export const putBlockProducts = async (eventId: string, id: string, productIds: string[]) =>
+  unwrap(
+    await apiFetch<{ block: CatalogBlock }>(ws(eventId, `blocks/${id}/products`), json('PUT', { product_ids: productIds })),
+    'block',
+  );
+/** Orden de los bloques (tiene que incluir todos). */
+export const reorderBlocks = (eventId: string, ids: string[]) =>
+  apiFetch<{ ok: true }>(ws(eventId, 'blocks/reorder'), json('POST', { ids }));
+export const uploadBlockBanner = async (eventId: string, id: string, uri: string) =>
+  unwrap(await apiUpload<{ block: CatalogBlock }>(ws(eventId, `blocks/${id}/banner`), imageFile(uri, 'banner')), 'block');
+export const deleteBlockBanner = async (eventId: string, id: string) =>
+  unwrap(await apiFetch<{ block: CatalogBlock }>(ws(eventId, `blocks/${id}/banner`), json('DELETE')), 'block');
 
 /* ───────────── Puntos de retiro ───────────── */
 

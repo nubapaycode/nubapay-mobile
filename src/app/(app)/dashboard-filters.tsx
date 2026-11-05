@@ -20,7 +20,7 @@ import {
 } from '@/features/dashboard/filters';
 import { eventPhase } from '@/features/dashboard/format';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
-import { USE_MOCK, useEvents } from '@/features/dashboard/use-event-dashboard';
+import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { makeStyles, useTheme } from '@/theme';
 
 type PeriodChoice = RangePreset | 'custom';
@@ -139,13 +139,10 @@ function FiltersContent() {
         {rangeError ? <Text style={styles.error}>{rangeError}</Text> : null}
       </View>
 
-      {/* El backend todavía no filtra por tipo de venta: solo con datos de prueba. */}
-      {USE_MOCK ? (
-        <Animated.View layout={LinearTransition.duration(260)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Mostrar</Text>
-          <Segmented options={SCOPES} value={scope} onChange={setScope} />
-        </Animated.View>
-      ) : null}
+      <Animated.View layout={LinearTransition.duration(260)} style={styles.section}>
+        <Text style={styles.sectionTitle}>Mostrar</Text>
+        <Segmented options={SCOPES} value={scope} onChange={setScope} />
+      </Animated.View>
 
       <Animated.View layout={LinearTransition.duration(260)}>
         <Pressable

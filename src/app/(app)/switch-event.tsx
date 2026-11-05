@@ -97,7 +97,7 @@ function SwitchEventContent() {
         </Pressable>
       ) : null}
 
-      <AddEventButton />
+      <AddEventButton onPress={() => dismiss(() => router.push('/new-event'))} />
     </ScrollView>
   );
 }

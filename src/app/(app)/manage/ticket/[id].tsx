@@ -21,6 +21,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { enter } from "@/components/dashboard/detail-kit";
+import { Icon } from "@/components/dashboard/icon";
 import {
   Card,
   CardList,
@@ -30,6 +31,7 @@ import {
 import { DisplayFont, Radius, Spacing } from "@/constants/theme";
 import { formatInt, formatMoney } from "@/features/dashboard/format";
 import {
+  removeTicket,
   saveTicket,
   type TicketType,
   useTickets,
@@ -158,6 +160,32 @@ function TicketForm({
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
   };
+
+  const remove = () =>
+    Alert.alert(
+      "Eliminar entrada",
+      sold > 0
+        ? `“${ticket?.name}” deja de venderse. Las ${formatInt(sold)} ya vendidas siguen valiendo.`
+        : `“${ticket?.name}” deja de estar a la venta.`,
+      [
+        { text: "Volver", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            if (!ticket || !eventId) return;
+            const res = await removeTicket(eventId, ticket.id);
+            if (!res.ok) {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              Alert.alert("No se pudo eliminar", res.error);
+              return;
+            }
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            router.back();
+          },
+        },
+      ],
+    );
 
   const free = price.trim() !== "" && amount === 0;
   const left =
@@ -394,6 +422,19 @@ function TicketForm({
               </Card>
             </Animated.View>
           ) : null}
+
+          {!isNew && ticket ? (
+            <Animated.View entering={enter(5)}>
+              <Pressable
+                onPress={remove}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.delete, pressed && { opacity: 0.6 }]}
+              >
+                <Icon name="trash" size={15} color={colors.danger} />
+                <Text style={styles.deleteText}>Eliminar entrada</Text>
+              </Pressable>
+            </Animated.View>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </>
@@ -608,5 +649,13 @@ const useStyles = makeStyles((c) =>
       backgroundColor: "#ffffff",
     },
     missingText: { color: c.textSecondary, fontSize: 15 },
+    delete: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      height: 48,
+    },
+    deleteText: { color: c.danger, fontSize: 15, fontFamily: DisplayFont.semibold },
   }),
 );

@@ -62,17 +62,18 @@ export function activeFilterCount(f: DashboardFilters, base: DashboardFilters): 
 
 const p2 = (n: number) => String(n).padStart(2, '0');
 const ymd = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+const ymdhm = (d: Date) => `${ymd(d)}T${p2(d.getHours())}:${p2(d.getMinutes())}`;
 
 /**
- * Query del endpoint de dashboard. El backend acepta `from`/`to` como fechas (YYYY-MM-DD,
- * inclusive, hora de Argentina): del rango personalizado se usan los días, no la hora.
- * TODO(backend): soportar hora en `from`/`to` y un filtro por tipo (`scope=tickets|bar`).
+ * Query del endpoint de dashboard (hora de Argentina). Los presets mandan días completos
+ * (YYYY-MM-DD, inclusive); el rango personalizado manda fecha y hora (YYYY-MM-DDTHH:MM).
+ * `scope=tickets|bar` limita a entradas o a productos de la barra.
  */
 export function filtersQuery(f: DashboardFilters, now = new Date()): string | undefined {
   const parts: string[] = [];
   const p = f.period;
   if (isCustom(p)) {
-    parts.push(`from=${ymd(p.from)}`, `to=${ymd(p.to)}`);
+    parts.push(`from=${encodeURIComponent(ymdhm(p.from))}`, `to=${encodeURIComponent(ymdhm(p.to))}`);
   } else if (p.preset === 'today') {
     parts.push(`from=${ymd(now)}`, `to=${ymd(now)}`);
   } else if (p.preset !== 'event') {

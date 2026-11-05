@@ -138,6 +138,16 @@ export function GroupHeader({
   );
 }
 
+/** Acción chica de texto para la derecha de un `GroupHeader` (p. ej. "Ordenar"). */
+export function HeaderAction({ label, onPress }: { label: string; onPress: () => void }) {
+  const styles = useStyles();
+  return (
+    <Pressable onPress={onPress} hitSlop={10} accessibilityRole="button" style={({ pressed }) => pressed && { opacity: 0.5 }}>
+      <Text style={styles.headerAction}>{label}</Text>
+    </Pressable>
+  );
+}
+
 /** Cada ítem en su propia card (nada de tablas con separadores). */
 export function Card({
   children,
@@ -360,6 +370,7 @@ const useStyles = makeStyles((c) =>
       fontSize: 15,
       fontFamily: DisplayFont.semibold,
     },
+    headerAction: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
     groupCount: {
       color: c.textMuted,
       fontWeight: "600",

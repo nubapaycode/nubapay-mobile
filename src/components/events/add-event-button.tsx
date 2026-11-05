@@ -2,27 +2,24 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius } from '@/constants/theme';
-import { openAddEvent, WEB_URL } from '@/features/events/add-event';
+import { useEventAccess } from '@/features/access/access';
+import { openAddEvent } from '@/features/events/add-event';
 import { makeStyles, useTheme } from '@/theme';
 
 const INK = '#000000';
 
-/** Botón gris para crear un evento (abre la web de Nubapay). Texto e ícono en negro. */
-export function AddEventButton() {
+/** Botón gris para crear un evento. Texto e ícono en negro. Las cuentas de staff no lo ven. */
+export function AddEventButton({ onPress = openAddEvent }: { onPress?: () => void }) {
   const styles = useStyles();
   const { colors } = useTheme();
+  const { canCreateEvents } = useEventAccess();
+  if (!canCreateEvents) return null;
   return (
     <Pressable
-      onPress={() => openAddEvent(colors.primary)}
-      disabled={!WEB_URL}
+      onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel="Agregar evento"
-      accessibilityHint="Abre la web de Nubapay para crear un evento"
-      style={({ pressed }) => [
-        styles.add,
-        pressed && { backgroundColor: colors.border },
-        !WEB_URL && { opacity: 0.5 },
-      ]}>
+      style={({ pressed }) => [styles.add, pressed && { backgroundColor: colors.border }]}>
       <Icon name="plus" size={15} color={INK} />
       <Text style={styles.text}>Agregar evento</Text>
     </Pressable>

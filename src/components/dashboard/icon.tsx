@@ -60,6 +60,12 @@ const ICONS = {
   tag: { ios: 'tag', android: 'sell' },
   message: { ios: 'message', android: 'chat' },
   undo: { ios: 'arrow.uturn.backward', android: 'undo' },
+  flashlightOn: { ios: 'flashlight.on.fill', android: 'flashlight_on' },
+  arrowUp: { ios: 'arrow.up', android: 'arrow_upward' },
+  arrowDown: { ios: 'arrow.down', android: 'arrow_downward' },
+  blocks: { ios: 'rectangle.stack', android: 'view_agenda' },
+  lock: { ios: 'lock', android: 'lock' },
+  warning: { ios: 'exclamationmark.triangle', android: 'warning' },
 } as const;
 
 export type IconName = keyof typeof ICONS;
