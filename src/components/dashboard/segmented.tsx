@@ -74,7 +74,7 @@ const useStyles = makeStyles((c) =>
       bottom: 3,
       left: 3,
       borderRadius: Radius.pill,
-      backgroundColor: c.surface,
+      backgroundColor: c.elevated,
       borderWidth: c.scheme === 'dark' ? StyleSheet.hairlineWidth : 0,
       borderColor: c.border,
       shadowColor: '#000',

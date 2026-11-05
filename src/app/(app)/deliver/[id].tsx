@@ -21,7 +21,7 @@ export default function DeliverScreen() {
   const { eventId, can } = useEventAccess();
   const key = eventId && id ? `scan:${eventId}:${id}` : null;
   const q = useQuery<Order>(key, () => previewScan(eventId!, id));
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   if (!can('scanner')) {
     return (
@@ -60,7 +60,7 @@ export default function DeliverScreen() {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six },
     error: { color: c.textSecondary, fontSize: 15, textAlign: 'center', marginTop: 40 },
   }),

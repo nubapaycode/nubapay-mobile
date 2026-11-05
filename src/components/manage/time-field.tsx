@@ -49,7 +49,7 @@ export function TimeField({
               pressed && { backgroundColor: colors.border },
             ]}
           >
-            <Icon name="clock" size={15} color="#000000" />
+            <Icon name="clock" size={15} color={colors.ink} />
             <Text style={styles.chipText}>{formatTime(value)}</Text>
           </Pressable>
           {open ? (
@@ -86,7 +86,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     chipText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 17,
       fontFamily: DisplayFont.semibold,
       fontVariant: ["tabular-nums"],

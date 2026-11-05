@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { router, Stack } from "expo-router";
 import type { SFSymbol } from "expo-symbols";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   Platform,
@@ -13,13 +13,19 @@ import {
   View,
 } from "react-native";
 import Animated, {
+  Easing,
   FadeIn,
   FadeOut,
   LinearTransition,
-  ZoomIn,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { EventContext } from "@/components/events/event-context";
 import { enter } from "@/components/dashboard/detail-kit";
 import { Icon, type IconName } from "@/components/dashboard/icon";
 import {
@@ -28,7 +34,6 @@ import {
   Card,
   CardList,
   GroupHeader,
-  HeaderAction,
   ProductThumb,
   SearchField,
 } from "@/components/manage/catalog-kit";
@@ -100,18 +105,21 @@ const matchesQuery = (p: Product, q: string) =>
   !q || `${p.name} ${p.category ?? ""}`.toLowerCase().includes(q);
 
 /**
- * Catálogo (patrón de Shopify Products + gestores de menú): buscador con botón de filtros (estado
- * y categorías, en su hoja) y los productos agrupados por categoría, cada uno en su card. Cada fila: miniatura (o inicial), nombre, precio, vendidos y switch de venta; al
- * tocarla se abre la edición. El "+" del header crea producto, combo o categoría.
+ * Catálogo (patrón de Shopify Products + gestores de menú, con el lenguaje del resto de la app):
+ * buscador con botón de filtros (que también lleva a categorías y a ordenar), un resumen (a la
+ * venta, vendidos, en promo) y los productos agrupados por categoría, cada uno en su card con miniatura, precio,
+ * tags (vendidos / pausado / promo) y switch de venta. El "+" del header crea producto, combo o
+ * categoría.
  */
 export default function ProductsScreen() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { products: list, error, eventId } = useProducts();
   const [query, setQuery] = useState("");
   const filters = useCatalogFilters();
   const activeFilters = activeCatalogFilters(filters);
   const [menuOpen, setMenuOpen] = useState(false);
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
 
   const products = useMemo(() => list ?? [], [list]);
   const q = query.trim().toLowerCase();
@@ -133,6 +141,11 @@ export default function ProductsScreen() {
   }, [products, filtered]);
 
   const narrowed = !!q || activeFilters > 0;
+  const onSale = products.filter((p) => p.isActive).length;
+  const soldTotal = products.reduce((a, p) => a + p.sold, 0);
+  const promos = products.filter(
+    (p) => p.promo && p.promo.isActive && !promoEnded(p.promo),
+  ).length;
   const clearAll = () => {
     Haptics.selectionAsync();
     setQuery("");
@@ -180,7 +193,7 @@ export default function ProductsScreen() {
                       pressed && { opacity: 0.8 },
                     ]}
                   >
-                    <Icon name="plus" size={20} color="#000000" />
+                    <Icon name="plus" size={20} color={colors.onBrand} />
                   </Pressable>
                 ),
               }
@@ -196,6 +209,9 @@ export default function ProductsScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       >
+        <Animated.View entering={enter(0)}>
+          <EventContext caption="Catálogo de" />
+        </Animated.View>
         {/* Buscador + filtros (estado y categorías) */}
         <Animated.View entering={enter(0)} style={styles.searchRow}>
           <SearchField
@@ -221,7 +237,7 @@ export default function ProductsScreen() {
             <Icon
               name="filter"
               size={17}
-              color={activeFilters > 0 ? "#ffffff" : "#000000"}
+              color={activeFilters > 0 ? colors.onInk : colors.ink}
             />
             {activeFilters > 0 ? (
               <View style={styles.badgeCount}>
@@ -271,14 +287,13 @@ export default function ProductsScreen() {
         ) : (
           <>
           {!narrowed ? (
-            <Animated.View entering={FadeIn.duration(300)} style={styles.tools}>
-              <HeaderAction label="Categorías" onPress={() => router.push("/manage/categories")} />
-              {products.length > 1 ? (
-                <HeaderAction
-                  label="Ordenar"
-                  onPress={() => router.push({ pathname: "/manage/reorder", params: { kind: "products" } })}
-                />
-              ) : null}
+            <Animated.View entering={FadeIn.duration(300)}>
+              {/* Resumen del catálogo, cada dato en su card. */}
+              <View style={styles.stats}>
+                <Stat label="A la venta" value={`${formatInt(onSale)}`} suffix={`/ ${formatInt(products.length)}`} />
+                <Stat label="Vendidos" value={formatInt(soldTotal)} />
+                <Stat label="En promo" value={formatInt(promos)} accent={promos > 0} />
+              </View>
             </Animated.View>
           ) : null}
           {groups.map(([name, items]) => (
@@ -324,11 +339,47 @@ function CreatePopover({
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
+  // El Modal no anima (animationType="none"): entrada y salida corren con Reanimated.
+  // `mounted` lo mantiene visible hasta que termina la animación de salida.
+  const [mounted, setMounted] = useState(open);
+  const progress = useSharedValue(0);
+  // Ajuste de estado durante el render (no en el efecto): abrir monta al instante.
+  if (open && !mounted) setMounted(true);
+  if (!open && mounted && reduceMotion) setMounted(false);
+
+  useEffect(() => {
+    if (open) {
+      progress.set(
+        reduceMotion
+          ? 1
+          : withTiming(1, { duration: 180, easing: Easing.out(Easing.cubic) }),
+      );
+    } else if (reduceMotion) {
+      progress.set(0);
+    } else {
+      progress.set(
+        withTiming(
+          0,
+          { duration: 130, easing: Easing.in(Easing.cubic) },
+          (done) => {
+            if (done) scheduleOnRN(setMounted, false);
+          },
+        ),
+      );
+    }
+  }, [open, progress, reduceMotion]);
+
+  const popoverStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: 0.92 + progress.value * 0.08 }],
+  }));
+
   return (
     <Modal
-      visible={open}
+      visible={mounted}
       transparent
-      animationType="fade"
+      animationType="none"
       onRequestClose={onClose}
       statusBarTranslucent
     >
@@ -337,36 +388,63 @@ function CreatePopover({
         onPress={onClose}
         accessibilityLabel="Cerrar menú"
       />
-      {open ? (
-        <Animated.View
-          entering={ZoomIn.duration(160)}
-          style={[styles.popover, { top: insets.top + 52 }]}
-        >
-          {CREATE_OPTIONS.map((o, i) => (
-            <Pressable
-              key={o.key}
-              onPress={() => {
-                Haptics.selectionAsync();
-                onClose();
-                o.onPress();
-              }}
-              accessibilityRole="menuitem"
-              style={({ pressed }) => [
-                styles.popoverItem,
-                i > 0 && styles.popoverDivider,
-                pressed && { backgroundColor: colors.raised },
-              ]}
-            >
-              <Text style={styles.popoverText}>{o.label}</Text>
-              <Icon name={o.icon} size={17} color={colors.textSecondary} />
-            </Pressable>
-          ))}
-        </Animated.View>
-      ) : null}
+      <Animated.View
+        pointerEvents={open ? "auto" : "none"}
+        style={[styles.popover, { top: insets.top + 52 }, popoverStyle]}
+      >
+        {CREATE_OPTIONS.map((o, i) => (
+          <Pressable
+            key={o.key}
+            onPress={() => {
+              Haptics.selectionAsync();
+              onClose();
+              o.onPress();
+            }}
+            accessibilityRole="menuitem"
+            style={({ pressed }) => [
+              styles.popoverItem,
+              i > 0 && styles.popoverDivider,
+              pressed && { backgroundColor: colors.raised },
+            ]}
+          >
+            <Text style={styles.popoverText}>{o.label}</Text>
+            <Icon name={o.icon} size={17} color={colors.textSecondary} />
+          </Pressable>
+        ))}
+      </Animated.View>
     </Modal>
   );
 }
 
+function Stat({
+  label,
+  value,
+  suffix,
+  accent,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+  accent?: boolean;
+}) {
+  const styles = useStyles();
+  return (
+    <View style={[styles.stat, accent && styles.statAccent]}>
+      <Text style={[styles.statLabel, accent && styles.statLabelAccent]} numberOfLines={1}>
+        {label}
+      </Text>
+      <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+        {suffix ? <Text style={styles.statSuffix}> {suffix}</Text> : null}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * Producto en su card: miniatura, nombre (y "Combo"), contenido del combo, precio (con el de lista
+ * tachado si hay promo vigente), vendidos o "Pausado", la promo y el switch de venta.
+ */
 function ProductRow({
   product: p,
   eventId,
@@ -393,7 +471,9 @@ function ProductRow({
         router.push({ pathname: "/manage/product/[id]", params: { id: p.id } });
       }}
       accessibilityRole="button"
-      accessibilityLabel={`${p.name}, ${formatMoney(p.price)}${p.isActive ? "" : ", pausado"}. Editar`}
+      accessibilityLabel={`${p.name}, ${formatMoney(live ? promo!.promoPrice : p.price)}${
+        p.isActive ? "" : ", pausado"
+      }. Editar`}
       style={({ pressed }) => [
         styles.row,
         pressed && { backgroundColor: colors.canvas },
@@ -403,6 +483,7 @@ function ProductRow({
         uri={p.imageUri}
         name={p.name}
         combo={combo}
+        size={58}
         dim={!p.isActive}
       />
       <View style={styles.rowBody}>
@@ -415,6 +496,7 @@ function ProductRow({
           </Text>
           {combo ? (
             <View style={styles.comboTag}>
+              <Icon name="combo" size={9} color={colors.brandText} />
               <Text style={styles.comboTagText}>Combo</Text>
             </View>
           ) : null}
@@ -431,27 +513,35 @@ function ProductRow({
           {live ? (
             <Text style={styles.priceOld}>{formatMoney(p.price)}</Text>
           ) : null}
+        </View>
+        <View style={styles.tags}>
           {!p.isActive ? (
-            <Text style={styles.meta}>· Pausado</Text>
+            <View style={styles.tag}>
+              <Icon name="minus" size={10} color={colors.textSecondary} />
+              <Text style={styles.tagText}>Pausado</Text>
+            </View>
           ) : p.sold > 0 ? (
-            <Text style={styles.meta}>· {formatInt(p.sold)} vendidos</Text>
+            <View style={styles.tag}>
+              <Icon name="cart" size={10} color={colors.textSecondary} />
+              <Text style={styles.tagText}>{formatInt(p.sold)} vendidos</Text>
+            </View>
+          ) : null}
+          {promo ? (
+            <View style={[styles.tag, live && styles.promoLive]}>
+              <Icon
+                name={live ? "bolt" : "clock"}
+                size={10}
+                color={live ? colors.onBrand : colors.textSecondary}
+              />
+              <Text
+                style={[styles.tagText, live && { color: colors.onBrand }]}
+                numberOfLines={1}
+              >
+                {promo.label} · {live ? "ahora" : formatWindowShort(promo)}
+              </Text>
+            </View>
           ) : null}
         </View>
-        {promo ? (
-          <View style={[styles.promo, live && styles.promoLive]}>
-            <Icon
-              name={live ? "bolt" : "clock"}
-              size={11}
-              color={live ? "#000000" : colors.textSecondary}
-            />
-            <Text
-              style={[styles.promoText, live && { color: "#000000" }]}
-              numberOfLines={1}
-            >
-              {promo.label} · {live ? "ahora" : formatWindowShort(promo)}
-            </Text>
-          </View>
-        ) : null}
       </View>
       <Switch
         value={p.isActive}
@@ -468,7 +558,7 @@ function ProductRow({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: {
       padding: Spacing.three,
       paddingBottom: Spacing.six,
@@ -483,6 +573,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: LIME,
     },
     popover: {
+      transformOrigin: "top right",
       position: "absolute",
       right: 12,
       minWidth: 200,
@@ -513,19 +604,21 @@ const useStyles = makeStyles((c) =>
 
     searchRow: { flexDirection: "row", alignItems: "center", gap: 10 },
     filterBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: Radius.lg,
-      borderCurve: "continuous",
+      width: 46,
+      height: 46,
+      borderRadius: 23,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: c.raised,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
-    filterBtnOn: { backgroundColor: "#000000" },
+    filterBtnOn: { backgroundColor: c.ink, borderColor: c.ink },
     badgeCount: {
       position: "absolute",
-      top: -4,
-      right: -4,
+      top: -3,
+      right: -3,
       minWidth: 18,
       height: 18,
       paddingHorizontal: 4,
@@ -534,13 +627,37 @@ const useStyles = makeStyles((c) =>
       justifyContent: "center",
       backgroundColor: LIME,
       borderWidth: 2,
-      borderColor: "#ffffff",
+      borderColor: c.background,
     },
-    badgeCountText: { color: "#000000", fontSize: 10, fontWeight: "800" },
+    badgeCountText: { color: c.onBrand, fontSize: 10, fontWeight: "800" },
 
-    group: { gap: 8, marginTop: 4 },
+    stats: { flexDirection: "row", gap: 8 },
+    stat: {
+      flex: 1,
+      gap: 4,
+      padding: 12,
+      borderRadius: Radius.xl,
+      borderCurve: "continuous",
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
+    },
+    statAccent: { backgroundColor: c.brandMuted, borderColor: "transparent", boxShadow: "none" },
+    statLabel: { color: c.textSecondary, fontSize: 11 },
+    statLabelAccent: { color: c.brandText },
+    statValue: {
+      color: c.text,
+      fontSize: 20,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.4,
+      fontVariant: ["tabular-nums"],
+    },
+    statSuffix: { color: c.textMuted, fontSize: 13, fontFamily: DisplayFont.semibold, letterSpacing: 0 },
+
+    group: { gap: 8, marginTop: 8 },
     row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12 },
-    rowBody: { flex: 1, gap: 3 },
+    rowBody: { flex: 1, gap: 4 },
     nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
     name: {
       flexShrink: 1,
@@ -549,10 +666,12 @@ const useStyles = makeStyles((c) =>
       fontFamily: DisplayFont.semibold,
     },
     comboTag: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
       paddingHorizontal: 6,
       height: 18,
-      justifyContent: "center",
-      borderRadius: 5,
+      borderRadius: Radius.pill,
       backgroundColor: c.brandMuted,
     },
     comboTagText: {
@@ -568,32 +687,32 @@ const useStyles = makeStyles((c) =>
       textDecorationLine: "line-through",
       fontVariant: ["tabular-nums"],
     },
-    promo: {
+    tags: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 2 },
+    tag: {
       flexDirection: "row",
       alignItems: "center",
-      alignSelf: "flex-start",
       gap: 4,
-      marginTop: 3,
       height: 22,
       paddingHorizontal: 8,
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
+      maxWidth: "100%",
     },
-    promoLive: { backgroundColor: LIME },
-    promoText: {
+    tagText: {
+      flexShrink: 1,
       color: c.textSecondary,
       fontSize: 11,
       fontWeight: "700",
       fontVariant: ["tabular-nums"],
     },
+    promoLive: { backgroundColor: LIME },
     price: {
       color: c.text,
-      fontSize: 15,
+      fontSize: 16,
       fontFamily: DisplayFont.bold,
       fontVariant: ["tabular-nums"],
     },
     off: { color: c.textMuted },
     meta: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
-    tools: { flexDirection: "row", justifyContent: "flex-end", gap: 20, paddingHorizontal: 4 },
   }),
 );

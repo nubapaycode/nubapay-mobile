@@ -176,7 +176,7 @@ function NewItemContent() {
           accessibilityRole="button"
           style={({ pressed }) => [styles.submit, !valid && styles.submitOff, pressed && { opacity: 0.85 }]}>
           {saving ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={colors.onInk} />
           ) : (
             <Text style={[styles.submitText, !valid && styles.submitTextOff]}>Crear</Text>
           )}
@@ -255,7 +255,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
     toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13 },
     toggleTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
     toggleText: { color: c.textMuted, fontSize: 13 },
@@ -265,10 +265,10 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
     submitOff: { backgroundColor: c.raised },
-    submitText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    submitText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
     submitTextOff: { color: c.textMuted },
   }),
 );

@@ -41,7 +41,7 @@ export default function CommissionScreen() {
     listApprovedPayments(selectedId!),
   );
   const { data: detail } = useSelectedEventDetail();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   const list = payments.data;
   const feeMode = !!detail?.service_fee_enabled;
@@ -89,7 +89,7 @@ export default function CommissionScreen() {
           </View>
           <View style={styles.switchBtn}>
             <Text style={styles.switchText}>Cambiar</Text>
-            <Icon name="chevronDown" size={11} color="#000000" />
+            <Icon name="chevronDown" size={11} color={colors.ink} />
           </View>
         </Pressable>
       </Animated.View>
@@ -170,7 +170,7 @@ function Row({ label, value, divider }: { label: string; value: string; divider?
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: 28 },
 
     eventCard: {
@@ -195,7 +195,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
     },
-    switchText: { color: '#000000', fontSize: 13, fontFamily: DisplayFont.semibold },
+    switchText: { color: c.ink, fontSize: 13, fontFamily: DisplayFont.semibold },
 
     loading: { paddingVertical: Spacing.six, alignItems: 'center' },
 

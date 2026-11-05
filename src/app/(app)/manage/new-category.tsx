@@ -62,7 +62,7 @@ function NewCategoryContent() {
     <View style={styles.content}>
       <View style={styles.header}>
         <View style={styles.headerIcon}>
-          <Icon name="tag" size={20} color="#000000" />
+          <Icon name="tag" size={20} color={colors.onBrand} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={styles.title}>Nueva categoría</Text>
@@ -132,7 +132,7 @@ function NewCategoryContent() {
         accessibilityState={{ disabled: !valid }}
         style={({ pressed }) => [styles.submit, !valid && styles.submitOff, pressed && { opacity: 0.85 }]}>
         {saving ? (
-          <ActivityIndicator color="#ffffff" />
+          <ActivityIndicator color={colors.onInk} />
         ) : (
           <Text style={[styles.submitText, !valid && styles.submitTextOff]}>
             {trimmed && valid ? `Crear “${trimmed}”` : 'Crear categoría'}
@@ -193,7 +193,7 @@ const useStyles = makeStyles((c) =>
     },
     chipStatic: { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.border },
     chipDup: { borderColor: c.danger },
-    chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
 
     submit: {
       height: 54,
@@ -201,10 +201,10 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
     submitOff: { backgroundColor: c.raised },
-    submitText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    submitText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
     submitTextOff: { color: c.textMuted },
   }),
 );

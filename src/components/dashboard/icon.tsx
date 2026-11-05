@@ -7,6 +7,7 @@ import { useTheme } from '@/theme';
 const ICONS = {
   chevronDown: { ios: 'chevron.down', android: 'keyboard_arrow_down' },
   chevronRight: { ios: 'chevron.right', android: 'chevron_right' },
+  chevronUpDown: { ios: 'chevron.up.chevron.down', android: 'unfold_more' },
   ticket: { ios: 'ticket', android: 'confirmation_number' },
   scan: { ios: 'qrcode.viewfinder', android: 'qr_code_scanner' },
   bar: { ios: 'wineglass', android: 'local_bar' },

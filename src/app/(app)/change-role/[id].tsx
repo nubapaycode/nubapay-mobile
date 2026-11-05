@@ -89,7 +89,7 @@ function ChangeRoleContent() {
                 </Text>
               </View>
               <View style={[styles.radio, on && styles.radioOn]}>
-                {on ? <Icon name="checkmark" size={11} color="#ffffff" /> : null}
+                {on ? <Icon name="checkmark" size={11} color={colors.onInk} /> : null}
               </View>
             </Pressable>
           );
@@ -131,7 +131,7 @@ function ChangeRoleContent() {
             pressed && { opacity: 0.85 },
           ]}>
           {saving ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={colors.onInk} />
           ) : (
             <Text style={[styles.saveText, !changed && { color: colors.textMuted }]}>
               {changed ? `Cambiar a ${next.name}` : 'Elegí un rol'}
@@ -160,7 +160,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 1,
       borderColor: c.border,
     },
-    optionOn: { borderColor: '#000000' },
+    optionOn: { borderColor: c.ink },
     optionHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     optionName: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     optionPerms: { color: c.textMuted, fontSize: 13 },
@@ -181,7 +181,7 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    radioOn: { backgroundColor: '#000000', borderColor: '#000000' },
+    radioOn: { backgroundColor: c.ink, borderColor: c.ink },
     note: { color: c.textSecondary, fontSize: 13, lineHeight: 18, paddingHorizontal: 4 },
     save: {
       height: 54,
@@ -189,8 +189,8 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    saveText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

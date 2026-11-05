@@ -161,9 +161,9 @@ const useStyles = makeStyles((c) =>
     sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: { height: 38, paddingHorizontal: 14, borderRadius: Radius.pill, justifyContent: 'center', backgroundColor: c.raised },
-    chipOn: { backgroundColor: '#000000' },
-    chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
-    chipTextOn: { color: '#ffffff' },
+    chipOn: { backgroundColor: c.ink },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipTextOn: { color: c.onInk },
     purge: { alignItems: 'center', paddingVertical: 6 },
     purgeText: { color: c.danger, fontSize: 14, fontWeight: '600' },
     apply: {
@@ -172,8 +172,8 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    applyText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    applyText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

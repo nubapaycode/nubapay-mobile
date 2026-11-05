@@ -39,7 +39,7 @@ export default function BlockScreen() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { blocks, error } = useBlocks();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   if (id === 'new') return <BlockForm />;
   const block = blocks?.find((b) => b.id === id);
@@ -263,7 +263,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
                 onPress={() => openBlockProductsPicker(ids, setIds)}
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.addProducts, pressed && { backgroundColor: colors.border }]}>
-                <Icon name="plus" size={15} color="#000000" />
+                <Icon name="plus" size={15} color={colors.ink} />
                 <Text style={styles.addProductsText}>Agregar productos</Text>
               </Pressable>
             ) : (
@@ -362,6 +362,7 @@ function SmallButton({
   onPress: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -370,14 +371,14 @@ function SmallButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => [styles.small, disabled && { opacity: 0.25 }, pressed && { opacity: 0.6 }]}>
-      <Icon name={icon} size={12} color="#000000" />
+      <Icon name={icon} size={12} color={colors.ink} />
     </Pressable>
   );
 }
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
     section: { gap: 10 },
     field: { gap: 4, paddingVertical: 4 },
@@ -403,7 +404,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    addProductsText: { color: '#000000', fontSize: 15, fontFamily: DisplayFont.semibold },
+    addProductsText: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
     productRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     productName: { color: c.text, fontSize: 15, fontWeight: '500' },
     productMeta: { color: c.textMuted, fontSize: 12 },
@@ -421,7 +422,7 @@ const useStyles = makeStyles((c) =>
     toggleText: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
     delete: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48 },
     deleteText: { color: c.danger, fontSize: 15, fontFamily: DisplayFont.semibold },
-    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' },
+    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),
 );

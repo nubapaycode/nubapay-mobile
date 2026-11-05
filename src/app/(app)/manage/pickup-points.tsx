@@ -21,7 +21,7 @@ import { makeStyles, useTheme } from '@/theme';
 export default function PickupPointsScreen() {
   const styles = useStyles();
   const { pickups, error, eventId } = usePickupPoints();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   const points = pickups ?? [];
   const open = points.filter((p) => p.isActive).length;
@@ -105,7 +105,7 @@ function PointCard({
       style={[styles.card, !p.isActive && styles.cardOff]}>
       <View style={styles.top}>
         <View style={[styles.icon, !p.isActive && styles.iconOff]}>
-          <Icon name="store" size={17} color={p.isActive ? '#000000' : colors.textMuted} />
+          <Icon name="store" size={17} color={p.isActive ? colors.ink : colors.textMuted} />
         </View>
         <View style={{ flex: 1, gap: 3 }}>
           <View style={styles.nameRow}>
@@ -169,7 +169,7 @@ function Badge({ label, tone }: { label: string; tone?: 'attention' }) {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
     muted: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
 

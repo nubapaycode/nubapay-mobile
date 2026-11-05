@@ -302,7 +302,7 @@ function InviteContent() {
                 <Text style={styles.permText}>{PERMISSION_LABEL[p]}</Text>
                 <View style={[styles.check, on && styles.checkOn]}>
                   {on ? (
-                    <Icon name="checkmark" size={11} color="#ffffff" />
+                    <Icon name="checkmark" size={11} color={colors.onInk} />
                   ) : null}
                 </View>
               </Pressable>
@@ -325,7 +325,7 @@ function InviteContent() {
           ]}
         >
           {sending ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={colors.onInk} />
           ) : (
             <Text style={[styles.submitText, !valid && styles.submitTextOff]}>
               Enviar invitación
@@ -385,7 +385,7 @@ const useStyles = makeStyles((c) =>
     },
     cards: { gap: 8 },
     cardError: { borderColor: c.danger },
-    permRowOn: { borderColor: "#000000" },
+    permRowOn: { borderColor: c.ink },
     divider: {
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.borderSubtle,
@@ -428,7 +428,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: "center",
       backgroundColor: c.raised,
     },
-    chipText: { color: "#000000", fontSize: 14, fontWeight: "600" },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: "600" },
     hint: { color: c.textSecondary, fontSize: 13, paddingHorizontal: 4 },
     error: { color: c.danger, fontSize: 13, paddingHorizontal: 4 },
 
@@ -459,7 +459,7 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    checkOn: { backgroundColor: "#000000", borderColor: "#000000" },
+    checkOn: { backgroundColor: c.ink, borderColor: c.ink },
 
     submit: {
       height: 54,
@@ -467,11 +467,11 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
     submitOff: { backgroundColor: c.raised },
     submitText: {
-      color: "#ffffff",
+      color: c.onInk,
       fontSize: 16,
       fontFamily: DisplayFont.semibold,
     },

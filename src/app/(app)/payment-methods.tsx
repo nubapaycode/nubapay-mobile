@@ -52,15 +52,16 @@ async function save(e: EventDetail, payload: EventPatch): Promise<boolean> {
 /** Logo de cada método, en su tile. */
 function MethodMark({ id, size = 'md' }: { id: PaymentMethodId; size?: 'sm' | 'md' }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const sm = size === 'sm';
   return (
     <View style={[styles.mark, sm && styles.markSm, id !== 'mercadopago' && styles.markPlain]}>
       {id === 'mercadopago' ? (
         <MercadoPagoLogo width={sm ? 22 : 32} />
       ) : id === 'sipago' ? (
-        <Icon name="card" size={sm ? 13 : 18} color="#000000" />
+        <Icon name="card" size={sm ? 13 : 18} color={colors.ink} />
       ) : (
-        <Icon name="cash" size={sm ? 13 : 18} color="#000000" />
+        <Icon name="cash" size={sm ? 13 : 18} color={colors.ink} />
       )}
     </View>
   );
@@ -68,13 +69,15 @@ function MethodMark({ id, size = 'md' }: { id: PaymentMethodId; size?: 'sm' | 'm
 
 /**
  * Métodos de pago del evento seleccionado: Mercado Pago y Sipago (online) y Efectivo (en el
- * evento). Cada cambio se guarda en el backend (PATCH /api/events/<id>).
+ * evento). Resumen arriba; cada método en su card con estado en píldora y, al activarlo, su
+ * configuración en sub-cards (sin divisores). Cada cambio se guarda en el backend
+ * (PATCH /api/events/<id>).
  */
 export default function PaymentMethodsScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
   const { data: event, error } = useSelectedEventDetail();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   if (!event) {
     return (
@@ -98,7 +101,7 @@ export default function PaymentMethodsScreen() {
         contentInsetAdjustmentBehavior="automatic"
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive">
-        {/* Resumen tipo checklist */}
+        {/* Resumen: cuántos métodos acepta el evento, con sus logos y un segmento por método. */}
         <Animated.View entering={enter(0)} layout={LAYOUT} style={styles.summary}>
           <View style={styles.summaryTop}>
             <View style={{ flex: 1, gap: 2 }}>
@@ -127,7 +130,12 @@ export default function PaymentMethodsScreen() {
           </View>
         </Animated.View>
         {ready.length === 0 ? (
-          <Text style={styles.warning}>Sin métodos activos tu catálogo no puede recibir pedidos.</Text>
+          <Animated.View entering={FadeIn.duration(260)} style={styles.warning}>
+            <Icon name="warning" size={15} color={colors.danger} />
+            <Text style={styles.warningText}>
+              Sin métodos activos tu catálogo no puede recibir pedidos.
+            </Text>
+          </Animated.View>
         ) : null}
 
         <Group title="Online" index={1}>
@@ -179,8 +187,12 @@ function MethodCard({
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const dot = tone === 'on' ? colors.brand : tone === 'pending' ? colors.warning : colors.border;
-  const statusColor = tone === 'on' ? colors.brandText : tone === 'pending' ? colors.warning : colors.textMuted;
+  const pill =
+    tone === 'on'
+      ? { fg: colors.success, bg: colors.successMuted }
+      : tone === 'pending'
+        ? { fg: colors.warning, bg: colors.warningMuted }
+        : { fg: colors.textMuted, bg: colors.raised };
 
   return (
     <Animated.View layout={LAYOUT} style={[styles.card, enabled && styles.cardOn]}>
@@ -189,12 +201,14 @@ function MethodCard({
         <View style={{ flex: 1, gap: 3 }}>
           <Text style={styles.title}>{METHOD_LABEL[id]}</Text>
           {enabled ? (
-            <View style={styles.statusRow}>
-              <View style={[styles.dot, { backgroundColor: dot }]} />
-              <Text style={[styles.status, { color: statusColor }]} numberOfLines={1}>
+            <Animated.View
+              entering={FadeIn.duration(200)}
+              style={[styles.statusPill, { backgroundColor: pill.bg }]}>
+              <View style={[styles.dot, { backgroundColor: pill.fg }]} />
+              <Text style={[styles.status, { color: pill.fg }]} numberOfLines={1}>
                 {status}
               </Text>
-            </View>
+            </Animated.View>
           ) : (
             <Text style={styles.description} numberOfLines={2}>
               {description}
@@ -233,6 +247,7 @@ function MethodCard({
 
 function CashCard({ event }: { event: EventDetail }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const [busy, setBusy] = useState(false);
   return (
     <MethodCard
@@ -248,9 +263,12 @@ function CashCard({ event }: { event: EventDetail }) {
         await save(event, { cash_enabled: v });
         setBusy(false);
       }}>
-      <Text style={styles.note}>
-        Los pedidos en efectivo quedan como “por cobrar” hasta que los confirmás en caja.
-      </Text>
+      <View style={[styles.sub, styles.account]}>
+        <Icon name="clock" size={15} color={colors.textSecondary} />
+        <Text style={[styles.note, { flex: 1 }]}>
+          Los pedidos en efectivo quedan como “por cobrar” hasta que los confirmás en caja.
+        </Text>
+      </View>
     </MethodCard>
   );
 }
@@ -291,9 +309,9 @@ function MercadoPagoCard({ event }: { event: EventDetail }) {
       onToggle={(v) => (v ? setOpen(true) : connected ? disconnect() : setOpen(false))}>
       {connected ? (
         <View style={{ gap: 12 }}>
-          <View style={styles.account}>
+          <View style={[styles.sub, styles.account]}>
             <View style={styles.accountCheck}>
-              <Icon name="checkmark" size={11} color="#ffffff" />
+              <Icon name="checkmark" size={11} color={colors.onInk} />
             </View>
             <View style={{ flex: 1, gap: 1 }}>
               <Text style={styles.fieldValue}>Credenciales cargadas</Text>
@@ -326,8 +344,9 @@ function MercadoPagoCard({ event }: { event: EventDetail }) {
           <Pressable
             onPress={disconnect}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.ghost, pressed && { opacity: 0.6 }]}>
-            <Text style={[styles.ghostText, { color: colors.danger }]}>Desconectar</Text>
+            style={({ pressed }) => [styles.disconnect, pressed && { opacity: 0.7 }]}>
+            <Icon name="trash" size={14} color={colors.danger} />
+            <Text style={styles.disconnectText}>Desconectar</Text>
           </Pressable>
         </View>
       ) : (
@@ -375,9 +394,9 @@ function SipagoCard({ event }: { event: EventDetail }) {
       onToggle={(v) => (v ? setOpen(true) : connected ? disconnect() : setOpen(false))}>
       {connected ? (
         <View style={{ gap: 12 }}>
-          <View style={styles.account}>
+          <View style={[styles.sub, styles.account]}>
             <View style={styles.accountCheck}>
-              <Icon name="checkmark" size={11} color="#ffffff" />
+              <Icon name="checkmark" size={11} color={colors.onInk} />
             </View>
             <Text style={[styles.fieldValue, { flex: 1 }]}>Credenciales cargadas</Text>
           </View>
@@ -394,8 +413,9 @@ function SipagoCard({ event }: { event: EventDetail }) {
           <Pressable
             onPress={disconnect}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.ghost, pressed && { opacity: 0.6 }]}>
-            <Text style={[styles.ghostText, { color: colors.danger }]}>Desconectar</Text>
+            style={({ pressed }) => [styles.disconnect, pressed && { opacity: 0.7 }]}>
+            <Icon name="trash" size={14} color={colors.danger} />
+            <Text style={styles.disconnectText}>Desconectar</Text>
           </Pressable>
         </View>
       ) : (
@@ -443,9 +463,13 @@ function CredentialsForm({
 
   if (!expanded) {
     return (
-      <Pressable onPress={() => setExpanded(true)} accessibilityRole="button" style={styles.helpLink}>
-        <Text style={styles.helpText}>{title}</Text>
-        <Icon name="chevronRight" size={11} color={colors.textSecondary} />
+      <Pressable
+        onPress={() => setExpanded(true)}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.sub, styles.subRow, pressed && { opacity: 0.7 }]}>
+        <Icon name="pencil" size={14} color={colors.textSecondary} />
+        <Text style={[styles.fieldValue, { flex: 1 }]}>{title}</Text>
+        <Icon name="chevronRight" size={11} color={colors.textMuted} />
       </Pressable>
     );
   }
@@ -454,10 +478,10 @@ function CredentialsForm({
     <View style={{ gap: 12 }}>
       {intro ? <Text style={styles.note}>{intro}</Text> : null}
       <View style={styles.inputs}>
-        {fields.map((f, i) => {
+        {fields.map((f) => {
           const k = f.key as string;
           return (
-            <View key={k} style={[styles.inputBlock, i > 0 && styles.divider]}>
+            <View key={k} style={styles.inputBlock}>
               <Text style={styles.fieldLabel}>{f.label}</Text>
               <View style={styles.inputRow}>
                 <TextInput
@@ -547,7 +571,7 @@ function ToggleLine({
   const { colors } = useTheme();
   const [busy, setBusy] = useState(false);
   return (
-    <View style={styles.toggleLine}>
+    <View style={[styles.sub, styles.toggleLine]}>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={[styles.fieldValue, disabled && { color: colors.textMuted }]}>{title}</Text>
         <Text style={styles.note}>{description}</Text>
@@ -573,35 +597,46 @@ function ToggleLine({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
-    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 24 },
+    screen: { flex: 1, backgroundColor: c.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background, padding: 24 },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
 
     summary: {
-      gap: 12,
+      gap: 14,
       padding: 16,
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
     summaryTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    summaryLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
+    summaryLabel: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
     summaryValue: {
       color: c.text,
-      fontSize: 28,
+      fontSize: 30,
       fontFamily: DisplayFont.bold,
       letterSpacing: -0.8,
       fontVariant: ['tabular-nums'],
     },
     summaryOf: { color: c.textMuted, fontSize: 15, fontFamily: DisplayFont.semibold, letterSpacing: 0 },
     segments: { flexDirection: 'row', gap: 4 },
-    segment: { flex: 1, height: 5, borderRadius: 3, backgroundColor: c.border },
-    segmentOn: { backgroundColor: c.brand },
+    segment: { flex: 1, height: 6, borderRadius: 3, backgroundColor: c.raised },
+    segmentOn: { backgroundColor: c.success },
     stack: { flexDirection: 'row' },
-    stackItem: { borderRadius: 12, borderWidth: 2, borderColor: '#ffffff' },
-    warning: { color: c.danger, fontSize: 13, lineHeight: 18, marginTop: -16, paddingHorizontal: 4 },
+    stackItem: { borderRadius: 12, borderWidth: 2, borderColor: c.surface },
+    warning: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      padding: 14,
+      marginTop: -12,
+      borderRadius: Radius.xl,
+      borderCurve: 'continuous',
+      backgroundColor: c.dangerMuted,
+    },
+    warningText: { flex: 1, color: c.danger, fontSize: 13, lineHeight: 18, fontWeight: '500' },
 
     group: { gap: 10 },
     groupTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
@@ -609,48 +644,57 @@ const useStyles = makeStyles((c) =>
     card: {
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
       backgroundColor: c.surface,
       padding: 14,
-      overflow: 'hidden',
+      boxShadow: c.cardShadowSubtle,
     },
-    cardOn: { borderColor: '#d4d9e1' },
+    cardOn: { borderColor: c.borderStrong },
     head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     mark: {
-      width: 46,
-      height: 46,
-      borderRadius: 13,
-      borderCurve: 'continuous',
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
+      backgroundColor: c.elevated,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
     },
-    markSm: { width: 32, height: 32, borderRadius: 10 },
+    markSm: { width: 32, height: 32, borderRadius: 16 },
     markPlain: { backgroundColor: c.raised, borderColor: c.raised },
     title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     description: { color: c.textMuted, fontSize: 12, lineHeight: 16 },
-    statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    dot: { width: 7, height: 7, borderRadius: 4 },
-    status: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
+    statusPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 5,
+      height: 22,
+      paddingHorizontal: 8,
+      borderRadius: Radius.pill,
+    },
+    dot: { width: 6, height: 6, borderRadius: 3 },
+    status: { fontSize: 11, fontWeight: '700', flexShrink: 1 },
     features: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 },
     feature: {
-      paddingHorizontal: 8,
-      height: 22,
+      paddingHorizontal: 9,
+      height: 24,
       justifyContent: 'center',
-      borderRadius: 7,
-      backgroundColor: c.canvas,
+      borderRadius: Radius.pill,
+      backgroundColor: c.raised,
     },
     featureText: { color: c.textSecondary, fontSize: 11, fontWeight: '600' },
 
-    body: {
-      marginTop: 14,
-      paddingTop: 14,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: c.border,
+    body: { marginTop: 14 },
+    sub: {
+      padding: 12,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
+      backgroundColor: c.canvas,
     },
+    subRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     note: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
     footnote: { textAlign: 'center' },
 
@@ -666,25 +710,30 @@ const useStyles = makeStyles((c) =>
     fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
     fieldValue: { color: c.text, fontSize: 15, fontWeight: '500' },
     toggleLine: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    ghost: {
-      height: 44,
-      borderRadius: Radius.md,
+    disconnect: {
+      flexDirection: 'row',
+      gap: 8,
+      height: 46,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.raised,
+      backgroundColor: c.dangerMuted,
     },
-    ghostText: { color: '#000000', fontSize: 14, fontFamily: DisplayFont.semibold },
+    disconnectText: { color: c.danger, fontSize: 14, fontFamily: DisplayFont.semibold },
 
-    inputs: {
+    inputs: { gap: 8 },
+    inputBlock: {
+      paddingTop: 10,
+      paddingBottom: 6,
+      paddingHorizontal: 12,
+      gap: 2,
       borderRadius: Radius.lg,
       borderCurve: 'continuous',
       backgroundColor: c.canvas,
-      paddingHorizontal: 12,
     },
-    inputBlock: { paddingTop: 10, paddingBottom: 6, gap: 2 },
     inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     input: { color: c.text, fontSize: 15, paddingVertical: 6, paddingHorizontal: 0 },
-    divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border },
     helpLink: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' },
     helpText: { color: c.textSecondary, fontSize: 13, fontWeight: '600' },
 
@@ -694,10 +743,10 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
     primaryDisabled: { backgroundColor: c.raised },
-    primaryText: { color: '#ffffff', fontSize: 15, fontFamily: DisplayFont.semibold },
+    primaryText: { color: c.onInk, fontSize: 15, fontFamily: DisplayFont.semibold },
     primaryTextDisabled: { color: c.textMuted },
   }),
 );

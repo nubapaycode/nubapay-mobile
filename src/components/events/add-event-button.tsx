@@ -6,9 +6,7 @@ import { useEventAccess } from '@/features/access/access';
 import { openAddEvent } from '@/features/events/add-event';
 import { makeStyles, useTheme } from '@/theme';
 
-const INK = '#000000';
-
-/** Botón gris para crear un evento. Texto e ícono en negro. Las cuentas de staff no lo ven. */
+/** Botón gris para crear un evento. Texto e ícono en la tinta del tema. Las cuentas de staff no lo ven. */
 export function AddEventButton({ onPress = openAddEvent }: { onPress?: () => void }) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -20,7 +18,7 @@ export function AddEventButton({ onPress = openAddEvent }: { onPress?: () => voi
       accessibilityRole="button"
       accessibilityLabel="Agregar evento"
       style={({ pressed }) => [styles.add, pressed && { backgroundColor: colors.border }]}>
-      <Icon name="plus" size={15} color={INK} />
+      <Icon name="plus" size={15} color={colors.ink} />
       <Text style={styles.text}>Agregar evento</Text>
     </Pressable>
   );
@@ -38,6 +36,6 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    text: { color: INK, fontSize: 15, fontFamily: DisplayFont.semibold },
+    text: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
   }),
 );

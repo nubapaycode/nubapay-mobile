@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
+import { EventContext } from "@/components/events/event-context";
 import { enter, enterRow } from "@/components/dashboard/detail-kit";
 import { Icon } from "@/components/dashboard/icon";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
@@ -70,7 +71,7 @@ export default function TicketsAdminScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
   const { tickets: list, error, eventId } = useTickets();
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
 
   const tickets = list ?? [];
   const sold = tickets.reduce((a, t) => a + t.sold, 0);
@@ -116,7 +117,7 @@ export default function TicketsAdminScreen() {
                       pressed && { opacity: 0.8 },
                     ]}
                   >
-                    <Icon name="plus" size={20} color="#000000" />
+                    <Icon name="plus" size={20} color={colors.onBrand} />
                   </Pressable>
                 ),
               }
@@ -127,6 +128,9 @@ export default function TicketsAdminScreen() {
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
       >
+        <Animated.View entering={enter(0)}>
+          <EventContext caption="Entradas de" />
+        </Animated.View>
         {!list ? (
           error ? (
             <EmptyState
@@ -182,7 +186,7 @@ export default function TicketsAdminScreen() {
                     height={10}
                     total={capacity}
                     delay={160}
-                    track="#ffffff"
+                    track={colors.background}
                     segments={[{ value: sold, color: colors.chart.ramp[0] }]}
                   />
                   <View style={styles.capacityRow}>
@@ -406,7 +410,7 @@ function Figure({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: {
       padding: Spacing.three,
       paddingBottom: Spacing.six,
@@ -485,7 +489,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       overflow: "hidden",
     },
-    ticketPressed: { borderColor: "#c9ced6", transform: [{ scale: 0.99 }] },
+    ticketPressed: { borderColor: c.borderStrong, transform: [{ scale: 0.99 }] },
     stubTop: {
       gap: 6,
       paddingHorizontal: 16,
@@ -539,7 +543,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: NOTCH / 2,
       borderWidth: 1,
       borderColor: c.border,
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
     },
 
     stubBottom: {

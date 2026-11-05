@@ -186,9 +186,9 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    chipOn: { backgroundColor: '#000000' },
-    chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
-    chipTextOn: { color: '#ffffff' },
+    chipOn: { backgroundColor: c.ink },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipTextOn: { color: c.onInk },
 
     card: {
       borderRadius: Radius.xl,
@@ -208,8 +208,8 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    applyText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    applyText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

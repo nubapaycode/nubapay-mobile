@@ -28,6 +28,8 @@ import { makeStyles, useTheme } from '@/theme';
 import { AnimatedNumber } from './animated-number';
 import { FADE_EASING, FADE_MS } from './detail-kit';
 import { Icon, type IconName } from './icon';
+import { LivePill } from './live-pill';
+import { PaymentMethodIcon } from './payment-method-icon';
 import { ProgressBar } from './progress-bar';
 import { Rings } from './ring';
 
@@ -57,7 +59,11 @@ export function BentoGrid({ data }: { data: DashboardData }) {
       )}
       <SalesTile data={data} index={2} />
       {insights.recent_activity.length > 0 ? (
-        <ActivityTile items={insights.recent_activity} index={3} />
+        <ActivityTile
+          items={insights.recent_activity}
+          live={insights.event.phase === 'live'}
+          index={3}
+        />
       ) : null}
     </View>
   );
@@ -218,14 +224,22 @@ function BarTile({ data, index, wide }: { data: DashboardData; index: number; wi
   );
 }
 
+/**
+ * Cobros: la proporción por medio en una barra y, debajo, cada medio en su propia mini-card con
+ * monto, cantidad y porcentaje. El efectivo sin confirmar va aparte, como aviso a atender.
+ */
 function SalesTile({ data, index }: { data: DashboardData; index: number }) {
   const styles = useStyles();
   const { colors } = useTheme();
   const { payment_breakdown } = data.summary;
   const { cash_pending } = data.insights;
-  const methods = [...payment_breakdown].sort((a, b) => b.revenue - a.revenue);
+  const methods = [...payment_breakdown]
+    .filter((m) => m.revenue > 0)
+    .sort((a, b) => b.revenue - a.revenue);
   const total = methods.reduce((a, p) => a + p.revenue, 0);
+  const count = methods.reduce((a, p) => a + p.count, 0);
   const color = (i: number) => colors.chart.ramp[i % 3];
+  const pending = cash_pending.orders > 0 || cash_pending.amount > 0;
 
   return (
     <Tile
@@ -233,33 +247,69 @@ function SalesTile({ data, index }: { data: DashboardData; index: number }) {
       icon="cash"
       title="Cobros"
       index={index}
-      right={cash_pending.orders > 0 ? <Chip label={`${cash_pending.orders} por cobrar`} /> : null}
-      a11y={methods.map((m) => `${PAYMENT_LABEL[m.key]} ${formatPercent(total ? m.revenue / total : 0)}`).join(', ')}>
+      right={
+        count > 0 ? (
+          <Text style={styles.tileMuted}>
+            {formatInt(count)} {count === 1 ? 'cobro' : 'cobros'}
+          </Text>
+        ) : null
+      }
+      a11y={
+        total > 0
+          ? methods
+              .map((m) => `${PAYMENT_LABEL[m.key]} ${formatMoney(m.revenue)}, ${formatPercent(m.revenue / total)}`)
+              .join('; ')
+          : 'Todavía no hay cobros'
+      }>
       {total > 0 ? (
-        <>
+        <View style={{ gap: 10 }}>
           <ProgressBar
-            height={6}
+            height={8}
             total={total}
             segments={methods.map((m, i) => ({ value: m.revenue, color: color(i) }))}
             delay={260}
           />
-          <View style={styles.legendRow}>
-            {methods.map((m, i) => (
-              <View key={m.key} style={styles.legendItem}>
-                <Legend color={color(i)} label={PAYMENT_LABEL[m.key]} />
-                <Text style={styles.legendValue}>{formatPercent(m.revenue / total)}</Text>
+          {methods.map((m, i) => (
+            <View key={m.key} style={styles.method}>
+              <View style={styles.methodIcon}>
+                <PaymentMethodIcon method={m.key} />
+                <View style={[styles.methodSwatch, { backgroundColor: color(i) }]} />
               </View>
-            ))}
-          </View>
-          {cash_pending.amount > 0 ? (
-            <Text style={styles.tileMuted}>
-              {formatMoney(cash_pending.amount)} en efectivo sin confirmar
-            </Text>
-          ) : null}
-        </>
+              <View style={styles.methodTexts}>
+                <Text style={styles.methodLabel} numberOfLines={1}>
+                  {PAYMENT_LABEL[m.key]}
+                </Text>
+                <Text style={styles.tileMuted} numberOfLines={1}>
+                  {formatInt(m.count)} {m.count === 1 ? 'cobro' : 'cobros'} ·{' '}
+                  {formatPercent(m.revenue / total)}
+                </Text>
+              </View>
+              <AnimatedNumber value={m.revenue} format={formatMoney} style={styles.methodAmount} />
+            </View>
+          ))}
+        </View>
       ) : (
-        <Text style={styles.tileMuted}>Todavía no hay cobros</Text>
+        <View style={styles.salesEmpty}>
+          <Text style={styles.tileMuted}>Todavía no hay cobros</Text>
+        </View>
       )}
+
+      {pending ? (
+        <View style={[styles.pendingCard, { backgroundColor: colors.brandMuted }]}>
+          <View style={[styles.pendingIcon, { backgroundColor: colors.brand }]}>
+            <Icon name="clock" size={13} color={colors.onBrand} />
+          </View>
+          <View style={styles.methodTexts}>
+            <Text style={[styles.pendingTitle, { color: colors.brandText }]} numberOfLines={1}>
+              {formatMoney(cash_pending.amount)} sin confirmar
+            </Text>
+            <Text style={[styles.pendingText, { color: colors.brandText }]} numberOfLines={1}>
+              {formatInt(cash_pending.orders)}{' '}
+              {cash_pending.orders === 1 ? 'orden' : 'órdenes'} en efectivo por cobrar
+            </Text>
+          </View>
+        </View>
+      ) : null}
     </Tile>
   );
 }
@@ -270,35 +320,75 @@ const ACTIVITY: Record<ActivityItem['type'], { icon: IconName; label: string }> 
   pickup: { icon: 'check', label: 'Retiro' },
 };
 
-/** Feed corto: lo nuevo aparece con un fundido y el resto se reacomoda suave. */
-function ActivityTile({ items, index }: { items: ActivityItem[]; index: number }) {
+/**
+ * Últimos movimientos: cada uno en su propia mini-card con ícono por tipo, detalle, monto y hace
+ * cuánto. Lo nuevo entra con un fundido y el resto se reacomoda suave. En vivo, el punto que late.
+ */
+function ActivityTile({
+  items,
+  live,
+  index,
+}: {
+  items: ActivityItem[];
+  live: boolean;
+  index: number;
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   const now = useNow(15_000);
+  const tone: Record<ActivityItem['type'], string> = {
+    sale: colors.primary,
+    ticket_checkin: colors.chart.series[2],
+    pickup: colors.success,
+  };
 
   return (
-    <Tile href="/detail/activity" icon="clock" title="Actividad" index={index} a11y="Últimos movimientos">
-      <View>
-        {items.slice(0, 3).map((a, i) => {
+    <Tile
+      href="/detail/activity"
+      icon="clock"
+      title="Actividad"
+      index={index}
+      a11y="Últimos movimientos"
+      right={
+        live ? (
+          <View style={styles.activityLive}>
+            <LivePill compact />
+            <Text style={[styles.chipText, { color: colors.brandText }]}>En vivo</Text>
+          </View>
+        ) : null
+      }>
+      <View style={{ gap: 8 }}>
+        {items.slice(0, 3).map((a) => {
           const k = ACTIVITY[a.type];
+          const detail = [a.customer_name, a.summary].filter(Boolean).join(' · ');
           return (
             <Animated.View
               key={`${a.type}-${a.order_id}-${a.at}`}
               entering={FadeIn.duration(FADE_MS).easing(FADE_EASING)}
               layout={LinearTransition.duration(260)}
-              style={[styles.feedRow, i > 0 && styles.feedBorder]}>
-              <View style={styles.feedDot}>
-                <Icon name={k.icon} size={12} color={colors.textSecondary} />
+              style={styles.activityCard}>
+              <View style={styles.methodIcon}>
+                <Icon name={k.icon} size={15} color={tone[a.type]} />
               </View>
-              <Text style={styles.feedText} numberOfLines={1}>
-                {k.label}
-                {a.amount != null ? (
-                  <Text style={styles.feedStrong}> {formatMoney(a.amount)}</Text>
-                ) : a.customer_name ? (
-                  <Text style={styles.tileMuted}> · {a.customer_name}</Text>
+              <View style={styles.methodTexts}>
+                <Text style={styles.methodLabel} numberOfLines={1}>
+                  {k.label}
+                  {a.order_number != null ? (
+                    <Text style={styles.activityOrder}> #{a.order_number}</Text>
+                  ) : null}
+                </Text>
+                {detail ? (
+                  <Text style={styles.tileMuted} numberOfLines={1}>
+                    {detail}
+                  </Text>
                 ) : null}
-              </Text>
-              <Text style={styles.feedTime}>{relativeTime(a.at, now)}</Text>
+              </View>
+              <View style={styles.activityRight}>
+                {a.amount != null ? (
+                  <Text style={styles.activityAmount}>+{formatMoney(a.amount)}</Text>
+                ) : null}
+                <Text style={styles.feedTime}>{relativeTime(a.at, now)}</Text>
+              </View>
             </Animated.View>
           );
         })}
@@ -406,6 +496,7 @@ const useStyles = makeStyles((c) =>
     tile: {
       flex: 1,
       backgroundColor: c.surface,
+      boxShadow: c.cardShadow,
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
       borderWidth: StyleSheet.hairlineWidth,
@@ -455,6 +546,67 @@ const useStyles = makeStyles((c) =>
     legendRow: { flexDirection: 'row', flexWrap: 'wrap', columnGap: Spacing.three, rowGap: 6 },
     legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     legendValue: { color: c.text, fontSize: 12, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    method: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
+      backgroundColor: c.raised,
+    },
+    methodIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: Radius.md,
+      borderCurve: 'continuous',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.surface,
+    },
+    methodSwatch: {
+      position: 'absolute',
+      right: -2,
+      bottom: -2,
+      width: 12,
+      height: 12,
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: c.raised,
+    },
+    methodTexts: { flex: 1, gap: 2 },
+    methodLabel: { color: c.text, fontSize: 14, fontWeight: '600' },
+    methodAmount: {
+      color: c.text,
+      fontSize: 16,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.3,
+      fontVariant: ['tabular-nums'],
+    },
+    salesEmpty: {
+      alignItems: 'center',
+      paddingVertical: 18,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
+      backgroundColor: c.raised,
+    },
+    pendingCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
+    },
+    pendingIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    pendingTitle: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    pendingText: { fontSize: 12, fontWeight: '500', opacity: 0.85 },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -465,19 +617,33 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
     },
     chipText: { fontSize: 11, fontWeight: '700' },
-    feedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 9 },
-    feedBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderSubtle },
-    feedDot: {
-      width: 24,
-      height: 24,
-      borderRadius: 7,
-      borderCurve: 'continuous',
+    activityCard: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      gap: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: Radius.lg,
+      borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    feedText: { flex: 1, color: c.text, fontSize: 13, fontWeight: '500' },
-    feedStrong: { color: c.text, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    activityOrder: { color: c.textMuted, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    activityRight: { alignItems: 'flex-end', gap: 2 },
+    activityAmount: {
+      color: c.text,
+      fontSize: 14,
+      fontWeight: '700',
+      fontVariant: ['tabular-nums'],
+    },
+    activityLive: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 8,
+      height: 22,
+      borderRadius: Radius.pill,
+      backgroundColor: c.brandMuted,
+    },
     feedTime: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
   }),
 );

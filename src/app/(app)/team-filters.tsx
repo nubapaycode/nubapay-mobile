@@ -13,7 +13,7 @@ import {
   useTeamFilters,
 } from '@/features/team/team';
 import { useRoles } from '@/features/team/use-team';
-import { makeStyles } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
 /**
  * Hoja de filtros del equipo: por roles creados y/o por permisos (se puede elegir más de uno).
@@ -31,6 +31,7 @@ const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x
 
 function FiltersContent() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { dismiss } = useSheet();
   const current = useTeamFilters();
   const roleList = useRoles();
@@ -92,7 +93,7 @@ function FiltersContent() {
                 style={[styles.row, i > 0 && styles.divider]}>
                 <Text style={styles.rowText}>{PERMISSION_LABEL[p]}</Text>
                 <View style={[styles.check, on && styles.checkOn]}>
-                  {on ? <Icon name="checkmark" size={11} color="#ffffff" /> : null}
+                  {on ? <Icon name="checkmark" size={11} color={colors.onInk} /> : null}
                 </View>
               </Pressable>
             );
@@ -135,9 +136,9 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    chipOn: { backgroundColor: '#000000' },
-    chipText: { color: '#000000', fontSize: 14, fontWeight: '600' },
-    chipTextOn: { color: '#ffffff' },
+    chipOn: { backgroundColor: c.ink },
+    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipTextOn: { color: c.onInk },
     card: {
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
@@ -157,15 +158,15 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    checkOn: { backgroundColor: '#000000', borderColor: '#000000' },
+    checkOn: { backgroundColor: c.ink, borderColor: c.ink },
     apply: {
       height: 54,
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    applyText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    applyText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

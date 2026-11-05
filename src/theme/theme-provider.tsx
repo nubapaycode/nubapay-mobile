@@ -1,35 +1,79 @@
 import * as SecureStore from 'expo-secure-store';
 import * as SystemUI from 'expo-system-ui';
-import { createContext, type ReactNode, useContext, useEffect, useMemo } from 'react';
-import { Appearance, Platform } from 'react-native';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { Appearance, Platform, useColorScheme } from 'react-native';
 
-import { light, type Palette } from './palette';
+import { dark, light, type Palette } from './palette';
 
-/** Preferencia de apariencia que guardaban versiones anteriores (había modo oscuro). */
-const LEGACY_STORAGE_KEY = 'nubapay_appearance';
+/** Apariencia elegida en Perfil: seguir al teléfono o fijar claro u oscuro. */
+export type AppearancePreference = 'system' | 'light' | 'dark';
+
+const STORAGE_KEY = 'nubapay_appearance';
+const canStore = Platform.OS !== 'web';
+
+const isPreference = (v: unknown): v is AppearancePreference =>
+  v === 'system' || v === 'light' || v === 'dark';
 
 type ThemeState = {
   colors: Palette;
-  /** Se mantiene por compatibilidad con el layout raíz: el tema ya no se carga de forma asíncrona. */
+  preference: AppearancePreference;
+  setPreference: (p: AppearancePreference) => void;
+  /** Falso hasta leer la preferencia guardada: el layout raíz espera para no parpadear. */
   loaded: boolean;
 };
 
 const ThemeContext = createContext<ThemeState | null>(null);
 
-const VALUE: ThemeState = { colors: light, loaded: true };
-
 /**
- * Tema único claro. La app no tiene modo oscuro: también se fuerza en lo nativo
- * (`Appearance` + `userInterfaceStyle: "light"` en app.json) para hojas, teclado y barra.
+ * Tema claro u oscuro. Por defecto sigue al sistema (`userInterfaceStyle: "automatic"`); desde
+ * Perfil se puede fijar uno. La elección también se aplica a lo nativo (`Appearance`), así hojas,
+ * teclado y alertas usan el mismo modo, y queda guardada en el teléfono.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [preference, setPref] = useState<AppearancePreference>('system');
+  const [loaded, setLoaded] = useState(!canStore);
+  const system = useColorScheme();
+
   useEffect(() => {
-    Appearance.setColorScheme('light');
-    SystemUI.setBackgroundColorAsync(light.canvas).catch(() => {});
-    if (Platform.OS !== 'web') SecureStore.deleteItemAsync(LEGACY_STORAGE_KEY).catch(() => {});
+    if (!canStore) return;
+    SecureStore.getItemAsync(STORAGE_KEY)
+      .then((v) => {
+        if (isPreference(v)) setPref(v);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, []);
 
-  return <ThemeContext.Provider value={VALUE}>{children}</ThemeContext.Provider>;
+  useEffect(() => {
+    Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
+  }, [preference]);
+
+  const setPreference = useCallback((p: AppearancePreference) => {
+    setPref(p);
+    if (canStore) SecureStore.setItemAsync(STORAGE_KEY, p).catch(() => {});
+  }, []);
+
+  const scheme = preference === 'system' ? system : preference;
+  const colors = scheme === 'dark' ? dark : light;
+
+  useEffect(() => {
+    // Fondo de la ventana nativa: es lo que se ve detrás de hojas y transiciones.
+    SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+  }, [colors]);
+
+  const value = useMemo(
+    () => ({ colors, preference, setPreference, loaded }),
+    [colors, preference, setPreference, loaded],
+  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeState {

@@ -1,13 +1,22 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DashboardHeader } from '@/components/dashboard/dashboard-header';
-import { FADE_EASING, FADE_MS } from '@/components/dashboard/detail-kit';
 import { BentoGrid } from '@/components/dashboard/bento-grid';
-import { HeroSection } from '@/components/dashboard/hero-section';
+import { FADE_EASING, FADE_MS } from '@/components/dashboard/detail-kit';
+import { HeroBackdrop } from '@/components/dashboard/hero-backdrop';
+import { LastHourCard } from '@/components/dashboard/last-hour-card';
+import { PulseHeader } from '@/components/dashboard/pulse-header';
+import { PulseHero } from '@/components/dashboard/pulse-hero';
+import { QuickActions } from '@/components/dashboard/quick-actions';
 import { DashboardSkeleton } from '@/components/dashboard/skeleton';
 import { Button } from '@/components/ui';
 import { NoAccess } from '@/components/ui/no-access';
@@ -18,6 +27,7 @@ import {
   defaultFilters,
   filtersKey,
   periodLabel,
+  type RangePreset,
   SCOPE_LABEL,
   setDashboardFilters,
   useDashboardFilters,
@@ -28,29 +38,30 @@ import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/sel
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useAuth } from '@/providers/auth-provider';
-import { light, makeStyles, PaletteScope, useTheme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
-/** Sin selector de período: en curso → ritmo de las últimas horas; si no, la venta de los últimos 30 días. */
+/** Alto del degradé del hero por debajo del área segura. */
+const HERO_HEIGHT = 560;
 
 /**
- * Home: una tarjeta protagonista que responde "¿cómo va el evento?" (recaudación + tendencia + pulso
- * en vivo) y una grilla bento con un dato por tarjeta. Cada tarjeta abre su detalle.
+ * Inicio ("Pulso"): degradé del azul de marca a todo el ancho con la recaudación centrada, la curva
+ * de borde a borde y atajos de período; debajo, accesos rápidos, el pulso de la última hora y la
+ * grilla bento con un dato por tarjeta. Sigue el tema claro u oscuro del sistema.
  */
 export default function HomeScreen() {
-  // El home es siempre claro: barra de estado oscura mientras está en foco.
-  useFocusStatusBar('dark');
-
-  return (
-    <PaletteScope palette={light}>
-      <HomeContent />
-    </PaletteScope>
-  );
-}
-
-function HomeContent() {
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  useFocusStatusBar();
+
+  // La franja bajo la barra de estado aparece al scrollear (arriba se ve el degradé).
+  const scrollY = useSharedValue(0);
+  const onScroll = useAnimatedScrollHandler((e) => {
+    scrollY.set(e.contentOffset.y);
+  });
+  const scrimStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 140], [0, 1], 'clamp'),
+  }));
   const { user } = useAuth();
   const { events, error: eventsError } = useEvents();
   const selectedId = useSelectedEventId();
@@ -85,9 +96,14 @@ function HomeContent() {
   const scopeLabel =
     filters.scope !== 'all' ? SCOPE_LABEL[filters.scope] : only ? SCOPE_LABEL[only] : null;
 
+  const selectPreset = (preset: RangePreset) =>
+    setDashboardFilters({ ...filters, period: { preset } });
+
   return (
     <View style={styles.screen}>
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         style={styles.screen}
         contentContainerStyle={[
           styles.content,
@@ -104,12 +120,16 @@ function HomeContent() {
             progressBackgroundColor={colors.surface}
           />
         }>
-        <DashboardHeader
+        <HeroBackdrop height={insets.top + HERO_HEIGHT} />
+        <PulseHeader
           event={event}
           phase={data?.insights.event.phase ?? phase}
           userName={user?.name ?? null}
+          filterCount={activeFilterCount(filters, base)}
+          showFilters={canView}
           onOpenEvents={() => router.push('/switch-event')}
           onOpenProfile={() => router.push('/profile')}
+          onOpenFilters={() => router.push('/dashboard-filters')}
         />
 
         {eventsError ? (
@@ -125,23 +145,29 @@ function HomeContent() {
             key={event.id}
             entering={FadeIn.duration(FADE_MS).easing(FADE_EASING)}
             style={styles.sections}>
-            <HeroSection
+            <PulseHero
               summary={data.summary}
-              phase={data.insights.event.phase}
               chartKey={`${event.id}-${filtersKey(filters)}`}
+              period={filters.period}
               periodLabel={periodLabel(filters.period)}
               scopeLabel={scopeLabel}
-              filterCount={activeFilterCount(filters, base)}
-              onOpenFilters={() => router.push('/dashboard-filters')}
+              onSelectPreset={selectPreset}
             />
+
+            <QuickActions />
+
+            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} /> : null}
 
             <BentoGrid data={data} />
 
           </Animated.View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
       {/* Franja fija bajo la barra de estado: el contenido no se superpone con la hora/batería al scrollear. */}
-      <View pointerEvents="none" style={[styles.statusScrim, { height: insets.top }]} />
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.statusScrim, { height: insets.top }, scrimStyle]}
+      />
     </View>
   );
 }
@@ -159,16 +185,16 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     statusScrim: {
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'rgba(255, 255, 255, 0.94)',
+      backgroundColor: c.backgroundTranslucent,
     },
     content: { paddingHorizontal: Spacing.three, gap: Spacing.four },
-    sections: { gap: Spacing.five - 4 },
+    sections: { gap: Spacing.four },
     error: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
     errorTitle: { color: c.text, fontSize: 16, fontWeight: '600' },
     errorText: { color: c.textSecondary, fontSize: 14, textAlign: 'center' },

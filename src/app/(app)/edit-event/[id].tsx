@@ -13,7 +13,7 @@ export default function EditEventScreen() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = useQuery<EventDetail>(id ? `event:${id}` : null, () => getEvent(id));
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   if (!detail.data) {
     return (
@@ -32,7 +32,7 @@ export default function EditEventScreen() {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' },
+    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),
 );

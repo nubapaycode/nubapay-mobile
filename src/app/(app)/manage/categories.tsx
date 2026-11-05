@@ -133,7 +133,7 @@ function CategoryCard({
             disabled={!valid || busy}
             accessibilityRole="button"
             style={[styles.saveBtn, (!valid || busy) && { opacity: 0.4 }]}>
-            {busy ? <ActivityIndicator color="#ffffff" size="small" /> : <Text style={styles.saveText}>Guardar</Text>}
+            {busy ? <ActivityIndicator color={colors.onInk} size="small" /> : <Text style={styles.saveText}>Guardar</Text>}
           </Pressable>
         </Animated.View>
       ) : (
@@ -164,7 +164,7 @@ function CategoryCard({
 function RoundIcon({
   icon,
   label,
-  color = '#000000',
+  color,
   onPress,
 }: {
   icon: 'pencil' | 'trash';
@@ -173,6 +173,8 @@ function RoundIcon({
   onPress: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
+  const tint = color ?? colors.ink;
   return (
     <Pressable
       onPress={onPress}
@@ -180,7 +182,7 @@ function RoundIcon({
       accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => [styles.round, pressed && { opacity: 0.6 }]}>
-      <Icon name={icon} size={14} color={color} />
+      <Icon name={icon} size={14} color={tint} />
     </Pressable>
   );
 }
@@ -215,8 +217,8 @@ const useStyles = makeStyles((c) =>
       borderRadius: 17,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    saveText: { color: '#ffffff', fontSize: 14, fontWeight: '600' },
+    saveText: { color: c.onInk, fontSize: 14, fontWeight: '600' },
   }),
 );

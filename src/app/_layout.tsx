@@ -47,8 +47,8 @@ function RootNavigator() {
       colors: {
         ...base.colors,
         primary: colors.primary,
-        background: colors.canvas,
-        card: colors.canvas,
+        background: colors.background,
+        card: colors.background,
         text: colors.text,
         border: colors.border,
       },

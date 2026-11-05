@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
-import { light, makeStyles } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
 /** Ícono (normal / activo) y nombre accesible de cada pestaña, por nombre de ruta. */
 const TABS: Record<string, { icon: IconName; active: IconName; label: string }> = {
@@ -35,6 +35,7 @@ export function AppTabBar({
   onScan,
 }: BottomTabBarProps & { onScan: () => void }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const routes = state.routes.filter((r) => TABS[r.name]);
   const half = Math.ceil(routes.length / 2);
 
@@ -59,7 +60,7 @@ export function AppTabBar({
         <Icon
           name={focused ? meta.active : meta.icon}
           size={23}
-          color={focused ? '#000000' : light.textMuted}
+          color={focused ? colors.ink : colors.textMuted}
         />
         <View style={[styles.indicator, focused && styles.indicatorOn]} />
       </Pressable>
@@ -78,6 +79,7 @@ export function AppTabBar({
 /** Botón central elevado: círculo azul de marca con el ícono de QR. */
 function ScanButton({ onPress }: { onPress: () => void }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
   const press = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
@@ -93,7 +95,7 @@ function ScanButton({ onPress }: { onPress: () => void }) {
           accessibilityRole="button"
           accessibilityLabel="Escanear QR"
           style={styles.scan}>
-          <Icon name="qr" size={26} color="#ffffff" />
+          <Icon name="qr" size={26} color={colors.onPrimary} />
         </Pressable>
       </Animated.View>
     </View>
@@ -106,20 +108,20 @@ const useStyles = makeStyles((c) =>
       flexDirection: 'row',
       alignItems: 'flex-start',
       paddingTop: 10,
-      backgroundColor: '#ffffff',
+      backgroundColor: c.background,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.border,
     },
     tab: { flex: 1, alignItems: 'center', gap: 6, paddingTop: 6, height: 44 },
     indicator: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent' },
-    indicatorOn: { backgroundColor: '#000000' },
+    indicatorOn: { backgroundColor: c.ink },
 
     scanSlot: { flex: 1, alignItems: 'center' },
     scanRing: {
       marginTop: -28,
       padding: 5,
       borderRadius: 40,
-      backgroundColor: '#ffffff',
+      backgroundColor: c.background,
     },
     scan: {
       width: 60,

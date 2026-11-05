@@ -38,7 +38,7 @@ export function NavCard({
       }}
       style={({ pressed }) => [styles.card, pressed && { backgroundColor: colors.canvas }]}>
       <View style={styles.icon}>
-        <Icon name={icon} size={17} color="#000000" />
+        <Icon name={icon} size={17} color={colors.ink} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={styles.title}>{title}</Text>

@@ -12,7 +12,7 @@ import { periodNote } from '@/features/dashboard/filters';
 import { eventOffer } from '@/features/dashboard/offer';
 import type { DashboardData } from '@/features/dashboard/types';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { light, makeStyles, PaletteScope } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
 const TITLES = {
   tickets: 'Entradas',
@@ -24,28 +24,29 @@ type Section = keyof typeof TITLES;
 
 /**
  * Detalle de una sección del home. Usa los datos que ya cargó el home (incluidas las actualizaciones
- * en vivo). Igual que el home: siempre claro y sobre blanco, header incluido.
+ * en vivo). Sobre el fondo de pantalla, header incluido.
  */
 export default function DetailScreen() {
   const { section } = useLocalSearchParams<{ section: string }>();
   const key = (section in TITLES ? section : 'activity') as Section;
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
+  const { colors } = useTheme();
 
   return (
-    <PaletteScope palette={light}>
+    <>
       <Stack.Screen
         options={{
           title: TITLES[key],
           // Título fijo en la barra desde que se entra (el título grande de iOS no aparecía hasta scrollear).
           headerLargeTitle: false,
-          headerStyle: { backgroundColor: '#ffffff' },
-          headerTintColor: light.text,
-          headerTitleStyle: { fontFamily: DisplayFont.semibold, color: light.text },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontFamily: DisplayFont.semibold, color: colors.text },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <DetailBody section={key} />
-    </PaletteScope>
+    </>
   );
 }
 
@@ -108,7 +109,7 @@ function Content({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six },
     empty: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
     emptyText: { color: c.textSecondary, fontSize: 15 },

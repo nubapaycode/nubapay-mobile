@@ -536,7 +536,7 @@ function ToggleRow({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
 
     summary: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 },

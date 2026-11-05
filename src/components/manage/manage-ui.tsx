@@ -27,7 +27,7 @@ export function ManageScreen({
   children?: ReactNode;
 }) {
   const styles = useStyles();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
   return (
     <ScrollView
       style={styles.screen}
@@ -74,7 +74,7 @@ export function AddButton({ label, onPress }: { label: string; onPress: () => vo
       }}
       accessibilityRole="button"
       style={({ pressed }) => [styles.add, pressed && { backgroundColor: colors.border }]}>
-      <Icon name="plus" size={15} color="#000000" />
+      <Icon name="plus" size={15} color={colors.ink} />
       <Text style={styles.addText}>{label}</Text>
     </Pressable>
   );
@@ -142,7 +142,7 @@ export function ItemCard({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.three },
     list: { gap: 10 },
     muted: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
@@ -175,7 +175,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    addText: { color: '#000000', fontSize: 15, fontFamily: DisplayFont.semibold },
+    addText: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
 
     card: {
       padding: 14,

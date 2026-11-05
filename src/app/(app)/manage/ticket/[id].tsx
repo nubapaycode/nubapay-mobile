@@ -63,7 +63,7 @@ export default function TicketScreen() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { tickets, eventId } = useTickets();
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
 
   const isNew = id === "new";
   const ticket = isNew ? undefined : tickets?.find((t) => t.id === id);
@@ -546,7 +546,7 @@ function Chip({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: {
       padding: Spacing.three,
       paddingBottom: Spacing.six,
@@ -613,14 +613,14 @@ const useStyles = makeStyles((c) =>
       justifyContent: "center",
       backgroundColor: c.raised,
     },
-    chipOn: { backgroundColor: "#000000" },
+    chipOn: { backgroundColor: c.ink },
     chipText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 14,
       fontWeight: "600",
       fontVariant: ["tabular-nums"],
     },
-    chipTextOn: { color: "#ffffff" },
+    chipTextOn: { color: c.onInk },
     hint: {
       color: c.textMuted,
       fontSize: 13,
@@ -646,7 +646,7 @@ const useStyles = makeStyles((c) =>
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
     },
     missingText: { color: c.textSecondary, fontSize: 15 },
     delete: {

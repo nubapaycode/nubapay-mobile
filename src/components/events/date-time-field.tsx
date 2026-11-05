@@ -62,7 +62,7 @@ export function DateTimeField({
         accessibilityLabel={`Fecha: ${dateFmt.format(value)}. Cambiar`}
         onPress={() => setAndroidPicker('date')}
         style={({ pressed }) => [styles.chip, styles.dateChip, pressed && styles.pressed]}>
-        <Icon name="calendar" size={15} color="#000000" />
+        <Icon name="calendar" size={15} color={colors.ink} />
         <Text style={styles.chipText}>{dateFmt.format(value)}</Text>
       </Pressable>
       <Pressable
@@ -70,7 +70,7 @@ export function DateTimeField({
         accessibilityLabel={`Hora: ${timeFmt.format(value)}. Cambiar`}
         onPress={() => setAndroidPicker('time')}
         style={({ pressed }) => [styles.chip, pressed && styles.pressed]}>
-        <Icon name="clock" size={15} color="#000000" />
+        <Icon name="clock" size={15} color={colors.ink} />
         <Text style={styles.chipText}>{timeFmt.format(value)}</Text>
       </Pressable>
 
@@ -108,6 +108,6 @@ const useStyles = makeStyles((c) =>
     },
     dateChip: { flex: 1 },
     pressed: { backgroundColor: c.border },
-    chipText: { color: '#000000', fontSize: 15, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    chipText: { color: c.ink, fontSize: 15, fontWeight: '500', fontVariant: ['tabular-nums'] },
   }),
 );

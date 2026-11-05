@@ -96,7 +96,7 @@ export function DeliverPanel({
       {awaitingCash(order) ? (
         <>
           <View style={styles.cashCard}>
-            <Icon name="cash" size={22} color="#000000" />
+            <Icon name="cash" size={22} color={colors.ink} />
             <Text style={styles.cashLabel}>Pago en efectivo pendiente. Debés recibir</Text>
             <Text style={styles.cashValue}>{formatMoney(order.total)}</Text>
           </View>
@@ -180,6 +180,7 @@ function StepButton({
   onPress: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -188,7 +189,7 @@ function StepButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => [styles.step, disabled && { opacity: 0.3 }, pressed && { opacity: 0.6 }]}>
-      <Icon name={icon} size={14} color="#000000" />
+      <Icon name={icon} size={14} color={colors.ink} />
     </Pressable>
   );
 }
@@ -205,13 +206,14 @@ function PrimaryButton({
   onPress: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       style={({ pressed }) => [styles.primary, disabled && !loading && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
-      {loading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.primaryText}>{label}</Text>}
+      {loading ? <ActivityIndicator color={colors.onInk} /> : <Text style={styles.primaryText}>{label}</Text>}
     </Pressable>
   );
 }
@@ -250,7 +252,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       backgroundColor: c.surface,
     },
-    itemOn: { borderColor: '#000000' },
+    itemOn: { borderColor: c.ink },
     itemDone: { backgroundColor: c.canvas },
     itemName: { color: c.text, fontSize: 15, fontWeight: '500' },
     itemMeta: { color: c.textMuted, fontSize: 12 },
@@ -301,9 +303,9 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    primaryText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    primaryText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
     secondary: {
       height: 48,
       borderRadius: Radius.xl,
@@ -312,6 +314,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    secondaryText: { color: '#000000', fontSize: 15, fontWeight: '600' },
+    secondaryText: { color: c.ink, fontSize: 15, fontWeight: '600' },
   }),
 );

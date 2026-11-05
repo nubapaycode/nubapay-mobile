@@ -37,7 +37,7 @@ const HINT: Record<ReorderKind, string> = {
 export default function ReorderScreen() {
   const { kind } = useLocalSearchParams<{ kind: ReorderKind }>();
   const groups = useGroups(kind);
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
   if (!groups.data) return <Loading error={groups.error} />;
   return <ReorderList key={kind} kind={kind} initial={groups.data} eventId={groups.eventId} />;
 }
@@ -87,6 +87,7 @@ function useGroups(kind: ReorderKind): { data: Group[] | null; error: string | n
 
 function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: Group[]; eventId: string | null }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [groups, setGroups] = useState(initial);
   const [saving, setSaving] = useState(false);
@@ -161,7 +162,7 @@ function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: G
           disabled={!dirty || saving}
           accessibilityRole="button"
           style={({ pressed }) => [styles.save, (!dirty || saving) && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
-          {saving ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.saveText}>Guardar orden</Text>}
+          {saving ? <ActivityIndicator color={colors.onInk} /> : <Text style={styles.saveText}>Guardar orden</Text>}
         </Pressable>
       </View>
     </View>
@@ -180,6 +181,7 @@ function Arrow({
   onPress: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -188,7 +190,7 @@ function Arrow({
       accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => [styles.arrow, disabled && { opacity: 0.25 }, pressed && { opacity: 0.6 }]}>
-      <Icon name={icon} size={14} color="#000000" />
+      <Icon name={icon} size={14} color={colors.ink} />
     </Pressable>
   );
 }
@@ -205,7 +207,7 @@ function Loading({ error }: { error: string | null }) {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, gap: Spacing.three },
     hint: { color: c.textMuted, fontSize: 13, lineHeight: 18, paddingHorizontal: 4 },
     group: { gap: 8 },
@@ -238,7 +240,7 @@ const useStyles = makeStyles((c) =>
       bottom: 0,
       paddingHorizontal: Spacing.three,
       paddingTop: 12,
-      backgroundColor: '#ffffff',
+      backgroundColor: c.background,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.border,
     },
@@ -248,8 +250,8 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#000000',
+      backgroundColor: c.ink,
     },
-    saveText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

@@ -81,7 +81,7 @@ export default function ProductScreen() {
   const { colors } = useTheme();
   const { id, type } = useLocalSearchParams<{ id: string; type?: string }>();
   const { products, eventId } = useProducts();
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
 
   const isNew = id === "new";
   const product = isNew ? undefined : products?.find((p) => p.id === id);
@@ -577,7 +577,7 @@ function Cover({
         ]}
       >
         <View style={styles.coverIcon}>
-          <Icon name="photo" size={22} color="#000000" />
+          <Icon name="photo" size={22} color={colors.ink} />
         </View>
         <View style={{ alignItems: "center", gap: 2 }}>
           <Text style={styles.coverTitle}>Agregar foto</Text>
@@ -661,7 +661,7 @@ function PillButton({
         pressed && { opacity: 0.75 },
       ]}
     >
-      <Icon name={icon} size={14} color={danger ? colors.danger : "#000000"} />
+      <Icon name={icon} size={14} color={danger ? colors.danger : colors.ink} />
       {label ? <Text style={styles.pillText}>{label}</Text> : null}
     </Pressable>
   );
@@ -726,9 +726,10 @@ function Field({
 
 function RowIcon({ name }: { name: IconName }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.rowIcon}>
-      <Icon name={name} size={15} color="#000000" />
+      <Icon name={name} size={15} color={colors.ink} />
     </View>
   );
 }
@@ -859,7 +860,7 @@ function ComboSection({
           ]}
         >
           <View style={styles.comboAddIcon}>
-            <Icon name="plus" size={14} color="#000000" />
+            <Icon name="plus" size={14} color={colors.ink} />
           </View>
           <View style={{ flex: 1, gap: 1 }}>
             <Text style={styles.comboAddText}>Agregar productos</Text>
@@ -916,7 +917,7 @@ function ComboSection({
                         <Icon
                           name={l.quantity > 1 ? "minus" : "trash"}
                           size={13}
-                          color={l.quantity > 1 ? "#000000" : colors.danger}
+                          color={l.quantity > 1 ? colors.ink : colors.danger}
                         />
                       </Pressable>
                       <Text style={styles.stepQty}>{l.quantity}</Text>
@@ -930,7 +931,7 @@ function ComboSection({
                           pressed && { backgroundColor: colors.border },
                         ]}
                       >
-                        <Icon name="plus" size={13} color="#000000" />
+                        <Icon name="plus" size={13} color={colors.ink} />
                       </Pressable>
                     </View>
                   </View>
@@ -946,7 +947,7 @@ function ComboSection({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: {
       padding: Spacing.three,
       paddingBottom: Spacing.six,
@@ -986,7 +987,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 24,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
     },
     coverTitle: {
       color: c.text,
@@ -1002,7 +1003,7 @@ const useStyles = makeStyles((c) =>
       height: 34,
       paddingHorizontal: 12,
       borderRadius: Radius.pill,
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
       borderWidth: 1,
       borderColor: c.border,
     },
@@ -1012,7 +1013,7 @@ const useStyles = makeStyles((c) =>
     },
     pillIconOnly: { width: 34, paddingHorizontal: 0, justifyContent: "center" },
     pillText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 13,
       fontFamily: DisplayFont.semibold,
     },
@@ -1135,7 +1136,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 15,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
     },
     stepQty: {
       minWidth: 22,
@@ -1172,7 +1173,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     comboAddText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 15,
       fontFamily: DisplayFont.semibold,
     },
@@ -1194,7 +1195,7 @@ const useStyles = makeStyles((c) =>
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
     },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),

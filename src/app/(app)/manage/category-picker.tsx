@@ -153,9 +153,9 @@ function CategoryPickerContent() {
                 >
                   <View style={styles.createIcon}>
                     {creating ? (
-                      <ActivityIndicator size="small" color="#000000" />
+                      <ActivityIndicator size="small" color={colors.onBrand} />
                     ) : (
-                      <Icon name="plus" size={15} color="#000000" />
+                      <Icon name="plus" size={15} color={colors.onBrand} />
                     )}
                   </View>
                   <View style={{ flex: 1, gap: 1 }}>
@@ -309,7 +309,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
     },
     initialText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 14,
       fontFamily: DisplayFont.semibold,
     },
@@ -324,12 +324,12 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    radioOn: { borderColor: "#000000", borderWidth: 2 },
+    radioOn: { borderColor: c.ink, borderWidth: 2 },
     radioDot: {
       width: 10,
       height: 10,
       borderRadius: 5,
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
 
     create: {

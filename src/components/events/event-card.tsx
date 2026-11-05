@@ -110,8 +110,8 @@ export function EventCard({ event, selected, onSelect, swipe }: Props) {
                 swipe?.onEdit();
               }}
               style={({ pressed }) => [styles.action, styles.edit, pressed && { opacity: 0.8 }]}>
-              <Icon name="pencil" size={17} color="#000000" />
-              <Text style={[styles.actionText, { color: '#000000' }]}>Editar</Text>
+              <Icon name="pencil" size={17} color={colors.ink} />
+              <Text style={[styles.actionText, { color: colors.ink }]}>Editar</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -121,7 +121,7 @@ export function EventCard({ event, selected, onSelect, swipe }: Props) {
                 swipe?.onDelete();
               }}
               style={({ pressed }) => [styles.action, styles.delete, pressed && { opacity: 0.8 }]}>
-              <Icon name="trash" size={17} color="#ffffff" />
+              <Icon name="trash" size={17} color={colors.onPrimary} />
               <Text style={styles.actionText}>Eliminar</Text>
             </Pressable>
           </Animated.View>
@@ -209,7 +209,7 @@ const useStyles = makeStyles((c) =>
     },
     edit: { backgroundColor: c.raised },
     delete: { backgroundColor: c.danger },
-    actionText: { color: '#ffffff', fontSize: 12, fontWeight: '700' },
+    actionText: { color: c.onPrimary, fontSize: 12, fontWeight: '700' },
 
     card: {
       flexDirection: 'row',

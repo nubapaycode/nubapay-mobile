@@ -78,7 +78,7 @@ const useStyles = makeStyles((c) =>
     avatar: { alignItems: "center", justifyContent: "center" },
     avatarPending: { backgroundColor: LIME },
     avatarDone: { backgroundColor: c.raised },
-    avatarText: { color: "#000000", fontFamily: DisplayFont.bold },
+    avatarText: { color: c.onBrand, fontFamily: DisplayFont.bold },
     avatarTextDone: { color: c.textSecondary },
     pill: {
       flexDirection: "row",

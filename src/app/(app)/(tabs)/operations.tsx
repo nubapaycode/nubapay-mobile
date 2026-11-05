@@ -8,17 +8,17 @@ import { enter } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
-import { Radius } from '@/constants/theme';
+import { DisplayFont, Radius } from '@/constants/theme';
 import { NoAccess } from '@/components/ui/no-access';
 import { useEventAccess } from '@/features/access/access';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
+import { formatInt, formatMoney } from '@/features/dashboard/format';
 import {
   activeOperationFilters,
   CHANNEL_FILTER_LABEL,
   ordersQuery,
-  PAYMENT_FILTER_LABEL,
-  STATUS_FILTER_LABEL,
+  setOperationFilters,
   useOperationFilters,
 } from '@/features/operations/operations';
 import { useNow } from '@/hooks/use-now';
@@ -27,8 +27,9 @@ import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 
 /**
- * Operaciones: pedidos del evento actual como tarjetas, con buscador (cliente, email o número
- * de pedido) y filtros por retiro, pago y medio. Búsqueda y filtros van al servidor.
+ * Operaciones (referencias: Mercury y Revolut Business): buscador, el total de resultados y los pedidos agrupados por día con lo cobrado en cada uno, cada
+ * pedido en su card. Los filtros van en su hoja. Búsqueda y
+ * filtros van al servidor.
  */
 const PAGE_SIZE = 50;
 type OrdersPage = { orders: Order[]; total: number };
@@ -51,7 +52,8 @@ function OperationsContent() {
   const eventId = useSelectedEventId();
   const { events } = useEvents();
   const filters = useOperationFilters();
-  const now = useNow(15_000);
+  // Para los títulos "Hoy" / "Ayer" (se recalculan al cambiar de día).
+  const now = useNow(60_000);
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
 
@@ -98,57 +100,70 @@ function OperationsContent() {
 
   const event = events?.find((e) => e.id === eventId);
   const active = activeOperationFilters(filters);
-  const activeLabels = [
-    filters.status !== 'all' ? STATUS_FILTER_LABEL[filters.status] : null,
-    filters.payment !== 'all' ? `Pago ${PAYMENT_FILTER_LABEL[filters.payment].toLowerCase()}` : null,
-    filters.channel !== 'all' ? CHANNEL_FILTER_LABEL[filters.channel] : null,
-  ].filter(Boolean) as string[];
   const list = orders.data?.orders ?? [];
+  const groups = groupByDay(list, now);
+
+  const filterButton = (
+    <Pressable
+      onPress={() => {
+        Haptics.selectionAsync();
+        router.push('/operations-filters');
+      }}
+      hitSlop={6}
+      accessibilityRole="button"
+      accessibilityLabel={`Filtros${active ? `, ${active} activos` : ''}`}
+      style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}>
+      <Icon name="filter" size={17} color={colors.text} />
+      {active > 0 ? (
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{active}</Text>
+        </View>
+      ) : null}
+    </Pressable>
+  );
 
   return (
-    <TabPage title="Operaciones" subtitle={event?.name}>
-      <Animated.View entering={enter(1)} style={{ gap: 10 }}>
-        <View style={styles.searchRow}>
-          <View style={styles.search}>
-            <Icon name="search" size={16} color={colors.textMuted} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Buscar por nombre, email o pedido"
-              placeholderTextColor={colors.textMuted}
-              autoCorrect={false}
-              autoCapitalize="none"
-              returnKeyType="search"
-              style={styles.input}
-              accessibilityLabel="Buscar operaciones"
-            />
-            {query ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Borrar búsqueda">
-                <Icon name="clearCircle" size={17} color={colors.textMuted} />
+    <TabPage title="Operaciones" subtitle={event?.name} right={filterButton}>
+      <Animated.View entering={enter(1)} style={{ gap: 12 }}>
+        <View style={styles.search}>
+          <Icon name="search" size={16} color={colors.textMuted} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar por nombre, email o pedido"
+            placeholderTextColor={colors.textMuted}
+            autoCorrect={false}
+            autoCapitalize="none"
+            returnKeyType="search"
+            style={styles.input}
+            accessibilityLabel="Buscar operaciones"
+          />
+          {query ? (
+            <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Borrar búsqueda">
+              <Icon name="clearCircle" size={17} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+
+        {orders.data ? (
+          <Animated.View entering={FadeIn.duration(260)} style={styles.resultRow}>
+            <Text style={styles.resultText}>
+              {formatInt(orders.data.total)} {orders.data.total === 1 ? 'pedido' : 'pedidos'}
+            </Text>
+            {filters.channel !== 'all' ? (
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setOperationFilters({ ...filters, channel: 'all' });
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`Quitar filtro ${CHANNEL_FILTER_LABEL[filters.channel]}`}
+                style={({ pressed }) => [styles.tag, pressed && styles.pressed]}>
+                <Text style={styles.tagText}>{CHANNEL_FILTER_LABEL[filters.channel]}</Text>
+                <Icon name="close" size={10} color={colors.textSecondary} />
               </Pressable>
             ) : null}
-          </View>
-          <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push('/operations-filters');
-            }}
-            hitSlop={6}
-            accessibilityRole="button"
-            accessibilityLabel={`Filtros${active ? `, ${active} activos` : ''}`}
-            style={({ pressed }) => [styles.filterBtn, pressed && { backgroundColor: colors.border }]}>
-            <Icon name="filter" size={17} color="#000000" />
-            {active > 0 ? (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{active}</Text>
-              </View>
-            ) : null}
-          </Pressable>
-        </View>
-        {activeLabels.length ? (
-          <Animated.Text entering={FadeIn.duration(260)} style={styles.activeFilters}>
-            Filtrando: {activeLabels.join(' · ')}
-          </Animated.Text>
+          </Animated.View>
         ) : null}
       </Animated.View>
 
@@ -156,6 +171,9 @@ function OperationsContent() {
         <Text style={styles.empty}>{orders.error ?? 'Cargando operaciones…'}</Text>
       ) : list.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
+          <View style={styles.emptyIcon}>
+            <Icon name={debounced.trim() ? 'search' : 'receipt'} size={20} color={colors.textSecondary} />
+          </View>
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {debounced.trim()
@@ -166,18 +184,25 @@ function OperationsContent() {
           </Text>
         </Animated.View>
       ) : (
-        <View style={[styles.list, orders.refreshing && { opacity: 0.6 }]}>
-          {list.map((o) => (
-            <Animated.View
-              key={o.id}
-              entering={FadeIn.duration(300)}
-              exiting={FadeOut.duration(160)}
-              layout={LinearTransition.duration(260)}>
-              <OperationCard
-                order={o}
-                now={now}
-                onPress={() => router.push({ pathname: '/operation/[key]', params: { key: o.id } })}
-              />
+        <View style={[styles.groups, orders.refreshing && { opacity: 0.6 }]}>
+          {groups.map((g) => (
+            <Animated.View key={g.key} layout={LinearTransition.duration(260)} style={styles.group}>
+              <View style={styles.groupHead}>
+                <Text style={styles.groupTitle}>{g.label}</Text>
+                {g.sum > 0 ? <Text style={styles.groupSum}>{formatMoney(g.sum)}</Text> : null}
+              </View>
+              {g.orders.map((o) => (
+                <Animated.View
+                  key={o.id}
+                  entering={FadeIn.duration(300)}
+                  exiting={FadeOut.duration(160)}
+                  layout={LinearTransition.duration(260)}>
+                  <OperationCard
+                    order={o}
+                    onPress={() => router.push({ pathname: '/operation/[key]', params: { key: o.id } })}
+                  />
+                </Animated.View>
+              ))}
             </Animated.View>
           ))}
         </View>
@@ -188,12 +213,12 @@ function OperationsContent() {
           onPress={loadMore}
           disabled={loadingMore}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.more, pressed && { backgroundColor: colors.border }]}>
+          style={({ pressed }) => [styles.more, pressed && styles.pressed]}>
           {loadingMore ? (
             <ActivityIndicator color={colors.textMuted} />
           ) : (
             <Text style={styles.moreText}>
-              Cargar más · {list.length} de {orders.data.total}
+              Cargar más · {formatInt(list.length)} de {formatInt(orders.data.total)}
             </Text>
           )}
         </Pressable>
@@ -202,11 +227,43 @@ function OperationsContent() {
   );
 }
 
+/* ── Agrupado por día ── */
+
+const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const WEEKDAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const DAY = 86_400_000;
+
+function dayLabel(d: Date, now: number): string {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today.getTime() - new Date(d).setHours(0, 0, 0, 0)) / DAY);
+  if (diff === 0) return 'Hoy';
+  if (diff === 1) return 'Ayer';
+  const base = `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+  return diff < 7 ? `${WEEKDAYS[d.getDay()]} ${base}` : base;
+}
+
+/** Grupos por día con lo cobrado en cada uno (sin contar cancelados). */
+function groupByDay(list: Order[], now: number) {
+  const groups: { key: string; label: string; sum: number; orders: Order[] }[] = [];
+  for (const o of list) {
+    const d = new Date(o.createdAt);
+    const key = d.toDateString();
+    let g = groups[groups.length - 1];
+    if (g?.key !== key) {
+      g = { key, label: dayLabel(d, now), sum: 0, orders: [] };
+      groups.push(g);
+    }
+    g.orders.push(o);
+    if (o.status !== 'cancelled') g.sum += o.total;
+  }
+  return groups;
+}
+
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    searchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    pressed: { opacity: 0.7 },
     search: {
-      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
@@ -218,18 +275,20 @@ const useStyles = makeStyles((c) =>
     },
     input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
     filterBtn: {
-      width: 46,
-      height: 46,
-      borderRadius: Radius.lg,
-      borderCurve: 'continuous',
+      width: 42,
+      height: 42,
+      borderRadius: 21,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.raised,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
     badge: {
       position: 'absolute',
-      top: -4,
-      right: -4,
+      top: -3,
+      right: -3,
       minWidth: 18,
       height: 18,
       paddingHorizontal: 4,
@@ -238,22 +297,58 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.primary,
       borderWidth: 2,
-      borderColor: '#ffffff',
+      borderColor: c.background,
     },
     badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
-    activeFilters: { color: c.textSecondary, fontSize: 13, paddingHorizontal: 4 },
-    list: { gap: 10 },
+
+    resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
+    resultText: { color: c.textSecondary, fontSize: 13, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    tag: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      height: 24,
+      paddingHorizontal: 10,
+      borderRadius: Radius.pill,
+      backgroundColor: c.raised,
+    },
+    tagText: { color: c.textSecondary, fontSize: 12, fontWeight: '600' },
+
+    groups: { gap: 22 },
+    group: { gap: 8 },
+    groupHead: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      paddingHorizontal: 4,
+      marginBottom: 2,
+    },
+    groupTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    groupSum: { color: c.textSecondary, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
     emptyBox: {
       gap: 6,
-      padding: 20,
+      paddingVertical: 28,
+      paddingHorizontal: 20,
       alignItems: 'center',
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
-      borderWidth: 1,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
-    emptyTitle: { color: c.text, fontSize: 16, fontWeight: '600' },
+    emptyIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.raised,
+      marginBottom: 6,
+    },
+    emptyTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     emptyText: { color: c.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
     more: {
       height: 48,
@@ -263,7 +358,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    moreText: { color: '#000000', fontSize: 15, fontWeight: '600' },
+    moreText: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
   }),
 );
 

@@ -1,4 +1,5 @@
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   Pressable,
@@ -10,7 +11,7 @@ import {
 } from "react-native";
 import Animated, { ZoomIn } from "react-native-reanimated";
 
-import { Icon } from "@/components/dashboard/icon";
+import { Icon, type IconName } from "@/components/dashboard/icon";
 import { Card, CardList, GroupHeader } from "@/components/manage/catalog-kit";
 import { Sheet, useSheet } from "@/components/ui/sheet";
 import { DisplayFont, Radius, Spacing } from "@/constants/theme";
@@ -23,7 +24,7 @@ import {
   useCategories,
   useProducts,
 } from "@/features/manage/manage";
-import { makeStyles } from "@/theme";
+import { makeStyles, useTheme } from "@/theme";
 
 const STATUS: { value: CatalogFilters["status"]; label: string }[] = [
   { value: "all", label: "Todos" },
@@ -33,7 +34,8 @@ const STATUS: { value: CatalogFilters["status"]; label: string }[] = [
 
 /**
  * Filtros del catálogo: estado (todos / a la venta / pausados) y categorías (varias), cada opción
- * en su card con cuántos productos tiene. El botón dice cuántos van a quedar antes de aplicar.
+ * en su card con cuántos productos tiene; al final, atajos para gestionar categorías y ordenar.
+ * El botón dice cuántos van a quedar antes de aplicar.
  */
 export default function CatalogFiltersSheet() {
   return (
@@ -45,6 +47,7 @@ export default function CatalogFiltersSheet() {
 
 function FiltersContent() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { dismiss } = useSheet();
   const { height } = useWindowDimensions();
   const current = useCatalogFilters();
@@ -163,7 +166,7 @@ function FiltersContent() {
                       <View style={[styles.check, on && styles.checkOn]}>
                         {on ? (
                           <Animated.View entering={ZoomIn.duration(160)}>
-                            <Icon name="checkmark" size={12} color="#ffffff" />
+                            <Icon name="checkmark" size={12} color={colors.onInk} />
                           </Animated.View>
                         ) : null}
                       </View>
@@ -173,6 +176,31 @@ function FiltersContent() {
               })}
             </CardList>
           )}
+        </View>
+
+        {/* Atajos de gestión: cierran la hoja y abren su pantalla. */}
+        <View style={styles.section}>
+          <GroupHeader title="Gestionar" />
+          <CardList>
+            <ManageRow
+              icon="tag"
+              title="Categorías"
+              subtitle="Crear, renombrar y eliminar"
+              onPress={() => dismiss(() => router.push("/manage/categories"))}
+            />
+            {all.length > 1 ? (
+              <ManageRow
+                icon="blocks"
+                title="Ordenar productos"
+                subtitle="El orden en que se ven en la tienda"
+                onPress={() =>
+                  dismiss(() =>
+                    router.push({ pathname: "/manage/reorder", params: { kind: "products" } }),
+                  )
+                }
+              />
+            ) : null}
+          </CardList>
         </View>
       </ScrollView>
 
@@ -195,6 +223,42 @@ function FiltersContent() {
         </Pressable>
       </View>
     </View>
+  );
+}
+
+function ManageRow({
+  icon,
+  title,
+  subtitle,
+  onPress,
+}: {
+  icon: IconName;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <Card>
+      <Pressable
+        onPress={() => {
+          Haptics.selectionAsync();
+          onPress();
+        }}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.manageRow, pressed && { backgroundColor: colors.canvas }]}
+      >
+        <View style={styles.manageIcon}>
+          <Icon name={icon} size={15} color={colors.text} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={styles.name}>{title}</Text>
+          <Text style={styles.count}>{subtitle}</Text>
+        </View>
+        <Icon name="chevronRight" size={12} color={colors.textMuted} />
+      </Pressable>
+    </Card>
   );
 }
 
@@ -250,12 +314,12 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    radioOn: { borderColor: "#000000", borderWidth: 2 },
+    radioOn: { borderColor: c.ink, borderWidth: 2 },
     radioDot: {
       width: 10,
       height: 10,
       borderRadius: 5,
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
     check: {
       width: 22,
@@ -266,7 +330,22 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    checkOn: { backgroundColor: "#000000", borderColor: "#000000" },
+    checkOn: { backgroundColor: c.ink, borderColor: c.ink },
+    manageRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+    },
+    manageIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: c.raised,
+    },
     footer: { paddingHorizontal: Spacing.three, paddingTop: 12 },
     apply: {
       height: 54,
@@ -274,10 +353,10 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
     applyText: {
-      color: "#ffffff",
+      color: c.onInk,
       fontSize: 16,
       fontFamily: DisplayFont.semibold,
     },

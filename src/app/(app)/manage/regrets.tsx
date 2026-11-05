@@ -8,6 +8,7 @@ import Animated, {
   LinearTransition,
 } from "react-native-reanimated";
 
+import { EventContext } from "@/components/events/event-context";
 import { enter } from "@/components/dashboard/detail-kit";
 import { Icon } from "@/components/dashboard/icon";
 import { Segmented } from "@/components/dashboard/segmented";
@@ -41,7 +42,7 @@ export default function RegretsScreen() {
   const { regrets: list, error } = useRegrets();
   const now = useNow(30_000);
   const [filter, setFilter] = useState<Filter>("pending");
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
 
   const { pending, resolved } = useMemo(() => {
     const all = list ?? [];
@@ -64,6 +65,9 @@ export default function RegretsScreen() {
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
     >
+      <Animated.View entering={enter(0)}>
+        <EventContext caption="Arrepentimientos de" />
+      </Animated.View>
       {!list ? (
         error ? (
           <EmptyState
@@ -115,7 +119,7 @@ export default function RegretsScreen() {
             ) : (
               <View style={styles.doneRow}>
                 <View style={styles.doneIcon}>
-                  <Icon name="checkmark" size={18} color="#ffffff" />
+                  <Icon name="checkmark" size={18} color={colors.onPrimary} />
                 </View>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.doneTitle}>Todo al día</Text>
@@ -244,7 +248,7 @@ function RegretCard({ regret: r, now }: { regret: Regret; now: number }) {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: {
       padding: Spacing.three,
       paddingBottom: Spacing.six,
@@ -312,7 +316,7 @@ const useStyles = makeStyles((c) =>
       height: 13,
       borderRadius: 7,
       borderWidth: 2,
-      borderColor: "#ffffff",
+      borderColor: c.background,
       backgroundColor: c.primary,
     },
     body: { flex: 1, gap: 4 },

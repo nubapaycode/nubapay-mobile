@@ -13,7 +13,7 @@ import { makeStyles } from '@/theme';
 export default function PayoutsScreen() {
   const styles = useStyles();
   const { data: event } = useSelectedEventDetail();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   const ready = event ? METHODS.filter((m) => isReady(m, event)) : [];
   const methodsSubtitle = !event
@@ -59,7 +59,7 @@ export default function PayoutsScreen() {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
     intro: { color: c.textSecondary, fontSize: 14, lineHeight: 20, paddingHorizontal: 4 },
     list: { gap: 10 },

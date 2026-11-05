@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Radius, Spacing } from '@/constants/theme';
-import { light, makeStyles, useTheme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
 function Block({
   w,
@@ -41,10 +41,10 @@ export function DashboardSkeleton() {
   return (
     <Animated.View style={[styles.wrap, pulse]} accessibilityLabel="Cargando métricas">
       <View style={styles.hero}>
-        <Block w={130} h={12} tone={light.raised} />
-        <Block w={230} h={40} r={10} tone={light.raised} />
-        <Block w={170} h={16} tone={light.raised} />
-        <Block w="100%" h={176} r={14} tone={light.raised} />
+        <Block w={150} h={12} />
+        <Block w={240} h={44} r={10} />
+        <Block w={170} h={22} r={11} />
+        <Block w="100%" h={150} r={14} />
       </View>
       <View style={styles.row}>
         <View style={styles.tile}>
@@ -69,13 +69,12 @@ export function DashboardSkeleton() {
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrap: { gap: 12 },
+    // Transparente y centrado, como el hero: el degradé del inicio se ve detrás.
     hero: {
       gap: 12,
-      marginHorizontal: -Spacing.three,
+      alignItems: 'center',
       marginBottom: Spacing.three,
-      paddingHorizontal: Spacing.three,
-      paddingVertical: Spacing.four,
-      backgroundColor: '#ffffff',
+      paddingVertical: Spacing.three,
     },
     row: { flexDirection: 'row', gap: 12 },
     tile: {
@@ -87,6 +86,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.surface,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
+      boxShadow: c.cardShadow,
     },
   }),
 );

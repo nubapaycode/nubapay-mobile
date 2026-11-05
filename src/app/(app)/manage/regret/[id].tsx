@@ -66,7 +66,7 @@ export default function RegretScreen() {
   const now = useNow(60_000);
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
-  useFocusStatusBar("dark");
+  useFocusStatusBar();
   useEffect(() => {
     if (!copied) return;
     const t = setTimeout(() => setCopied(false), 1800);
@@ -223,9 +223,9 @@ export default function RegretScreen() {
                 <Icon
                   name={copied ? "checkmark" : "copy"}
                   size={13}
-                  color={copied ? "#ffffff" : "#000000"}
+                  color={copied ? colors.onInk : colors.ink}
                 />
-                <Text style={[styles.copyText, copied && { color: "#ffffff" }]}>
+                <Text style={[styles.copyText, copied && { color: colors.onInk }]}>
                   {copied ? "Copiado" : "Copiar"}
                 </Text>
               </Animated.View>
@@ -249,7 +249,7 @@ export default function RegretScreen() {
                   transition={200}
                 />
                 <View style={styles.receiptOpen}>
-                  <Icon name="external" size={12} color="#000000" />
+                  <Icon name="external" size={12} color={colors.ink} />
                   <Text style={styles.receiptOpenText}>Abrir</Text>
                 </View>
               </Pressable>
@@ -314,13 +314,13 @@ export default function RegretScreen() {
             ]}
           >
             {saving ? (
-              <ActivityIndicator color={pending ? "#ffffff" : "#000000"} />
+              <ActivityIndicator color={pending ? colors.onInk : colors.ink} />
             ) : (
               <>
                 <Icon
                   name={pending ? "checkmark" : "undo"}
                   size={16}
-                  color={pending ? "#ffffff" : "#000000"}
+                  color={pending ? colors.onInk : colors.ink}
                 />
                 <Text
                   style={[
@@ -366,7 +366,7 @@ function QuickAction({
       ]}
     >
       <View style={styles.quickIcon}>
-        <Icon name={icon} size={16} color="#000000" />
+        <Icon name={icon} size={16} color={colors.ink} />
       </View>
       <View style={{ gap: 1 }}>
         <Text style={styles.quickLabel}>{label}</Text>
@@ -403,7 +403,7 @@ function Step({
             current && styles.stepDotCurrent,
           ]}
         >
-          {done ? <Icon name="checkmark" size={11} color="#ffffff" /> : null}
+          {done ? <Icon name="checkmark" size={11} color={colors.onInk} /> : null}
         </View>
         {!last ? (
           <View
@@ -431,7 +431,7 @@ function Step({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: "#ffffff" },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, gap: Spacing.four },
 
     header: {
@@ -508,11 +508,11 @@ const useStyles = makeStyles((c) =>
       height: 36,
       paddingHorizontal: 14,
       borderRadius: Radius.pill,
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
     },
     copyBtnDone: { backgroundColor: c.success },
     copyText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 13,
       fontFamily: DisplayFont.semibold,
     },
@@ -534,11 +534,11 @@ const useStyles = makeStyles((c) =>
       height: 30,
       paddingHorizontal: 12,
       borderRadius: Radius.pill,
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
       boxShadow: "0 2px 10px rgba(11, 15, 23, 0.18)",
     },
     receiptOpenText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 13,
       fontFamily: DisplayFont.semibold,
     },
@@ -566,10 +566,10 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
     },
     stepDotDone: { backgroundColor: c.success, borderColor: c.success },
-    stepDotCurrent: { borderColor: "#000000", borderWidth: 2 },
+    stepDotCurrent: { borderColor: c.ink, borderWidth: 2 },
     stepLine: {
       flex: 1,
       width: 2,
@@ -593,7 +593,7 @@ const useStyles = makeStyles((c) =>
       bottom: 0,
       paddingHorizontal: Spacing.three,
       paddingTop: 12,
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.border,
     },
@@ -606,20 +606,20 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    actionPrimary: { backgroundColor: "#000000" },
+    actionPrimary: { backgroundColor: c.ink },
     actionSecondary: { backgroundColor: c.raised },
     actionText: {
-      color: "#ffffff",
+      color: c.onInk,
       fontSize: 16,
       fontFamily: DisplayFont.semibold,
     },
-    actionTextSecondary: { color: "#000000" },
+    actionTextSecondary: { color: c.ink },
 
     missing: {
       flex: 1,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#ffffff",
+      backgroundColor: c.background,
     },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),

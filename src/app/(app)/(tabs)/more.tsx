@@ -5,6 +5,7 @@ import Animated from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
 import { TabPage } from '@/components/navigation/tab-page';
+import { LogoutButton } from '@/components/ui/logout-button';
 import { NavCard } from '@/components/ui/nav-card';
 import { useEventAccess } from '@/features/access/access';
 import { useRegrets } from '@/features/manage/manage';
@@ -136,6 +137,10 @@ export default function MoreScreen() {
             }
           />
         </View>
+      </Animated.View>
+
+      <Animated.View entering={enter(5)}>
+        <LogoutButton />
       </Animated.View>
     </TabPage>
   );

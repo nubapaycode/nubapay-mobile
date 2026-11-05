@@ -10,20 +10,23 @@ import { TabPage } from '@/components/navigation/tab-page';
 import { MemberCard } from '@/components/team/member-card';
 import { NoAccess } from '@/components/ui/no-access';
 import { useEventAccess } from '@/features/access/access';
-import { Radius } from '@/constants/theme';
+import { DisplayFont, Radius } from '@/constants/theme';
 import {
   activeTeamFilters,
+  DEFAULT_TEAM_FILTERS,
   matchesMemberQuery,
   matchesTeamFilters,
-  PERMISSION_SHORT,
+  type Member,
+  OWNER_ROLE,
+  setTeamFilters,
   useTeamFilters,
 } from '@/features/team/team';
 import { useTeam } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
 
 /**
- * Equipo del evento: buscador con filtros (por rol y/o permiso) y una tarjeta por persona con su
- * rol y permisos. Las estadísticas de cada uno están en su detalle.
+ * Equipo del evento (mismo lenguaje que Operaciones): filtros e invitar arriba a la derecha,
+ * buscador, y las personas agrupadas por rol, cada una en su card con permisos y escaneos.
  */
 export default function TeamScreen() {
   const { isStaff } = useEventAccess();
@@ -48,53 +51,14 @@ function TeamContent() {
   const members = (team ?? []).filter(
     (m) => matchesTeamFilters(m, filters) && matchesMemberQuery(m, query),
   );
-  const activeLabels = [
-    ...filters.roles,
-    ...filters.permissions.map((p) => PERMISSION_SHORT[p]),
-  ];
+  const groups = groupByRole(members);
 
   return (
     <TabPage
       title="Equipo"
-      subtitle={team ? `${team.length} personas` : undefined}
+      subtitle={team ? `${team.length} ${team.length === 1 ? 'persona' : 'personas'}` : undefined}
       right={
-        <Pressable
-          onPress={() => {
-            Haptics.selectionAsync();
-            router.push('/invite-member');
-          }}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Agregar al equipo"
-          style={({ pressed }) => [styles.invite, pressed && { backgroundColor: colors.border }]}>
-          <Icon name="userPlus" size={17} color="#000000" />
-        </Pressable>
-      }>
-      <Animated.View entering={enter(1)} style={{ gap: 10 }}>
-        <View style={styles.searchRow}>
-          <View style={styles.search}>
-            <Icon name="search" size={16} color={colors.textMuted} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Buscar por nombre, email o rol"
-              placeholderTextColor={colors.textMuted}
-              autoCorrect={false}
-              autoCapitalize="none"
-              returnKeyType="search"
-              style={styles.input}
-              accessibilityLabel="Buscar en el equipo"
-            />
-            {query ? (
-              <Pressable
-                onPress={() => setQuery('')}
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="Borrar búsqueda">
-                <Icon name="clearCircle" size={17} color={colors.textMuted} />
-              </Pressable>
-            ) : null}
-          </View>
+        <View style={styles.headActions}>
           <Pressable
             onPress={() => {
               Haptics.selectionAsync();
@@ -103,19 +67,68 @@ function TeamContent() {
             hitSlop={6}
             accessibilityRole="button"
             accessibilityLabel={`Filtros${active ? `, ${active} activos` : ''}`}
-            style={({ pressed }) => [styles.filterBtn, pressed && { backgroundColor: colors.border }]}>
-            <Icon name="filter" size={17} color="#000000" />
+            style={({ pressed }) => [styles.round, pressed && styles.pressed]}>
+            <Icon name="filter" size={17} color={colors.text} />
             {active > 0 ? (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{active}</Text>
               </View>
             ) : null}
           </Pressable>
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push('/invite-member');
+            }}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityLabel="Agregar al equipo"
+            style={({ pressed }) => [styles.round, styles.roundPrimary, pressed && styles.pressed]}>
+            <Icon name="userPlus" size={17} color={colors.onInk} />
+          </Pressable>
         </View>
-        {activeLabels.length ? (
-          <Animated.Text entering={FadeIn.duration(260)} style={styles.activeFilters} numberOfLines={2}>
-            Filtrando: {activeLabels.join(' · ')}
-          </Animated.Text>
+      }>
+      <Animated.View entering={enter(1)} style={{ gap: 12 }}>
+        <View style={styles.search}>
+          <Icon name="search" size={16} color={colors.textMuted} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Buscar por nombre, email o rol"
+            placeholderTextColor={colors.textMuted}
+            autoCorrect={false}
+            autoCapitalize="none"
+            returnKeyType="search"
+            style={styles.input}
+            accessibilityLabel="Buscar en el equipo"
+          />
+          {query ? (
+            <Pressable
+              onPress={() => setQuery('')}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Borrar búsqueda">
+              <Icon name="clearCircle" size={17} color={colors.textMuted} />
+            </Pressable>
+          ) : null}
+        </View>
+        {team && (active > 0 || query.trim()) ? (
+          <Animated.View entering={FadeIn.duration(260)} style={styles.resultRow}>
+            <Text style={styles.resultText}>
+              {members.length} de {team.length}
+            </Text>
+            {active > 0 ? (
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setTeamFilters(DEFAULT_TEAM_FILTERS);
+                }}
+                hitSlop={8}
+                accessibilityRole="button">
+                <Text style={styles.clear}>Limpiar filtros</Text>
+              </Pressable>
+            ) : null}
+          </Animated.View>
         ) : null}
       </Animated.View>
 
@@ -123,23 +136,34 @@ function TeamContent() {
         <Text style={styles.empty}>{error ?? 'Cargando equipo…'}</Text>
       ) : members.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
+          <View style={styles.emptyIcon}>
+            <Icon name={query ? 'search' : 'people'} size={20} color={colors.textSecondary} />
+          </View>
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {query ? `Nadie coincide con “${query.trim()}”.` : 'Nadie tiene ese rol o permiso.'}
           </Text>
         </Animated.View>
       ) : (
-        <View style={styles.list}>
-          {members.map((m) => (
-            <Animated.View
-              key={m.id}
-              entering={FadeIn.duration(300)}
-              exiting={FadeOut.duration(160)}
-              layout={LinearTransition.duration(260)}>
-              <MemberCard
-                member={m}
-                onPress={() => router.push({ pathname: '/member/[id]', params: { id: m.id } })}
-              />
+        <View style={styles.groups}>
+          {groups.map((g) => (
+            <Animated.View key={g.role} layout={LinearTransition.duration(260)} style={styles.group}>
+              <View style={styles.groupHead}>
+                <Text style={styles.groupTitle}>{g.role}</Text>
+                <Text style={styles.groupCount}>{g.members.length}</Text>
+              </View>
+              {g.members.map((m) => (
+                <Animated.View
+                  key={m.id}
+                  entering={FadeIn.duration(300)}
+                  exiting={FadeOut.duration(160)}
+                  layout={LinearTransition.duration(260)}>
+                  <MemberCard
+                    member={m}
+                    onPress={() => router.push({ pathname: '/member/[id]', params: { id: m.id } })}
+                  />
+                </Animated.View>
+              ))}
             </Animated.View>
           ))}
         </View>
@@ -148,19 +172,50 @@ function TeamContent() {
   );
 }
 
+/** Agrupa por rol: Administración primero, después el resto por nombre; vos primero en tu grupo. */
+function groupByRole(list: Member[]) {
+  const map = new Map<string, Member[]>();
+  for (const m of list) map.set(m.roleId, [...(map.get(m.roleId) ?? []), m]);
+  return [...map.entries()]
+    .sort(([a], [b]) => (a === OWNER_ROLE ? -1 : b === OWNER_ROLE ? 1 : a.localeCompare(b, 'es')))
+    .map(([role, members]) => ({
+      role,
+      members: [...members].sort((x, y) => Number(y.isOwner) - Number(x.isOwner)),
+    }));
+}
+
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    invite: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+    pressed: { opacity: 0.7 },
+    headActions: { flexDirection: 'row', gap: 8 },
+    round: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.raised,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
-    searchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    roundPrimary: { backgroundColor: c.ink, borderColor: c.ink },
+    badge: {
+      position: 'absolute',
+      top: -3,
+      right: -3,
+      minWidth: 18,
+      height: 18,
+      paddingHorizontal: 4,
+      borderRadius: 9,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.primary,
+      borderWidth: 2,
+      borderColor: c.background,
+    },
+    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
     search: {
-      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
@@ -171,43 +226,50 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
-    filterBtn: {
-      width: 46,
-      height: 46,
-      borderRadius: Radius.lg,
-      borderCurve: 'continuous',
+    resultRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.raised,
-    },
-    badge: {
-      position: 'absolute',
-      top: -4,
-      right: -4,
-      minWidth: 18,
-      height: 18,
+      justifyContent: 'space-between',
       paddingHorizontal: 4,
-      borderRadius: 9,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.primary,
-      borderWidth: 2,
-      borderColor: '#ffffff',
     },
-    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
-    activeFilters: { color: c.textSecondary, fontSize: 13, paddingHorizontal: 4 },
-    list: { gap: 10 },
+    resultText: { color: c.textSecondary, fontSize: 13, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    clear: { color: c.primary, fontSize: 13, fontWeight: '600' },
+
+    groups: { gap: 22 },
+    group: { gap: 8 },
+    groupHead: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
+      gap: 8,
+      paddingHorizontal: 4,
+      marginBottom: 2,
+    },
+    groupTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    groupCount: { color: c.textMuted, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
     emptyBox: {
       gap: 6,
-      padding: 20,
+      paddingVertical: 28,
+      paddingHorizontal: 20,
       alignItems: 'center',
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
-      borderWidth: 1,
+      backgroundColor: c.surface,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
+      boxShadow: c.cardShadowSubtle,
     },
-    emptyTitle: { color: c.text, fontSize: 16, fontWeight: '600' },
+    emptyIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.raised,
+      marginBottom: 6,
+    },
+    emptyTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     emptyText: { color: c.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
   }),
 );

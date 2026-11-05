@@ -6,10 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { enter } from '@/components/dashboard/detail-kit';
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { light, makeStyles, PaletteScope } from '@/theme';
+import { makeStyles } from '@/theme';
 
 /**
- * Página de una pestaña: blanca, con título grande propio (las pestañas no tienen header nativo)
+ * Página de una pestaña sobre el fondo del tema, con título grande propio (las pestañas no tienen header nativo)
  * y una acción opcional a la derecha del título.
  */
 export function TabPage({
@@ -24,11 +24,9 @@ export function TabPage({
   children: ReactNode;
 }) {
   return (
-    <PaletteScope palette={light}>
-      <TabPageContent title={title} subtitle={subtitle} right={right}>
-        {children}
-      </TabPageContent>
-    </PaletteScope>
+    <TabPageContent title={title} subtitle={subtitle} right={right}>
+      {children}
+    </TabPageContent>
   );
 }
 
@@ -45,7 +43,7 @@ function TabPageContent({
 }) {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   return (
     <ScrollView
@@ -66,7 +64,7 @@ function TabPageContent({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.four },
     head: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4 },
     title: { color: c.text, fontSize: 28, fontFamily: DisplayFont.bold, letterSpacing: -0.8 },

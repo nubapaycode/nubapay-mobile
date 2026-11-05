@@ -174,7 +174,7 @@ function ComboProductsContent() {
                               <Icon
                                 name="checkmark"
                                 size={13}
-                                color="#ffffff"
+                                color={colors.onInk}
                               />
                             </Animated.View>
                           ) : null}
@@ -261,7 +261,7 @@ const useStyles = makeStyles((c) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    checkOn: { backgroundColor: "#000000", borderColor: "#000000" },
+    checkOn: { backgroundColor: c.ink, borderColor: c.ink },
 
     footer: {
       flexDirection: "row",
@@ -290,10 +290,10 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
     submitText: {
-      color: "#ffffff",
+      color: c.onInk,
       fontSize: 16,
       fontFamily: DisplayFont.semibold,
     },

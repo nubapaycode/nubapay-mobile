@@ -205,7 +205,7 @@ export function PromoSection({
             style={styles.toggleRow}
           >
             <View style={styles.toggleIcon}>
-              <Icon name="percent" size={15} color="#000000" />
+              <Icon name="percent" size={15} color={colors.onBrand} />
             </View>
             <View style={{ flex: 1, gap: 1 }}>
               <Text style={styles.toggleTitle}>Descuento por horario</Text>
@@ -434,11 +434,11 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.sm,
     },
     kindOn: {
-      backgroundColor: "#ffffff",
+      backgroundColor: c.elevated,
       boxShadow: "0 1px 3px rgba(11, 15, 23, 0.12)",
     },
     kindText: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
-    kindTextOn: { color: "#000000" },
+    kindTextOn: { color: c.ink },
     amountRow: { flexDirection: "row", alignItems: "center", gap: 4 },
     affix: { color: c.textMuted, fontSize: 26, fontFamily: DisplayFont.bold },
     amountInput: {
@@ -460,14 +460,14 @@ const useStyles = makeStyles((c) =>
       justifyContent: "center",
       backgroundColor: c.raised,
     },
-    chipOn: { backgroundColor: "#000000" },
+    chipOn: { backgroundColor: c.ink },
     chipText: {
-      color: "#000000",
+      color: c.ink,
       fontSize: 14,
       fontWeight: "600",
       fontVariant: ["tabular-nums"],
     },
-    chipTextOn: { color: "#ffffff" },
+    chipTextOn: { color: c.onInk },
 
     preview: {
       flexDirection: "row",
@@ -500,7 +500,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: LIME,
     },
-    badgeText: { color: "#000000", fontSize: 13, fontWeight: "800" },
+    badgeText: { color: c.onBrand, fontSize: 13, fontWeight: "800" },
 
     window: { padding: 14, gap: 12 },
     times: { flexDirection: "row", alignItems: "flex-end", gap: 10 },

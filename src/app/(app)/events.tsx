@@ -17,7 +17,7 @@ import { useEventAccess } from '@/features/access/access';
 import { openAddEvent } from '@/features/events/add-event';
 import { confirmDeleteEvent } from '@/features/events/event-actions';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { makeStyles } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
 
 const GROUPS: { phase: EventPhase; title: string }[] = [
   { phase: 'live', title: 'En vivo' },
@@ -32,11 +32,12 @@ const GROUPS: { phase: EventPhase; title: string }[] = [
  */
 export default function EventsScreen() {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { events } = useEvents();
   const selectedId = useSelectedEventId();
   const [openId, setOpenId] = useState<string | null>(null);
   const { canCreateEvents } = useEventAccess();
-  useFocusStatusBar('dark');
+  useFocusStatusBar();
 
   const all = events ?? [];
   const groups = GROUPS.map((g) => ({
@@ -63,7 +64,7 @@ export default function EventsScreen() {
                   accessibilityRole="button"
                   accessibilityLabel="Agregar evento"
                   style={({ pressed }) => [styles.headerAdd, pressed && { opacity: 0.5 }]}>
-                  <Icon name="plus" size={14} color="#000000" />
+                  <Icon name="plus" size={14} color={colors.ink} />
                 </Pressable>
               )
             : undefined,
@@ -122,7 +123,7 @@ export default function EventsScreen() {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
+    screen: { flex: 1, backgroundColor: c.background },
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
     summary: { flexDirection: 'row', alignItems: 'baseline', gap: 8, paddingHorizontal: 4 },
     count: {

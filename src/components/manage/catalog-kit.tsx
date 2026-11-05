@@ -158,9 +158,12 @@ export function Card({
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
+  // La sombra va en un contenedor aparte: la card recorta (overflow hidden) el fondo al presionar.
   return (
-    <View style={[styles.card, danger && { borderColor: colors.danger }]}>
-      {children}
+    <View style={styles.cardShadow}>
+      <View style={[styles.card, danger && { borderColor: colors.danger }]}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -226,10 +229,11 @@ export function EmptyState({
   onAction?: () => void;
 }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Icon name={icon} size={24} color="#000000" />
+        <Icon name={icon} size={24} color={colors.ink} />
       </View>
       <View style={{ gap: 4, alignItems: "center" }}>
         <Text style={styles.emptyTitle}>{title}</Text>
@@ -349,7 +353,7 @@ const useStyles = makeStyles((c) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
-      height: 44,
+      height: 46,
       paddingHorizontal: 14,
       borderRadius: Radius.lg,
       borderCurve: "continuous",
@@ -367,7 +371,7 @@ const useStyles = makeStyles((c) =>
     groupTitle: {
       flexShrink: 1,
       color: c.text,
-      fontSize: 15,
+      fontSize: 17,
       fontFamily: DisplayFont.semibold,
     },
     headerAction: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
@@ -376,10 +380,15 @@ const useStyles = makeStyles((c) =>
       fontWeight: "600",
       fontVariant: ["tabular-nums"],
     },
+    cardShadow: {
+      borderRadius: Radius.xl,
+      borderCurve: "continuous",
+      boxShadow: c.cardShadowSubtle,
+    },
     card: {
       borderRadius: Radius.xl,
       borderCurve: "continuous",
-      borderWidth: 1,
+      borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
       backgroundColor: c.surface,
       overflow: "hidden",
@@ -445,10 +454,10 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#000000",
+      backgroundColor: c.ink,
     },
     emptyBtnText: {
-      color: "#ffffff",
+      color: c.onInk,
       fontSize: 15,
       fontFamily: DisplayFont.semibold,
     },

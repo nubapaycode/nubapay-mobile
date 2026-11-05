@@ -33,8 +33,8 @@ export default function AppLayout() {
         options={{
           title: 'Eventos',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -42,8 +42,8 @@ export default function AppLayout() {
         options={{
           title: 'Editar evento',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -51,8 +51,8 @@ export default function AppLayout() {
         options={{
           title: 'Cobros',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -60,8 +60,8 @@ export default function AppLayout() {
         options={{
           title: 'Métodos de pago',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -69,8 +69,8 @@ export default function AppLayout() {
         options={{
           title: 'Comisión',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -78,8 +78,8 @@ export default function AppLayout() {
         options={{
           title: 'Operación',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -87,8 +87,8 @@ export default function AppLayout() {
         options={{
           title: 'Entregar',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -96,8 +96,8 @@ export default function AppLayout() {
         options={{
           title: 'Nuevo evento',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -105,8 +105,8 @@ export default function AppLayout() {
         options={{
           title: 'Bloques de la tienda',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -114,8 +114,8 @@ export default function AppLayout() {
         options={{
           title: 'Bloque',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -123,8 +123,8 @@ export default function AppLayout() {
         options={{
           title: 'Categorías',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -132,8 +132,8 @@ export default function AppLayout() {
         options={{
           title: 'Ordenar',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -141,8 +141,8 @@ export default function AppLayout() {
         options={{
           title: 'Equipo',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -150,8 +150,8 @@ export default function AppLayout() {
         options={{
           title: 'Catálogo',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -159,8 +159,8 @@ export default function AppLayout() {
         options={{
           title: 'Entradas',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       {/* Puntos de retiro deshabilitado por ahora.
@@ -169,8 +169,8 @@ export default function AppLayout() {
         options={{
           title: 'Puntos de retiro',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       */}
@@ -179,8 +179,8 @@ export default function AppLayout() {
         options={{
           title: 'Arrepentimientos',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -188,8 +188,8 @@ export default function AppLayout() {
         options={{
           title: 'Arrepentimiento',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -197,8 +197,8 @@ export default function AppLayout() {
         options={{
           title: 'Entrada',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
@@ -206,8 +206,8 @@ export default function AppLayout() {
         options={{
           title: 'Producto',
           headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: '#ffffff' },
-          contentStyle: { backgroundColor: '#ffffff' },
+          headerStyle: { backgroundColor: colors.background },
+          contentStyle: { backgroundColor: colors.background },
         }}
       />
       <Stack.Screen
