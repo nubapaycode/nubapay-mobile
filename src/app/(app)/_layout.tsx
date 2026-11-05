@@ -109,6 +109,7 @@ export default function AppLayout() {
           contentStyle: { backgroundColor: '#ffffff' },
         }}
       />
+      {/* Puntos de retiro deshabilitado por ahora.
       <Stack.Screen
         name="manage/pickup-points"
         options={{
@@ -118,6 +119,7 @@ export default function AppLayout() {
           contentStyle: { backgroundColor: '#ffffff' },
         }}
       />
+      */}
       <Stack.Screen
         name="manage/regrets"
         options={{
@@ -131,6 +133,15 @@ export default function AppLayout() {
         name="manage/regret/[id]"
         options={{
           title: 'Arrepentimiento',
+          headerBackButtonDisplayMode: 'minimal',
+          headerStyle: { backgroundColor: '#ffffff' },
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/ticket/[id]"
+        options={{
+          title: 'Entrada',
           headerBackButtonDisplayMode: 'minimal',
           headerStyle: { backgroundColor: '#ffffff' },
           contentStyle: { backgroundColor: '#ffffff' },
@@ -207,6 +218,36 @@ export default function AppLayout() {
       />
       <Stack.Screen
         name="manage/new/[kind]"
+        options={{
+          // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.
+          headerShown: false,
+          presentation: 'transparentModal',
+          animation: 'none',
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/combo-products"
+        options={{
+          // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.
+          headerShown: false,
+          presentation: 'transparentModal',
+          animation: 'none',
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/category-picker"
+        options={{
+          // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.
+          headerShown: false,
+          presentation: 'transparentModal',
+          animation: 'none',
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
+      <Stack.Screen
+        name="manage/new-category"
         options={{
           // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.
           headerShown: false,

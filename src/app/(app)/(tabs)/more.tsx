@@ -44,12 +44,14 @@ export default function MoreScreen() {
             subtitle="Tipos de entrada, precios y cupos"
             onPress={() => router.push('/manage/tickets')}
           />
+          {/* Puntos de retiro deshabilitado por ahora.
           <NavCard
             icon="store"
             title="Puntos de retiro"
             subtitle="Dónde se entregan los pedidos"
             onPress={() => router.push('/manage/pickup-points')}
           />
+          */}
           <NavCard
             icon="receipt"
             title="Arrepentimientos"

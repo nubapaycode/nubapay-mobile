@@ -25,6 +25,7 @@ const ICONS = {
   moon: { ios: 'moon', android: 'dark_mode' },
   auto: { ios: 'circle.lefthalf.filled', android: 'contrast' },
   plus: { ios: 'plus', android: 'add' },
+  minus: { ios: 'minus', android: 'remove' },
   trash: { ios: 'trash', android: 'delete' },
   checkmark: { ios: 'checkmark', android: 'check' },
   bank: { ios: 'building.columns', android: 'account_balance' },
@@ -55,6 +56,10 @@ const ICONS = {
   photo: { ios: 'photo', android: 'image' },
   camera: { ios: 'camera', android: 'photo_camera' },
   eyeOff: { ios: 'eye.slash', android: 'visibility_off' },
+  combo: { ios: 'square.stack.3d.up', android: 'layers' },
+  tag: { ios: 'tag', android: 'sell' },
+  message: { ios: 'message', android: 'chat' },
+  undo: { ios: 'arrow.uturn.backward', android: 'undo' },
 } as const;
 
 export type IconName = keyof typeof ICONS;

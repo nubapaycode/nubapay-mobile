@@ -160,9 +160,9 @@ function TicketsTile({ data, index, wide }: { data: DashboardData; index: number
 function BarTile({ data, index, wide }: { data: DashboardData; index: number; wide?: boolean }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { products, event, pickup_points } = data.insights;
+  const { products, event /* , pickup_points */ } = data.insights; // Puntos de retiro deshabilitado por ahora
   const pending = event.phase === 'live' && products.units_pending > 0;
-  // A lo ancho (solo barra) suma el producto más pedido y los puntos de retiro.
+  // A lo ancho (solo barra) suma el producto más pedido (los puntos de retiro están deshabilitados por ahora).
   const top = wide
     ? data.summary.top_products.find((r) => !r.name.startsWith('Entrada'))
     : undefined;
@@ -194,7 +194,7 @@ function BarTile({ data, index, wide }: { data: DashboardData; index: number; wi
           </Text>
         )}
       </View>
-      {wide && (top || pickup_points.length > 0) ? (
+      {wide && top /* || pickup_points.length > 0 */ ? (
         <View style={styles.wideFooter}>
           {top ? (
             <View style={styles.wideKv}>
@@ -204,12 +204,14 @@ function BarTile({ data, index, wide }: { data: DashboardData; index: number; wi
               </Text>
             </View>
           ) : null}
+          {/* Puntos de retiro deshabilitado por ahora.
           {pickup_points.length > 0 ? (
             <View style={styles.wideKv}>
               <Text style={styles.tileMuted}>Puntos de retiro</Text>
               <Text style={styles.tileStrong}>{pickup_points.length}</Text>
             </View>
           ) : null}
+          */}
         </View>
       ) : null}
     </Tile>

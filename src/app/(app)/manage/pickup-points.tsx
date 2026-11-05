@@ -1,3 +1,4 @@
+// Puntos de retiro deshabilitado por ahora: la pantalla queda sin acceso (se sacó de "Más" y del layout). No se comenta entera porque Expo Router exige el `export default` de cada ruta.
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';

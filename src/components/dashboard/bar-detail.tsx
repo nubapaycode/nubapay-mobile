@@ -10,7 +10,7 @@ import type { DashboardData } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 
 import {
-  Badge,
+  // Badge, // Puntos de retiro deshabilitado por ahora (solo lo usaba esa sección).
   Breakdown,
   DetailHero,
   DetailNote,
@@ -41,7 +41,7 @@ export function BarDetail({ data, rangeNote }: { data: DashboardData; rangeNote:
   const totalSplit = revenue_split.tickets + revenue_split.products;
   const share = totalSplit ? revenue_split.products / totalSplit : null;
 
-  const maxPoint = Math.max(1, ...pickup_points.map((p) => p.revenue));
+  // const maxPoint = Math.max(1, ...pickup_points.map((p) => p.revenue)); // Puntos de retiro deshabilitado por ahora
   const ranking = summary.top_products.filter((r) => !r.name.startsWith('Entrada')).slice(0, 6);
   const maxQty = Math.max(1, ...ranking.map((r) => r.quantity));
 
@@ -92,6 +92,7 @@ export function BarDetail({ data, rangeNote }: { data: DashboardData; rangeNote:
         ]}
       />
 
+      {/* Puntos de retiro deshabilitado por ahora.
       {pickup_points.length > 0 ? (
         <DetailSection
           title="Puntos de retiro"
@@ -125,6 +126,7 @@ export function BarDetail({ data, rangeNote }: { data: DashboardData; rangeNote:
           ))}
         </DetailSection>
       ) : null}
+      */}
 
       {ranking.length > 0 ? (
         <DetailSection title="Lo más pedido" meta="por unidades" index={3}>

@@ -1,3 +1,4 @@
+// Puntos de retiro deshabilitado por ahora: esta hoja solo se abría desde Puntos de retiro (las entradas ahora usan /manage/ticket/[id]), así que queda sin acceso.
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';

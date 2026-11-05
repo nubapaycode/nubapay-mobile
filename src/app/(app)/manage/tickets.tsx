@@ -1,105 +1,233 @@
-import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
+import * as Haptics from "expo-haptics";
+import { router, Stack } from "expo-router";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
-import { enter, enterRow, StatsRow } from '@/components/dashboard/detail-kit';
-import { ProgressBar } from '@/components/dashboard/progress-bar';
-import { AddButton } from '@/components/manage/manage-ui';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { enter, enterRow } from "@/components/dashboard/detail-kit";
+import { Icon } from "@/components/dashboard/icon";
+import { ProgressBar } from "@/components/dashboard/progress-bar";
+import {
+  CatalogSkeleton,
+  EmptyState,
+  GroupHeader,
+} from "@/components/manage/catalog-kit";
+import { DisplayFont, Radius, Spacing } from "@/constants/theme";
 import {
   formatInt,
   formatMoney,
   formatMoneyCompact,
   formatPercent,
-} from '@/features/dashboard/format';
-import { setTicketActive, type TicketType, useTickets } from '@/features/manage/manage';
-import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { makeStyles, useTheme } from '@/theme';
+} from "@/features/dashboard/format";
+import {
+  setTicketActive,
+  type TicketType,
+  useTickets,
+} from "@/features/manage/manage";
+import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
+import { makeStyles, useTheme } from "@/theme";
 
+/** Verde lima del botón "+" del header (igual que el catálogo). */
+const LIME = "#C6FF00";
 /** Desde este % del cupo se avisa que quedan pocas. */
 const ALMOST = 0.9;
+/** Tamaño de los semicírculos del troquel. */
+const NOTCH = 18;
+
+const newTicket = () =>
+  router.push({ pathname: "/manage/ticket/[id]", params: { id: "new" } });
+
+type Status = {
+  label: string;
+  tone: "success" | "warning" | "strong" | "muted";
+};
+
+/** Estado de venta de un tipo de entrada (lo que se ve con el punto de color). */
+function ticketStatus(t: TicketType): Status {
+  if (!t.isActive) return { label: "Pausada", tone: "muted" };
+  if (t.stock != null && t.sold >= t.stock)
+    return { label: "Agotada", tone: "strong" };
+  if (t.stock != null && t.sold / t.stock >= ALMOST)
+    return { label: `Últimas ${formatInt(t.stock - t.sold)}`, tone: "warning" };
+  return { label: "A la venta", tone: "success" };
+}
 
 /**
- * Entradas (gestión): métricas, aforo total vendido y cada tipo de entrada en su tarjeta con
- * precio, cupo (barra que avisa cuando se está por agotar), recaudado y switch de activo/pausado.
+ * Entradas (patrón Luma "Tickets" + resumen tipo Posh): arriba lo recaudado y el aforo vendido;
+ * abajo cada tipo de entrada en una card con forma de ticket (troquel): nombre, precio y estado
+ * arriba; vendidas, barra de cupo y switch de venta abajo. Tocarla abre la edición; el "+" del
+ * header crea una nueva.
  */
 export default function TicketsAdminScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
   const { tickets: list, error, eventId } = useTickets();
-  useFocusStatusBar('dark');
+  useFocusStatusBar("dark");
 
   const tickets = list ?? [];
   const sold = tickets.reduce((a, t) => a + t.sold, 0);
   const revenue = tickets.reduce((a, t) => a + t.revenue, 0);
+  const onSale = tickets.filter((t) =>
+    ["success", "warning"].includes(ticketStatus(t).tone),
+  ).length;
   // Aforo total solo si todos los tipos tienen cupo.
-  const capacity = tickets.length && tickets.every((t) => t.stock != null)
-    ? tickets.reduce((a, t) => a + (t.stock ?? 0), 0)
-    : null;
+  const capacity =
+    tickets.length && tickets.every((t) => t.stock != null)
+      ? tickets.reduce((a, t) => a + (t.stock ?? 0), 0)
+      : null;
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic">
-      {!list ? (
-        <Text style={styles.muted}>{error ?? 'Cargando…'}</Text>
-      ) : (
-        <>
-          <StatsRow
-            index={0}
-            stats={[
-              { label: 'Tipos', value: formatInt(tickets.length) },
-              { label: 'Vendidas', value: formatInt(sold) },
-              { label: 'Recaudado', value: formatMoneyCompact(revenue) },
-            ]}
-          />
-
-          {capacity ? (
-            <Animated.View entering={enter(1)} style={styles.capacity}>
-              <View style={styles.capacityHead}>
-                <Text style={styles.capacityLabel}>Aforo vendido</Text>
-                <Text style={styles.capacityValue}>
-                  {formatPercent(sold / capacity)}
-                  <Text style={styles.capacityOf}>
-                    {'  '}
-                    {formatInt(sold)} / {formatInt(capacity)}
-                  </Text>
-                </Text>
-              </View>
-              <ProgressBar
-                height={8}
-                total={capacity}
-                delay={160}
-                segments={[{ value: sold, color: colors.chart.ramp[0] }]}
-              />
-            </Animated.View>
-          ) : null}
-
-          <Animated.View entering={enter(2)}>
-            <AddButton
-              label="Agregar tipo de entrada"
-              onPress={() => router.push({ pathname: '/manage/new/[kind]', params: { kind: 'ticket' } })}
+    <>
+      <Stack.Screen
+        options={
+          Platform.OS === "ios"
+            ? {
+                unstable_headerRightItems: () => [
+                  {
+                    type: "button",
+                    label: "Nueva entrada",
+                    icon: { type: "sfSymbol", name: "plus" },
+                    variant: "prominent",
+                    tintColor: LIME,
+                    onPress: newTicket,
+                  },
+                ],
+              }
+            : {
+                headerRight: () => (
+                  <Pressable
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      newTicket();
+                    }}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel="Nueva entrada"
+                    style={({ pressed }) => [
+                      styles.headerBtn,
+                      pressed && { opacity: 0.8 },
+                    ]}
+                  >
+                    <Icon name="plus" size={20} color="#000000" />
+                  </Pressable>
+                ),
+              }
+        }
+      />
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.content}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        {!list ? (
+          error ? (
+            <EmptyState
+              icon="help"
+              title="No pudimos cargar las entradas"
+              text={error}
+            />
+          ) : (
+            <CatalogSkeleton />
+          )
+        ) : tickets.length === 0 ? (
+          <Animated.View entering={FadeIn.duration(300)}>
+            <EmptyState
+              icon="ticket"
+              title="Todavía no vendés entradas"
+              text="Creá los tipos de entrada del evento: general, VIP, anticipadas. Cada uno con su precio y cupo."
+              action="Crear entrada"
+              onAction={() => {
+                Haptics.selectionAsync();
+                newTicket();
+              }}
             />
           </Animated.View>
+        ) : (
+          <>
+            {/* Resumen */}
+            <Animated.View entering={enter(0)} style={styles.hero}>
+              <Text style={styles.heroCaption}>Recaudado en entradas</Text>
+              <Text
+                style={styles.heroValue}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatMoney(revenue)}
+              </Text>
+              <View style={styles.heroStats}>
+                <HeroStat value={formatInt(sold)} label="vendidas" />
+                <View style={styles.heroDot} />
+                <HeroStat value={formatInt(onSale)} label="a la venta" />
+                {capacity ? (
+                  <>
+                    <View style={styles.heroDot} />
+                    <HeroStat
+                      value={formatInt(Math.max(0, capacity - sold))}
+                      label="disponibles"
+                    />
+                  </>
+                ) : null}
+              </View>
+              {capacity ? (
+                <View style={{ gap: 8, marginTop: 6 }}>
+                  <ProgressBar
+                    height={10}
+                    total={capacity}
+                    delay={160}
+                    track="#ffffff"
+                    segments={[{ value: sold, color: colors.chart.ramp[0] }]}
+                  />
+                  <View style={styles.capacityRow}>
+                    <Text style={styles.capacityText}>Aforo vendido</Text>
+                    <Text style={styles.capacityPct}>
+                      {formatPercent(sold / capacity)}
+                      <Text
+                        style={styles.capacityOf}
+                      >{`  ${formatInt(sold)} / ${formatInt(capacity)}`}</Text>
+                    </Text>
+                  </View>
+                </View>
+              ) : null}
+            </Animated.View>
 
-          {tickets.length === 0 ? (
-            <View style={styles.empty}>
-              <Text style={styles.emptyText}>Este evento todavía no vende entradas.</Text>
-            </View>
-          ) : (
-            <View style={styles.list}>
-              {tickets.map((t, i) => (
-                <TicketCard key={t.id} ticket={t} index={i} eventId={eventId} />
-              ))}
-            </View>
-          )}
-        </>
-      )}
-    </ScrollView>
+            <Animated.View entering={enter(1)} style={styles.section}>
+              <GroupHeader title="Tipos de entrada" count={tickets.length} />
+              <View style={styles.list}>
+                {tickets.map((t, i) => (
+                  <TicketCard
+                    key={t.id}
+                    ticket={t}
+                    index={i}
+                    eventId={eventId}
+                  />
+                ))}
+              </View>
+            </Animated.View>
+          </>
+        )}
+      </ScrollView>
+    </>
   );
 }
+
+function HeroStat({ value, label }: { value: string; label: string }) {
+  const styles = useStyles();
+  return (
+    <Text style={styles.heroStat}>
+      <Text style={styles.heroStatValue}>{value}</Text> {label}
+    </Text>
+  );
+}
+
+/** Guiones del troquel (dibujados a mano: el borde punteado de un solo lado no se ve en iOS). */
+const DASHES = Array.from({ length: 48 });
 
 function TicketCard({
   ticket: t,
@@ -112,141 +240,326 @@ function TicketCard({
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
+  const status = ticketStatus(t);
+  const off = !t.isActive;
   const free = t.price === 0;
-  const ratio = t.stock ? t.sold / t.stock : null;
-  const soldOut = t.stock != null && t.sold >= t.stock;
-  const almost = !soldOut && ratio != null && ratio >= ALMOST;
   const left = t.stock != null ? Math.max(0, t.stock - t.sold) : null;
-  const barColor = soldOut ? colors.text : almost ? colors.brand : colors.chart.ramp[0];
+  const ratio = t.stock ? Math.min(1, t.sold / t.stock) : null;
+
+  const tone = {
+    success: { fg: colors.success, bg: colors.successMuted },
+    warning: { fg: colors.warning, bg: colors.warningMuted },
+    strong: { fg: colors.surface, bg: colors.text },
+    muted: { fg: colors.textSecondary, bg: colors.raised },
+  }[status.tone];
+  const bar = off
+    ? colors.textMuted
+    : status.tone === "strong"
+      ? colors.text
+      : status.tone === "warning"
+        ? colors.warning
+        : colors.chart.ramp[0];
+  const paper = off ? colors.canvas : colors.surface;
 
   return (
     <Animated.View
       entering={enterRow(index)}
       layout={LinearTransition.duration(260)}
-      style={[styles.card, !t.isActive && styles.cardOff]}>
-      <View style={styles.top}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={[styles.name, !t.isActive && styles.off]} numberOfLines={1}>
-            {t.name}
-          </Text>
-          <Text style={[styles.price, !t.isActive && styles.off]}>
-            {free ? 'Gratis' : formatMoney(t.price)}
-          </Text>
+    >
+      <Pressable
+        onPress={() => {
+          Haptics.selectionAsync();
+          router.push({
+            pathname: "/manage/ticket/[id]",
+            params: { id: t.id },
+          });
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${t.name}, ${free ? "gratis" : formatMoney(t.price)}, ${status.label}. Editar`}
+        style={({ pressed }) => [
+          styles.ticket,
+          { backgroundColor: paper },
+          pressed && styles.ticketPressed,
+        ]}
+      >
+        {/* Talón superior: nombre + switch, precio + estado */}
+        <View style={styles.stubTop}>
+          <View style={styles.titleRow}>
+            <Text style={[styles.name, off && styles.off]} numberOfLines={1}>
+              {t.name}
+            </Text>
+            <Switch
+              value={t.isActive}
+              onValueChange={(v) => {
+                Haptics.selectionAsync();
+                if (eventId) setTicketActive(eventId, t.id, v);
+              }}
+              trackColor={{ true: colors.primary, false: colors.border }}
+              accessibilityLabel={`${t.name}: ${t.isActive ? "a la venta" : "pausada"}`}
+            />
+          </View>
+          <View style={styles.priceRow}>
+            <Text style={[styles.price, off && styles.off]}>
+              {free ? "Gratis" : formatMoney(t.price)}
+            </Text>
+            <View style={[styles.pill, { backgroundColor: tone.bg }]}>
+              {status.tone !== "strong" ? (
+                <View style={[styles.pillDot, { backgroundColor: tone.fg }]} />
+              ) : null}
+              <Text style={[styles.pillText, { color: tone.fg }]}>
+                {status.label}
+              </Text>
+            </View>
+          </View>
         </View>
-        <Switch
-          value={t.isActive}
-          onValueChange={(v) => {
-            Haptics.selectionAsync();
-            if (eventId) setTicketActive(eventId, t.id, v);
-          }}
-          trackColor={{ true: colors.primary, false: colors.border }}
-          accessibilityLabel={`${t.name}: ${t.isActive ? 'a la venta' : 'pausada'}`}
-        />
-      </View>
 
-      <ProgressBar
-        height={6}
-        total={t.stock ?? Math.max(1, t.sold)}
-        delay={220 + index * 70}
-        segments={[{ value: t.sold, color: t.isActive ? barColor : colors.border }]}
-      />
+        {/* Troquel */}
+        <View style={styles.perforation}>
+          <View style={[styles.notch, { left: -NOTCH / 2 }]} />
+          <View style={styles.dashes}>
+            {DASHES.map((_, i) => (
+              <View key={i} style={styles.dash} />
+            ))}
+          </View>
+          <View style={[styles.notch, { right: -NOTCH / 2 }]} />
+        </View>
 
-      <View style={styles.bottom}>
-        {!t.isActive ? (
-          <Badge label="Pausada" />
-        ) : soldOut ? (
-          <Badge label="Agotada" tone="strong" />
-        ) : almost ? (
-          <Badge label={`Últimas ${formatInt(left ?? 0)}`} tone="attention" />
-        ) : null}
-        <Text style={styles.meta}>
-          {formatInt(t.sold)}
-          {t.stock != null ? ` / ${formatInt(t.stock)}` : ''} vendidas
-          {t.stock == null ? ' · sin tope' : ''}
-        </Text>
-        <View style={{ flex: 1 }} />
-        {!free ? <Text style={styles.revenue}>{formatMoneyCompact(t.revenue)}</Text> : null}
-      </View>
+        {/* Talón inferior: cifras + barra de cupo */}
+        <View style={styles.stubBottom}>
+          <View style={styles.figures}>
+            <Figure
+              label="Vendidas"
+              value={formatInt(t.sold)}
+              suffix={t.stock != null ? `/${formatInt(t.stock)}` : undefined}
+              off={off}
+            />
+            <Figure
+              label="Quedan"
+              value={left != null ? formatInt(left) : "Sin tope"}
+              off={off}
+            />
+            <Figure
+              label="Recaudado"
+              value={free ? "—" : formatMoneyCompact(t.revenue)}
+              off={off}
+              align="right"
+            />
+          </View>
+          {ratio != null ? (
+            <View style={styles.barRow}>
+              <View style={{ flex: 1 }}>
+                <ProgressBar
+                  height={6}
+                  total={t.stock ?? 1}
+                  delay={220 + index * 70}
+                  track={off ? colors.border : colors.raised}
+                  segments={[{ value: t.sold, color: bar }]}
+                />
+              </View>
+              <Text style={styles.barPct}>{formatPercent(ratio)}</Text>
+            </View>
+          ) : null}
+        </View>
+      </Pressable>
     </Animated.View>
   );
 }
 
-function Badge({ label, tone }: { label: string; tone?: 'strong' | 'attention' }) {
+function Figure({
+  label,
+  value,
+  suffix,
+  off,
+  align,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+  off?: boolean;
+  align?: "right";
+}) {
   const styles = useStyles();
-  const { colors } = useTheme();
-  const bg = tone === 'strong' ? colors.text : tone === 'attention' ? colors.brandMuted : colors.raised;
-  const fg = tone === 'strong' ? colors.surface : tone === 'attention' ? colors.brandText : colors.textSecondary;
   return (
-    <View style={[styles.badge, { backgroundColor: bg }]}>
-      <Text style={[styles.badgeText, { color: fg }]}>{label}</Text>
+    <View
+      style={[styles.figure, align === "right" && { alignItems: "flex-end" }]}
+    >
+      <Text style={styles.figureLabel}>{label}</Text>
+      <Text style={[styles.figureValue, off && styles.off]} numberOfLines={1}>
+        {value}
+        {suffix ? <Text style={styles.figureSuffix}>{suffix}</Text> : null}
+      </Text>
     </View>
   );
 }
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
-    content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
-    muted: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
+    screen: { flex: 1, backgroundColor: "#ffffff" },
+    content: {
+      padding: Spacing.three,
+      paddingBottom: Spacing.six,
+      gap: Spacing.four,
+    },
+    headerBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: LIME,
+    },
 
-    capacity: {
-      gap: 12,
-      padding: 16,
+    // Resumen
+    hero: {
+      gap: 4,
+      padding: 18,
       borderRadius: Radius.xl,
-      borderCurve: 'continuous',
+      borderCurve: "continuous",
       backgroundColor: c.canvas,
     },
-    capacityHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-    capacityLabel: { color: c.textSecondary, fontSize: 14, fontWeight: '500' },
-    capacityValue: {
+    heroCaption: { color: c.textSecondary, fontSize: 13, fontWeight: "600" },
+    heroValue: {
       color: c.text,
-      fontSize: 22,
+      fontSize: 36,
       fontFamily: DisplayFont.bold,
-      letterSpacing: -0.5,
-      fontVariant: ['tabular-nums'],
+      letterSpacing: -1.2,
+      fontVariant: ["tabular-nums"],
+    },
+    heroStats: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    heroStat: { color: c.textSecondary, fontSize: 13 },
+    heroStatValue: {
+      color: c.text,
+      fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
+    heroDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 2,
+      backgroundColor: c.textMuted,
+    },
+    capacityRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      justifyContent: "space-between",
+    },
+    capacityText: { color: c.textSecondary, fontSize: 13 },
+    capacityPct: {
+      color: c.text,
+      fontSize: 15,
+      fontFamily: DisplayFont.bold,
+      fontVariant: ["tabular-nums"],
     },
     capacityOf: {
       color: c.textMuted,
-      fontSize: 13,
+      fontSize: 12,
       fontFamily: undefined,
-      fontWeight: '500',
-      letterSpacing: 0,
+      fontWeight: "500",
     },
 
-    list: { gap: 10 },
-    empty: {
-      padding: 20,
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-    emptyText: { color: c.textMuted, fontSize: 14, textAlign: 'center' },
+    section: { gap: 10 },
+    list: { gap: 12 },
 
-    card: {
-      gap: 12,
-      padding: 14,
+    // Ticket
+    ticket: {
       borderRadius: Radius.xl,
-      borderCurve: 'continuous',
+      borderCurve: "continuous",
       borderWidth: 1,
       borderColor: c.border,
-      backgroundColor: c.surface,
+      overflow: "hidden",
     },
-    cardOff: { backgroundColor: c.canvas },
-    top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    name: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
-    price: {
+    ticketPressed: { borderColor: "#c9ced6", transform: [{ scale: 0.99 }] },
+    stubTop: {
+      gap: 6,
+      paddingHorizontal: 16,
+      paddingTop: 14,
+      paddingBottom: 12,
+    },
+    titleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+    name: {
+      flex: 1,
       color: c.text,
-      fontSize: 20,
-      fontFamily: DisplayFont.bold,
-      letterSpacing: -0.4,
-      fontVariant: ['tabular-nums'],
+      fontSize: 17,
+      fontFamily: DisplayFont.semibold,
     },
     off: { color: c.textMuted },
-    bottom: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
-    revenue: { color: c.text, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
-    badge: { paddingHorizontal: 8, height: 22, justifyContent: 'center', borderRadius: 7 },
-    badgeText: { fontSize: 11, fontWeight: '700' },
+    priceRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    price: {
+      color: c.text,
+      fontSize: 24,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.6,
+      fontVariant: ["tabular-nums"],
+    },
+    pill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      height: 24,
+      paddingHorizontal: 9,
+      borderRadius: Radius.pill,
+    },
+    pillDot: { width: 6, height: 6, borderRadius: 3 },
+    pillText: {
+      fontSize: 12,
+      fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
+
+    perforation: { height: NOTCH, justifyContent: "center" },
+    dashes: {
+      flexDirection: "row",
+      gap: 5,
+      marginHorizontal: NOTCH,
+      overflow: "hidden",
+    },
+    dash: { width: 7, height: 1.5, borderRadius: 1, backgroundColor: c.border },
+    notch: {
+      position: "absolute",
+      top: 0,
+      width: NOTCH,
+      height: NOTCH,
+      borderRadius: NOTCH / 2,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: "#ffffff",
+    },
+
+    stubBottom: {
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingTop: 10,
+      paddingBottom: 16,
+    },
+    figures: { flexDirection: "row", gap: 12 },
+    figure: { flex: 1, gap: 2 },
+    figureLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    figureValue: {
+      color: c.text,
+      fontSize: 17,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.3,
+      fontVariant: ["tabular-nums"],
+    },
+    figureSuffix: {
+      color: c.textMuted,
+      fontSize: 13,
+      fontFamily: DisplayFont.semibold,
+      letterSpacing: 0,
+    },
+    barRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    barPct: {
+      minWidth: 36,
+      textAlign: "right",
+      color: c.textSecondary,
+      fontSize: 12,
+      fontWeight: "700",
+      fontVariant: ["tabular-nums"],
+    },
   }),
 );

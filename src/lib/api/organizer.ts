@@ -168,13 +168,20 @@ export type Product = {
   type: 'single' | 'combo';
   is_active: boolean;
   image_url: string | null;
+  /** Productos que forman el combo (vacío si `type` es 'single'). */
+  combo_lines?: { product_id: string; quantity: number; name: string }[];
 };
+export type ComboLinePayload = { product_id: string; quantity: number };
 export type ProductPayload = {
   name: string;
   price: number;
   description?: string | null;
   category_id?: string | null;
   is_active?: boolean;
+  /** Solo al crear: 'combo' necesita `lines`. */
+  type?: 'single' | 'combo';
+  /** Solo combos: reemplaza todas las líneas (al menos una; solo productos simples). */
+  lines?: ComboLinePayload[];
 };
 
 export const listCategories = (eventId: string) =>
@@ -190,6 +197,45 @@ export const patchProduct = async (eventId: string, id: string, payload: Partial
   unwrap(await apiFetch<{ product: Product }>(ws(eventId, `products/${id}`), json('PATCH', payload)), 'product');
 export const deleteProduct = (eventId: string, id: string) =>
   apiFetch<{ paused_combos?: string[] }>(ws(eventId, `products/${id}`), json('DELETE'));
+
+/* ───────────── Promociones (una por producto o combo) ───────────── */
+
+export type ProductPromotion = {
+  id: string;
+  product_id: string;
+  /** Etiqueta pública, p. ej. "20% OFF". */
+  badge_label: string;
+  /** Precio final con la promo (menor al de lista). */
+  promo_price: number | null;
+  is_active: boolean;
+  /** UTC sin zona ("2026-11-08T01:00:00"). */
+  starts_at: string | null;
+  ends_at: string | null;
+};
+export type ProductPromotionPayload = {
+  badge_label: string;
+  promo_price: number | null;
+  is_active: boolean;
+  /** ISO en UTC (`toISOString()`), igual que el panel web. */
+  starts_at: string | null;
+  ends_at: string | null;
+};
+
+export const listProductPromotions = async (eventId: string) =>
+  unwrap(
+    await apiFetch<{ promotions: ProductPromotion[] }>(ws(eventId, 'product-promotions')),
+    'promotions',
+  );
+export const putProductPromotion = async (eventId: string, productId: string, payload: ProductPromotionPayload) =>
+  unwrap(
+    await apiFetch<{ promotion: ProductPromotion }>(
+      ws(eventId, `product-promotions/${productId}`),
+      json('PUT', payload),
+    ),
+    'promotion',
+  );
+export const deleteProductPromotion = (eventId: string, productId: string) =>
+  apiFetch<{ ok: boolean }>(ws(eventId, `product-promotions/${productId}`), json('DELETE'));
 
 /** Sube la foto elegida (`file://…`) y devuelve el producto con su `image_url` nueva. */
 export async function uploadProductImage(eventId: string, id: string, uri: string) {

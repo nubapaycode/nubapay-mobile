@@ -93,7 +93,7 @@ function EditEventForm({ event }: { event: EventDetail }) {
     initial.end ?? new Date(initial.start.getTime() + DEFAULT_LENGTH_MS),
   );
   const [active, setActive] = useState(initial.active);
-  const [notifyPickup, setNotifyPickup] = useState(initial.notifyPickup);
+  const [notifyPickup /* , setNotifyPickup */] = useState(initial.notifyPickup); // Puntos de retiro deshabilitado por ahora
 
   const nameError = name.trim().length < 2 ? 'Poné un nombre para el evento' : null;
   const endError = hasEnd && end <= start ? 'El fin tiene que ser después del inicio' : null;
@@ -187,7 +187,7 @@ function EditEventForm({ event }: { event: EventDetail }) {
           </View>
         </Animated.View>
 
-        <Section title="Detalles" index={1}>
+        <Section title="Detalles" index={1} separate>
           <View style={styles.inputBlock}>
             <View style={styles.inputHead}>
               <Text style={styles.inputLabel}>Nombre</Text>
@@ -204,7 +204,7 @@ function EditEventForm({ event }: { event: EventDetail }) {
               accessibilityLabel="Nombre"
             />
           </View>
-          <View style={[styles.inputBlock, styles.divider]}>
+          <View style={styles.inputBlock}>
             <View style={styles.inputHead}>
               <Text style={styles.inputLabel}>Descripción</Text>
               <Text style={styles.counter}>
@@ -226,13 +226,13 @@ function EditEventForm({ event }: { event: EventDetail }) {
         </Section>
         {nameError ? <Text style={styles.error}>{nameError}</Text> : null}
 
-        <Section title="Fecha y hora" index={2}>
+        <Section title="Fecha y hora" index={2} separate>
           <View style={[styles.dateRow, !INLINE_PICKERS && styles.dateRowStacked]}>
             <Text style={styles.rowTitle}>Inicio</Text>
             <DateTimeField value={start} onChange={setStart} />
           </View>
 
-          <View style={[styles.switchRow, styles.divider]}>
+          <View style={styles.switchRow}>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={styles.rowTitle}>Hora de fin</Text>
               {!hasEnd ? (
@@ -253,7 +253,7 @@ function EditEventForm({ event }: { event: EventDetail }) {
           </View>
 
           {hasEnd ? (
-            <View style={[styles.dateRow, styles.divider, !INLINE_PICKERS && styles.dateRowStacked]}>
+            <View style={[styles.dateRow, !INLINE_PICKERS && styles.dateRowStacked]}>
               <Text style={styles.rowTitle}>Fin</Text>
               <DateTimeField value={end} onChange={setEnd} minimumDate={start} />
             </View>
@@ -268,12 +268,14 @@ function EditEventForm({ event }: { event: EventDetail }) {
             value={active}
             onValueChange={setActive}
           />
+          {/* Puntos de retiro deshabilitado por ahora: se conserva el valor actual del evento al guardar.
           <ToggleRow
             title="Avisar punto de retiro en email"
             description="Cuando está activo, el email de confirmación del pedido incluye el nombre del punto de retiro asignado"
             value={notifyPickup}
             onValueChange={setNotifyPickup}
           />
+          */}
         </Section>
       </ScrollView>
 
@@ -337,8 +339,11 @@ function Section({
       <Text style={styles.sectionTitle}>{title}</Text>
       {separate ? (
         <View style={styles.cards}>
-          {Children.map(children, (child) => (
-            <View style={styles.card}>{child}</View>
+          {/* toArray descarta los hijos vacíos (p. ej. "Fin" cuando no hay hora de fin). */}
+          {Children.toArray(children).map((child, i) => (
+            <View key={i} style={styles.card}>
+              {child}
+            </View>
           ))}
         </View>
       ) : (

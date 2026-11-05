@@ -1,51 +1,78 @@
-import * as Haptics from 'expo-haptics';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
+import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { type ReactNode, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { enter } from '@/components/dashboard/detail-kit';
-import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
-import { setRegretStatus, useRegrets } from '@/features/manage/manage';
-import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
-import { loadClipboard } from '@/lib/native-modules';
-import { makeStyles, useTheme } from '@/theme';
+import { enter } from "@/components/dashboard/detail-kit";
+import { Icon, type IconName } from "@/components/dashboard/icon";
+import { Card, GroupHeader } from "@/components/manage/catalog-kit";
+import {
+  RegretAvatar,
+  RegretStatus,
+  waitingFor,
+} from "@/components/manage/regret-kit";
+import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { setRegretStatus, useRegrets } from "@/features/manage/manage";
+import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
+import { useNow } from "@/hooks/use-now";
+import { loadClipboard } from "@/lib/native-modules";
+import { makeStyles, useTheme } from "@/theme";
 
-const dateFmt = new Intl.DateTimeFormat('es-AR', {
-  day: 'numeric',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
+const dateFmt = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
 });
 
 /**
- * Detalle de un arrepentimiento: qué pide el comprador, sus datos de contacto y el alias para
- * devolver el pago. Se marca como resuelta cuando ya se gestionó la devolución.
+ * Detalle de un arrepentimiento: quién lo pide y hace cuánto, accesos para escribirle (WhatsApp /
+ * email), qué compró, el alias para devolver el pago (se copia), el comprobante y los pasos para
+ * resolverlo (patrón de seguimiento de Zip / Shopee). "Marcar como resuelta" queda fijo abajo.
  * (Cancelar el QR del pedido se hace desde Operaciones → detalle del pedido.)
  */
 export default function RegretScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { regrets, eventId } = useRegrets();
   const regret = regrets?.find((r) => r.id === id);
+  const now = useNow(60_000);
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  useFocusStatusBar("dark");
   useEffect(() => {
     if (!copied) return;
     const t = setTimeout(() => setCopied(false), 1800);
     return () => clearTimeout(t);
   }, [copied]);
-  useFocusStatusBar('dark');
 
   if (!regret) {
     return (
       <View style={styles.missing}>
-        <Text style={styles.missingText}>No encontramos esta solicitud.</Text>
+        {regrets ? (
+          <Text style={styles.missingText}>No encontramos esta solicitud.</Text>
+        ) : (
+          <ActivityIndicator color={colors.textMuted} />
+        )}
       </View>
     );
   }
-  const pending = regret.status === 'pending';
+  const pending = regret.status === "pending";
+  const whatsappNumber = regret.whatsapp.replace(/[^\d]/g, "");
 
   const copyAlias = async () => {
     const Clipboard = await loadClipboard();
@@ -55,137 +82,254 @@ export default function RegretScreen() {
     setCopied(true);
   };
 
+  const update = async (status: "pending" | "resolved") => {
+    if (!eventId || saving) return;
+    setSaving(true);
+    const res = await setRegretStatus(eventId, regret.id, status);
+    setSaving(false);
+    if (!res.ok) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("No se pudo actualizar", res.error);
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
   const toggleStatus = () =>
     Alert.alert(
-      pending ? 'Marcar como resuelta' : 'Volver a pendiente',
+      pending ? "Marcar como resuelta" : "Volver a pendiente",
       pending
-        ? '¿Ya devolviste el pago y cancelaste el pedido?'
-        : 'La solicitud vuelve a la lista de pendientes.',
+        ? "¿Ya devolviste el pago y anulaste el QR del pedido?"
+        : "La solicitud vuelve a la lista de pendientes.",
       [
-        { text: 'Volver', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: pending ? 'Marcar resuelta' : 'Volver a pendiente',
-          onPress: async () => {
-            if (!eventId) return;
-            const res = await setRegretStatus(eventId, regret.id, pending ? 'resolved' : 'pending');
-            if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('No se pudo actualizar', res.error);
-              return;
-            }
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          },
+          text: pending ? "Sí, resuelta" : "Volver a pendiente",
+          onPress: () => update(pending ? "resolved" : "pending"),
         },
       ],
     );
 
-  const whatsappNumber = regret.whatsapp.replace(/[^\d]/g, '');
-
   return (
     <>
-      <Stack.Screen options={{ title: regret.fullName }} />
-      <ScrollView
-        style={styles.screen}
-        contentContainerStyle={styles.content}
-        contentInsetAdjustmentBehavior="automatic">
-        <Animated.View entering={enter(0)} style={styles.hero}>
-          <Text style={styles.caption}>Solicitud del {dateFmt.format(new Date(regret.createdAt))}</Text>
-          <Text style={styles.detail}>{regret.purchaseDetail}</Text>
-          <Animated.View
-            layout={LinearTransition.duration(260)}
-            style={[styles.chip, pending ? styles.chipPending : styles.chipDone]}>
-            <View style={[styles.dot, { backgroundColor: pending ? colors.brand : colors.textMuted }]} />
-            <Text style={[styles.chipText, pending && { color: colors.brandText }]}>
-              {pending ? 'Pendiente' : 'Resuelta'}
-            </Text>
-          </Animated.View>
-        </Animated.View>
-
-        {/* Devolución: alias para copiar */}
-        <Animated.View entering={enter(1)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Devolución</Text>
-          <Pressable
-            onPress={copyAlias}
-            accessibilityRole="button"
-            accessibilityLabel={`Alias ${regret.bankAlias}. Copiar`}
-            style={({ pressed }) => [styles.alias, pressed && { opacity: 0.8 }]}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={styles.fieldLabel}>Alias o CBU</Text>
-              <Text style={styles.aliasValue} selectable>
-                {regret.bankAlias}
+      <Stack.Screen options={{ title: "Solicitud" }} />
+      <View style={styles.screen}>
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={[
+            styles.content,
+            { paddingBottom: 120 + insets.bottom },
+          ]}
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          {/* Quién y cuándo */}
+          <Animated.View entering={enter(0)} style={styles.header}>
+            <RegretAvatar name={regret.fullName} pending={pending} size={56} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={styles.name} numberOfLines={2}>
+                {regret.fullName}
               </Text>
+              <Text style={styles.when}>
+                Pidió el {dateFmt.format(new Date(regret.createdAt))} ·{" "}
+                {waitingFor(regret.createdAt, now)}
+              </Text>
+              <Animated.View
+                layout={LinearTransition.duration(260)}
+                style={{ marginTop: 2 }}
+              >
+                <RegretStatus regret={regret} now={now} />
+              </Animated.View>
             </View>
-            <Animated.View key={String(copied)} entering={FadeIn.duration(200)} style={styles.copyBtn}>
-              <Icon name={copied ? 'checkmark' : 'copy'} size={13} color="#000000" />
-              <Text style={styles.copyText}>{copied ? 'Copiado' : 'Copiar'}</Text>
-            </Animated.View>
-          </Pressable>
-        </Animated.View>
+          </Animated.View>
 
-        {/* Contacto */}
-        <Animated.View entering={enter(2)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Contacto</Text>
-          <View style={styles.card}>
-            <ContactRow
-              icon="mail"
-              label="Email"
-              value={regret.email}
-              onPress={() => Linking.openURL(`mailto:${regret.email}`)}
-            />
-            <ContactRow
-              icon="people"
-              label="WhatsApp"
-              value={regret.whatsapp}
-              divider
-              onPress={() => Linking.openURL(`https://wa.me/${whatsappNumber}`)}
-            />
-          </View>
-        </Animated.View>
+          {/* Contactar */}
+          <Animated.View entering={enter(1)} style={styles.actions}>
+            {whatsappNumber ? (
+              <QuickAction
+                icon="message"
+                label="WhatsApp"
+                value={regret.whatsapp}
+                onPress={() =>
+                  Linking.openURL(`https://wa.me/${whatsappNumber}`)
+                }
+              />
+            ) : null}
+            {regret.email ? (
+              <QuickAction
+                icon="mail"
+                label="Email"
+                value={regret.email}
+                onPress={() => Linking.openURL(`mailto:${regret.email}`)}
+              />
+            ) : null}
+          </Animated.View>
 
-        {/* Comprobante */}
-        <Animated.View entering={enter(3)} style={styles.section}>
-          <Text style={styles.sectionTitle}>Comprobante</Text>
-          <View style={styles.receipt}>
-            <Icon name="receipt" size={18} color={colors.textMuted} />
-            <Text style={styles.receiptText}>
-              {regret.screenshotUrl ? 'Ver captura adjunta' : 'La captura se ve con el backend conectado'}
-            </Text>
-          </View>
-        </Animated.View>
+          {/* Qué compró */}
+          <Animated.View entering={enter(2)} style={styles.section}>
+            <GroupHeader title="Qué compró" />
+            <Card>
+              <View style={styles.purchase}>
+                <View style={styles.quoteBar} />
+                <Text style={styles.purchaseText} selectable>
+                  {regret.purchaseDetail}
+                </Text>
+              </View>
+            </Card>
+          </Animated.View>
 
-        <Animated.View entering={enter(4)}>
+          {/* Devolución */}
+          <Animated.View entering={enter(3)} style={styles.section}>
+            <GroupHeader title="Devolución" />
+            <Pressable
+              onPress={copyAlias}
+              accessibilityRole="button"
+              accessibilityLabel={`Alias ${regret.bankAlias}. Copiar`}
+              style={({ pressed }) => [
+                styles.alias,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={styles.aliasLabel}>
+                  Alias o CBU para devolver el pago
+                </Text>
+                <Text style={styles.aliasValue} selectable numberOfLines={2}>
+                  {regret.bankAlias}
+                </Text>
+              </View>
+              <Animated.View
+                key={String(copied)}
+                entering={FadeIn.duration(200)}
+                style={[styles.copyBtn, copied && styles.copyBtnDone]}
+              >
+                <Icon
+                  name={copied ? "checkmark" : "copy"}
+                  size={13}
+                  color={copied ? "#ffffff" : "#000000"}
+                />
+                <Text style={[styles.copyText, copied && { color: "#ffffff" }]}>
+                  {copied ? "Copiado" : "Copiar"}
+                </Text>
+              </Animated.View>
+            </Pressable>
+          </Animated.View>
+
+          {/* Comprobante */}
+          <Animated.View entering={enter(4)} style={styles.section}>
+            <GroupHeader title="Comprobante" />
+            {regret.screenshotUrl ? (
+              <Pressable
+                onPress={() => Linking.openURL(regret.screenshotUrl!)}
+                accessibilityRole="imagebutton"
+                accessibilityLabel="Abrir comprobante"
+                style={styles.receipt}
+              >
+                <Image
+                  source={{ uri: regret.screenshotUrl }}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                  transition={200}
+                />
+                <View style={styles.receiptOpen}>
+                  <Icon name="external" size={12} color="#000000" />
+                  <Text style={styles.receiptOpenText}>Abrir</Text>
+                </View>
+              </Pressable>
+            ) : (
+              <View style={styles.noReceipt}>
+                <Icon name="receipt" size={18} color={colors.textMuted} />
+                <Text style={styles.noReceiptText}>
+                  El comprador no adjuntó comprobante.
+                </Text>
+              </View>
+            )}
+          </Animated.View>
+
+          {/* Pasos */}
+          <Animated.View entering={enter(5)} style={styles.section}>
+            <GroupHeader title="Cómo resolverla" />
+            <Card>
+              <View style={styles.steps}>
+                <Step
+                  done
+                  title="Solicitud recibida"
+                  text={dateFmt.format(new Date(regret.createdAt))}
+                />
+                <Step
+                  done={!pending}
+                  current={pending}
+                  title="Devolver el pago"
+                  text="Transferí el monto al alias o CBU del comprador."
+                />
+                <Step
+                  done={!pending}
+                  current={pending}
+                  title="Anular el QR del pedido"
+                  text="Desde Operaciones, abrí el pedido y cancelalo."
+                />
+                <Step
+                  done={!pending}
+                  last
+                  title="Marcar como resuelta"
+                  text={pending ? "Con el botón de abajo." : "Listo."}
+                />
+              </View>
+            </Card>
+          </Animated.View>
+        </ScrollView>
+
+        {/* Acción fija */}
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: Math.max(insets.bottom, Spacing.three) },
+          ]}
+        >
           <Pressable
             onPress={toggleStatus}
+            disabled={saving}
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.action,
               pending ? styles.actionPrimary : styles.actionSecondary,
               pressed && { opacity: 0.85 },
-            ]}>
-            <Text style={[styles.actionText, !pending && styles.actionTextSecondary]}>
-              {pending ? 'Marcar como resuelta' : 'Volver a pendiente'}
-            </Text>
+            ]}
+          >
+            {saving ? (
+              <ActivityIndicator color={pending ? "#ffffff" : "#000000"} />
+            ) : (
+              <>
+                <Icon
+                  name={pending ? "checkmark" : "undo"}
+                  size={16}
+                  color={pending ? "#ffffff" : "#000000"}
+                />
+                <Text
+                  style={[
+                    styles.actionText,
+                    !pending && styles.actionTextSecondary,
+                  ]}
+                >
+                  {pending ? "Marcar como resuelta" : "Volver a pendiente"}
+                </Text>
+              </>
+            )}
           </Pressable>
-          <Text style={styles.note}>
-            Para anular el QR, abrí el pedido desde Operaciones y cancelalo.
-          </Text>
-        </Animated.View>
-      </ScrollView>
+        </View>
+      </View>
     </>
   );
 }
 
-function ContactRow({
+function QuickAction({
   icon,
   label,
   value,
-  divider,
   onPress,
 }: {
-  icon: 'mail' | 'people';
+  icon: IconName;
   label: string;
   value: string;
-  divider?: boolean;
   onPress: () => void;
 }) {
   const styles = useStyles();
@@ -197,97 +341,268 @@ function ContactRow({
         onPress();
       }}
       accessibilityRole="link"
-      style={[styles.row, divider && styles.divider]}>
-      <Icon name={icon} size={16} color={colors.textMuted} />
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue} numberOfLines={1}>
-        {value}
-      </Text>
-      <Icon name="external" size={12} color={colors.textMuted} />
+      accessibilityLabel={`${label}: ${value}`}
+      style={({ pressed }) => [
+        styles.quick,
+        pressed && { backgroundColor: colors.canvas },
+      ]}
+    >
+      <View style={styles.quickIcon}>
+        <Icon name={icon} size={16} color="#000000" />
+      </View>
+      <View style={{ gap: 1 }}>
+        <Text style={styles.quickLabel}>{label}</Text>
+        <Text style={styles.quickValue} numberOfLines={1}>
+          {value}
+        </Text>
+      </View>
     </Pressable>
+  );
+}
+
+function Step({
+  title,
+  text,
+  done,
+  current,
+  last,
+}: {
+  title: string;
+  text: ReactNode;
+  done?: boolean;
+  current?: boolean;
+  last?: boolean;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <View style={styles.step}>
+      <View style={styles.stepRail}>
+        <View
+          style={[
+            styles.stepDot,
+            done && styles.stepDotDone,
+            current && styles.stepDotCurrent,
+          ]}
+        >
+          {done ? <Icon name="checkmark" size={11} color="#ffffff" /> : null}
+        </View>
+        {!last ? (
+          <View
+            style={[
+              styles.stepLine,
+              done && { backgroundColor: colors.success },
+            ]}
+          />
+        ) : null}
+      </View>
+      <View style={[styles.stepBody, !last && { paddingBottom: 18 }]}>
+        <Text
+          style={[
+            styles.stepTitle,
+            !done && !current && { color: colors.textMuted },
+          ]}
+        >
+          {title}
+        </Text>
+        <Text style={styles.stepText}>{text}</Text>
+      </View>
+    </View>
   );
 }
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: '#ffffff' },
-    content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: 28 },
-    hero: { gap: 10, paddingHorizontal: 4 },
-    caption: { color: c.textMuted, fontSize: 13 },
-    detail: { color: c.text, fontSize: 19, lineHeight: 26, fontFamily: DisplayFont.semibold },
-    chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-start',
-      gap: 5,
-      paddingHorizontal: 8,
-      height: 22,
-      borderRadius: 7,
+    screen: { flex: 1, backgroundColor: "#ffffff" },
+    content: { padding: Spacing.three, gap: Spacing.four },
+
+    header: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 14,
+      paddingHorizontal: 2,
     },
-    chipPending: { backgroundColor: c.brandMuted },
-    chipDone: { backgroundColor: c.raised },
-    dot: { width: 5, height: 5, borderRadius: 3 },
-    chipText: { color: c.textSecondary, fontSize: 11, fontWeight: '700' },
+    name: {
+      color: c.text,
+      fontSize: 22,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.5,
+    },
+    when: { color: c.textMuted, fontSize: 13 },
+
+    actions: { flexDirection: "row", gap: 10 },
+    quick: {
+      flex: 1,
+      gap: 10,
+      padding: 14,
+      borderRadius: Radius.xl,
+      borderCurve: "continuous",
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+    },
+    quickIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: c.raised,
+    },
+    quickLabel: {
+      color: c.text,
+      fontSize: 15,
+      fontFamily: DisplayFont.semibold,
+    },
+    quickValue: { color: c.textMuted, fontSize: 12 },
 
     section: { gap: 8 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    purchase: { flexDirection: "row", gap: 12, padding: 16 },
+    quoteBar: { width: 3, borderRadius: 2, backgroundColor: "#C6FF00" },
+    purchaseText: {
+      flex: 1,
+      color: c.text,
+      fontSize: 17,
+      lineHeight: 24,
+      fontFamily: DisplayFont.semibold,
+    },
+
     alias: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 12,
       padding: 16,
       borderRadius: Radius.xl,
-      borderCurve: 'continuous',
+      borderCurve: "continuous",
       backgroundColor: c.canvas,
     },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
-    aliasValue: { color: c.text, fontSize: 18, fontFamily: DisplayFont.semibold },
+    aliasLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    aliasValue: {
+      color: c.text,
+      fontSize: 20,
+      fontFamily: DisplayFont.bold,
+      letterSpacing: -0.3,
+    },
     copyBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 6,
-      height: 34,
+      height: 36,
+      paddingHorizontal: 14,
+      borderRadius: Radius.pill,
+      backgroundColor: "#ffffff",
+    },
+    copyBtnDone: { backgroundColor: c.success },
+    copyText: {
+      color: "#000000",
+      fontSize: 13,
+      fontFamily: DisplayFont.semibold,
+    },
+
+    receipt: {
+      height: 200,
+      borderRadius: Radius.xl,
+      borderCurve: "continuous",
+      overflow: "hidden",
+      backgroundColor: c.raised,
+    },
+    receiptOpen: {
+      position: "absolute",
+      right: 12,
+      bottom: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      height: 30,
       paddingHorizontal: 12,
       borderRadius: Radius.pill,
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
+      boxShadow: "0 2px 10px rgba(11, 15, 23, 0.18)",
     },
-    copyText: { color: '#000000', fontSize: 13, fontFamily: DisplayFont.semibold },
-    card: {
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      borderWidth: 1,
-      borderColor: c.border,
-      paddingHorizontal: 14,
+    receiptOpenText: {
+      color: "#000000",
+      fontSize: 13,
+      fontFamily: DisplayFont.semibold,
     },
-    row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 13 },
-    divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderSubtle },
-    rowLabel: { color: c.textSecondary, fontSize: 14 },
-    rowValue: { flex: 1, textAlign: 'right', color: c.text, fontSize: 15, fontWeight: '500' },
-    receipt: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    noReceipt: {
+      flexDirection: "row",
+      alignItems: "center",
       gap: 10,
       padding: 16,
       borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      borderWidth: 1,
+      borderCurve: "continuous",
+      borderWidth: 1.5,
+      borderStyle: "dashed",
       borderColor: c.border,
-      borderStyle: 'dashed',
     },
-    receiptText: { color: c.textMuted, fontSize: 14 },
+    noReceiptText: { color: c.textMuted, fontSize: 14 },
+
+    steps: { padding: 16 },
+    step: { flexDirection: "row", gap: 12 },
+    stepRail: { alignItems: "center", width: 20 },
+    stepDot: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#ffffff",
+    },
+    stepDotDone: { backgroundColor: c.success, borderColor: c.success },
+    stepDotCurrent: { borderColor: "#000000", borderWidth: 2 },
+    stepLine: {
+      flex: 1,
+      width: 2,
+      marginVertical: 2,
+      borderRadius: 1,
+      backgroundColor: c.border,
+    },
+    stepBody: { flex: 1, gap: 2 },
+    stepTitle: {
+      color: c.text,
+      fontSize: 15,
+      fontFamily: DisplayFont.semibold,
+      lineHeight: 20,
+    },
+    stepText: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
+
+    footer: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      paddingHorizontal: Spacing.three,
+      paddingTop: 12,
+      backgroundColor: "#ffffff",
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.border,
+    },
     action: {
+      flexDirection: "row",
+      gap: 8,
       height: 54,
       borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      alignItems: 'center',
-      justifyContent: 'center',
+      borderCurve: "continuous",
+      alignItems: "center",
+      justifyContent: "center",
     },
-    actionPrimary: { backgroundColor: '#000000' },
+    actionPrimary: { backgroundColor: "#000000" },
     actionSecondary: { backgroundColor: c.raised },
-    actionText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
-    actionTextSecondary: { color: '#000000' },
-    note: { color: c.textMuted, fontSize: 12, textAlign: 'center', marginTop: 10 },
-    missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' },
+    actionText: {
+      color: "#ffffff",
+      fontSize: 16,
+      fontFamily: DisplayFont.semibold,
+    },
+    actionTextSecondary: { color: "#000000" },
+
+    missing: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#ffffff",
+    },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),
 );

@@ -37,7 +37,9 @@ export const PERMISSION_SHORT: Record<PermissionId, string> = {
   payments: 'Pagos',
 };
 
-export const PERMISSIONS = Object.keys(PERMISSION_LABEL) as PermissionId[];
+export const PERMISSIONS = (Object.keys(PERMISSION_LABEL) as PermissionId[])
+  // Puntos de retiro deshabilitado por ahora: no se muestra ni se ofrece al invitar o cambiar de rol.
+  .filter((p) => p !== 'pickup_points');
 /** Herramientas que se marcan por defecto al invitar (igual que la web). */
 export const DEFAULT_PERMISSIONS: PermissionId[] = ['orders', 'scanner'];
 
