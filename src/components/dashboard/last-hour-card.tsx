@@ -3,14 +3,22 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoneyCompact } from '@/features/dashboard/format';
-import type { DashboardSummary } from '@/features/dashboard/types';
+import type { ActivityItem, DashboardSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 
 import { AnimatedNumber } from './animated-number';
+import { LiveTicker } from './live-ticker';
 import { PulseBars } from './pulse-bars';
 
 /** Con el evento en curso: pedidos y recaudación de la última hora, con el pulso por minuto. */
-export function LastHourCard({ live }: { live: DashboardSummary['live'] }) {
+export function LastHourCard({
+  live,
+  activity = [],
+}: {
+  live: DashboardSummary['live'];
+  /** Actividad reciente: se muestra de a un ítem en la tira de abajo. */
+  activity?: ActivityItem[];
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   return (
@@ -32,6 +40,7 @@ export function LastHourCard({ live }: { live: DashboardSummary['live'] }) {
         color={colors.scheme === 'dark' ? colors.borderStrong : colors.chart.ramp[2]}
         highlight={colors.hero.accent}
       />
+      {activity.length ? <LiveTicker items={activity} /> : null}
     </Animated.View>
   );
 }

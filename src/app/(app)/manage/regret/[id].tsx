@@ -29,6 +29,7 @@ import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { useNow } from "@/hooks/use-now";
 import { loadClipboard } from "@/lib/native-modules";
 import { makeStyles, useTheme } from "@/theme";
+import { toast } from "@/components/ui/toast";
 
 /** Solo acepta URLs https; cualquier otro esquema (intent:, tel:, javascript:…) se descarta. */
 function safeHttpsUrl(raw: string | null | undefined): string | null {
@@ -104,8 +105,7 @@ export default function RegretScreen() {
     const res = await setRegretStatus(eventId, regret.id, status);
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("No se pudo actualizar", res.error);
+      toast.error("No se pudo actualizar", res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

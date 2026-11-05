@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,10 +14,22 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
+import { Confetti } from '@/components/fx/confetti';
+import { Tilt } from '@/components/motion/tilt';
 import { MercadoPagoLogo } from '@/components/payouts/brand-logos';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import {
@@ -31,6 +43,7 @@ import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { type EventDetail, type EventPatch, patchEvent } from '@/lib/api/organizer';
 import { invalidate, setQueryData } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 const LAYOUT = LinearTransition.duration(260);
 const MP_CREDENTIALS = 'https://www.mercadopago.com.ar/developers/panel/app';
@@ -39,8 +52,7 @@ const MP_CREDENTIALS = 'https://www.mercadopago.com.ar/developers/panel/app';
 async function save(e: EventDetail, payload: EventPatch): Promise<boolean> {
   const res = await patchEvent(e.id, payload);
   if (!res.ok) {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    Alert.alert('No se pudo guardar', res.error);
+    toast.error('No se pudo guardar', res.error);
     return false;
   }
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -88,6 +100,19 @@ export default function PaymentMethodsScreen() {
   }
 
   const ready = METHODS.filter((m) => isReady(m, event));
+  return <PaymentMethodsContent event={event} ready={ready} />;
+}
+
+/** Contenido con el evento cargado; celebra cuando un método queda listo para cobrar. */
+function PaymentMethodsContent({ event, ready }: { event: EventDetail; ready: PaymentMethodId[] }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const [party, setParty] = useState(0);
+  const prevReady = useRef(ready.length);
+  useEffect(() => {
+    if (ready.length > prevReady.current) setParty((n) => n + 1);
+    prevReady.current = ready.length;
+  }, [ready.length]);
   const ordered = [...METHODS].sort((a, b) => Number(isReady(b, event)) - Number(isReady(a, event)));
 
   return (
@@ -102,7 +127,9 @@ export default function PaymentMethodsScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive">
         {/* Resumen: cuántos métodos acepta el evento, con sus logos y un segmento por método. */}
-        <Animated.View entering={enter(0)} layout={LAYOUT} style={styles.summary}>
+        <Animated.View entering={enter(0)} layout={LAYOUT}>
+        <Tilt radius={Radius.xl}>
+        <View style={styles.summary}>
           <View style={styles.summaryTop}>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={styles.summaryLabel} numberOfLines={1}>
@@ -128,6 +155,8 @@ export default function PaymentMethodsScreen() {
               <View key={m} style={[styles.segment, isReady(m, event) && styles.segmentOn]} />
             ))}
           </View>
+        </View>
+        </Tilt>
         </Animated.View>
         {ready.length === 0 ? (
           <Animated.View entering={FadeIn.duration(260)} style={styles.warning}>
@@ -149,6 +178,7 @@ export default function PaymentMethodsScreen() {
 
         <Text style={[styles.note, styles.footnote]}>Estos métodos son de {event.name}.</Text>
       </ScrollView>
+      {party ? <Confetti key={party} seed={party} /> : null}
     </KeyboardAvoidingView>
   );
 }
@@ -197,7 +227,9 @@ function MethodCard({
   return (
     <Animated.View layout={LAYOUT} style={[styles.card, enabled && styles.cardOn]}>
       <View style={styles.head}>
-        <MethodMark id={id} />
+        <FlipOnReady ready={tone === 'on'}>
+          <MethodMark id={id} />
+        </FlipOnReady>
         <View style={{ flex: 1, gap: 3 }}>
           <Text style={styles.title}>{METHOD_LABEL[id]}</Text>
           {enabled ? (
@@ -243,6 +275,28 @@ function MethodCard({
       ) : null}
     </Animated.View>
   );
+}
+
+/** El logo da una vuelta completa en 3D cuando el método queda activo y listo. */
+function FlipOnReady({ ready, children }: { ready: boolean; children: ReactNode }) {
+  const reduceMotion = useReducedMotion();
+  const turn = useSharedValue(0);
+  const was = useRef(ready);
+  useEffect(() => {
+    if (ready && !was.current && !reduceMotion) {
+      turn.set(
+        withSequence(
+          withTiming(0, { duration: 0 }),
+          withTiming(360, { duration: 750, easing: Easing.inOut(Easing.cubic) }),
+        ),
+      );
+    }
+    was.current = ready;
+  }, [ready, reduceMotion, turn]);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ perspective: 500 }, { rotateY: `${turn.value}deg` }],
+  }));
+  return <Animated.View style={style}>{children}</Animated.View>;
 }
 
 function CashCard({ event }: { event: EventDetail }) {

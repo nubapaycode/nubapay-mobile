@@ -16,6 +16,9 @@ import { useEffect, useMemo } from 'react';
 import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ThemeReveal } from '@/components/fx/theme-reveal';
+import { CardExpandHost } from '@/components/motion/card-expand';
+import { ToastHost } from '@/components/ui/toast';
 import { DisplayFont } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { ThemeProvider, useTheme } from '@/theme';
@@ -68,6 +71,8 @@ function RootNavigator() {
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
       </Stack>
+      <CardExpandHost />
+      <ToastHost />
     </NavigationThemeProvider>
   );
 }
@@ -76,9 +81,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
+        <ThemeReveal>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </ThemeReveal>
       </ThemeProvider>
     </GestureHandlerRootView>
   );

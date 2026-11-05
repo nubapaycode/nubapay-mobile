@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { type Href, router } from 'expo-router';
-import type { ReactNode } from 'react';
+import { type ComponentRef, type ReactNode, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
+  FadeInDown,
   LinearTransition,
   useAnimatedStyle,
   useSharedValue,
@@ -25,8 +26,10 @@ import { eventOffer } from '@/features/dashboard/offer';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
 
+import { expandCard } from '@/components/motion/card-expand';
+
 import { AnimatedNumber } from './animated-number';
-import { FADE_EASING, FADE_MS } from './detail-kit';
+import { FADE_EASING, FADE_MS, RISE_EASING, RISE_MS } from './detail-kit';
 import { Icon, type IconName } from './icon';
 import { LivePill } from './live-pill';
 import { PaymentMethodIcon } from './payment-method-icon';
@@ -423,12 +426,32 @@ function Tile({
   const { colors } = useTheme();
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const ref = useRef<ComponentRef<typeof View>>(null);
+  const opening = useRef(false);
+
+  // La tarjeta se expande hasta cubrir la pantalla y ahí se abre el detalle (con fundido).
+  const open = () => {
+    if (opening.current) return;
+    opening.current = true;
+    expandCard(ref, {
+      radius: Radius.xl,
+      from: colors.surface,
+      to: colors.background,
+      onCovered: () => {
+        opening.current = false;
+        router.push(href);
+      },
+    });
+  };
 
   return (
     <Animated.View
-      entering={FadeIn.delay(140 + index * 70).duration(FADE_MS).easing(FADE_EASING)}
+      entering={FadeInDown.delay(140 + index * 70)
+        .duration(RISE_MS)
+        .easing(RISE_EASING)
+        .withInitialValues({ opacity: 0, transform: [{ translateY: 18 }] })}
       style={styles.tileOuter}>
-      <Animated.View style={[styles.tileOuter, pressStyle]}>
+      <Animated.View ref={ref} collapsable={false} style={[styles.tileOuter, pressStyle]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${title}. ${a11y}. Ver detalle`}
@@ -436,7 +459,7 @@ function Tile({
           onPressOut={() => scale.set(withTiming(1, PRESS))}
           onPress={() => {
             Haptics.selectionAsync();
-            router.push(href);
+            open();
           }}
           style={({ pressed }) => [styles.tile, pressed && { backgroundColor: colors.raised }]}>
           <View style={styles.tileHeader}>

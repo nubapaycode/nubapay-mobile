@@ -32,6 +32,7 @@ import {
 } from "@/features/team/team";
 import { useRoles, useTeam } from "@/features/team/use-team";
 import { makeStyles, useTheme } from "@/theme";
+import { toast } from "@/components/ui/toast";
 
 const LAYOUT = LinearTransition.duration(240);
 
@@ -116,8 +117,7 @@ function InviteContent() {
     });
     setSending(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("No se pudo agregar", res.error);
+      toast.error("No se pudo agregar", res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

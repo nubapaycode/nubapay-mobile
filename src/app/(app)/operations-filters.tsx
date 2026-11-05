@@ -19,6 +19,7 @@ import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { purgeTestOrders } from '@/lib/api/organizer';
 import { invalidate } from '@/lib/query';
 import { makeStyles } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 const keys = <T extends string>(o: Record<T, string>) => Object.keys(o) as T[];
 
@@ -54,8 +55,7 @@ function FiltersContent() {
             if (!eventId) return;
             const res = await purgeTestOrders(eventId);
             if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('No se pudo borrar', res.error);
+              toast.error('No se pudo borrar', res.error);
               return;
             }
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

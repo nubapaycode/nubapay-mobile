@@ -26,7 +26,7 @@ import { scheduleOnRN } from "react-native-worklets";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EventContext } from "@/components/events/event-context";
-import { enter } from "@/components/dashboard/detail-kit";
+import { enter, enterItem } from "@/components/dashboard/detail-kit";
 import { Icon, type IconName } from "@/components/dashboard/icon";
 import {
   CatalogSkeleton,
@@ -306,10 +306,10 @@ export default function ProductsScreen() {
             >
               <GroupHeader title={name} count={items.length} />
               <CardList>
-                {items.map((p) => (
+                {items.map((p, i) => (
                   <Animated.View
                     key={p.id}
-                    entering={FadeIn.duration(300)}
+                    entering={enterItem(i)}
                     exiting={FadeOut.duration(160)}
                     layout={LAYOUT}
                   >

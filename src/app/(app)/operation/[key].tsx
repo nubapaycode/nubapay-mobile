@@ -31,6 +31,7 @@ import { cancelOrder, confirmCash, getOrder, type Order } from '@/lib/api/organi
 import { loadClipboard } from '@/lib/native-modules';
 import { invalidate, setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 const dateFmt = new Intl.DateTimeFormat('es-AR', {
   day: 'numeric',
@@ -85,8 +86,7 @@ export default function OperationScreen() {
   const after = async (res: { ok: true; data: Order } | { ok: false; error: string }) => {
     setBusy(null);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo completar', res.error);
+      toast.error('No se pudo completar', res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

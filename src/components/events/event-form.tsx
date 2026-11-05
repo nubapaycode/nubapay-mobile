@@ -42,6 +42,7 @@ import {
 import { loadImagePicker } from '@/lib/native-modules';
 import { invalidate, setQueryData } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 /** `starts_at` / `ends_at` del backend son hora local sin zona: `new Date` los lee como locales. */
 const parse = (iso: string | null) => (iso ? new Date(iso) : null);
@@ -152,8 +153,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
       : await createEvent(fields);
     if (!res.ok) {
       setSaving(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo guardar', res.error);
+      toast.error('No se pudo guardar', res.error);
       return;
     }
     // Al crear, el backend no recibe `show_category_shortcuts`: va en un PATCH aparte.
@@ -168,11 +168,13 @@ export function EventForm({ event }: { event?: EventDetail }) {
       else coverError = up.error;
     }
     setSaving(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (!coverError) {
+      toast.success(event ? 'Cambios guardados' : 'Evento creado', res.data.name, { celebrate: !event });
+    }
     setQueryData<EventDetail>(`event:${res.data.id}`, () => (res.ok ? res.data : null));
     await invalidate('events');
     if (!event) setSelectedEventId(res.data.id);
-    if (coverError) Alert.alert('Evento guardado', `No se pudo subir la portada: ${coverError}`);
+    if (coverError) toast.error('Evento guardado', `No se pudo subir la portada: ${coverError}`);
     router.back();
   };
 
@@ -184,7 +186,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
     if (source === 'camera') {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Sin acceso a la cámara', 'Habilitá el permiso de cámara desde Ajustes.');
+        toast.error('Sin acceso a la cámara', 'Habilitá el permiso de cámara desde Ajustes.');
         return;
       }
     }

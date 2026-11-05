@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
@@ -10,6 +10,7 @@ import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { PERMISSION_SHORT, PERMISSIONS, roleById, setMemberRole } from '@/features/team/team';
 import { useRoles, useTeam } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 /**
  * Hoja para cambiar el rol de una persona (PATCH /api/events/<id>/staff/<staff_id>). Con una
@@ -115,8 +116,7 @@ function ChangeRoleContent() {
             const res = await setMemberRole(eventId, member, roleId);
             setSaving(false);
             if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('No se pudo cambiar el rol', res.error);
+              toast.error('No se pudo cambiar el rol', res.error);
               return;
             }
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

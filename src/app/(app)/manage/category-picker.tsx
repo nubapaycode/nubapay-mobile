@@ -2,7 +2,6 @@ import * as Haptics from "expo-haptics";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -26,6 +25,7 @@ import {
   useProducts,
 } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
+import { toast } from "@/components/ui/toast";
 
 /**
  * Elegir la categoría de un producto, en una hoja (patrón "Search or add" de Shopify): buscador,
@@ -84,8 +84,7 @@ function CategoryPickerContent() {
     const res = await addCategory(eventId, q);
     setCreating(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("No se pudo crear la categoría", res.error);
+      toast.error("No se pudo crear la categoría", res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

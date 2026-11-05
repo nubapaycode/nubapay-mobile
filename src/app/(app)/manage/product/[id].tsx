@@ -49,6 +49,7 @@ import {
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { loadImagePicker } from "@/lib/native-modules";
 import { makeStyles, useTheme } from "@/theme";
+import { toast } from "@/components/ui/toast";
 
 const LAYOUT = LinearTransition.duration(240);
 const PICK: ImagePickerOptions = {
@@ -231,11 +232,14 @@ function ProductForm({
     );
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("No se pudo guardar", res.error);
+      toast.error("No se pudo guardar", res.error);
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toast.success(
+      isNew ? `${noun === "combo" ? "Combo creado" : "Producto creado"}` : "Cambios guardados",
+      input.name,
+      { celebrate: isNew },
+    );
     router.back();
   };
 
@@ -252,8 +256,7 @@ function ProductForm({
             if (!product || !eventId) return;
             const res = await deleteProduct(eventId, product.id);
             if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert("No se pudo eliminar", res.error);
+              toast.error("No se pudo eliminar", res.error);
               return;
             }
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);

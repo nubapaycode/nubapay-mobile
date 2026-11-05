@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
-import { enter } from '@/components/dashboard/detail-kit';
+import { enter, enterItem } from '@/components/dashboard/detail-kit';
+import { Lottie } from '@/components/fx/lottie';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
@@ -16,6 +17,7 @@ import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { formatInt, formatMoney } from '@/features/dashboard/format';
 import {
   activeOperationFilters,
+  canConfirmCash,
   CHANNEL_FILTER_LABEL,
   ordersQuery,
   setOperationFilters,
@@ -25,6 +27,7 @@ import { useNow } from '@/hooks/use-now';
 import { listOrders, type Order } from '@/lib/api/organizer';
 import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { awaitingCash, hasPending } from '@/features/operations/scan';
 
 /**
  * Operaciones (referencias: Mercury y Revolut Business): buscador, el total de resultados y los pedidos agrupados por día con lo cobrado en cada uno, cada
@@ -47,6 +50,11 @@ export default function OperationsScreen() {
 }
 
 function OperationsContent() {
+  const { can } = useEventAccess();
+  // Misma regla que el botón "Entregar" del detalle: queda algo por entregar, no espera efectivo
+  // y el rol puede escanear.
+  const deliverable = (o: Order) =>
+    can('scanner') && !canConfirmCash(o) && hasPending(o) && !awaitingCash(o);
   const styles = useStyles();
   const { colors } = useTheme();
   const eventId = useSelectedEventId();
@@ -171,9 +179,15 @@ function OperationsContent() {
         <Text style={styles.empty}>{orders.error ?? 'Cargando operaciones…'}</Text>
       ) : list.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
-          <View style={styles.emptyIcon}>
-            <Icon name={debounced.trim() ? 'search' : 'receipt'} size={20} color={colors.textSecondary} />
-          </View>
+          <Lottie
+            name={debounced.trim() ? 'search' : 'empty'}
+            size={124}
+            fallback={
+              <View style={styles.emptyIcon}>
+                <Icon name={debounced.trim() ? 'search' : 'receipt'} size={20} color={colors.textSecondary} />
+              </View>
+            }
+          />
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {debounced.trim()
@@ -191,15 +205,20 @@ function OperationsContent() {
                 <Text style={styles.groupTitle}>{g.label}</Text>
                 {g.sum > 0 ? <Text style={styles.groupSum}>{formatMoney(g.sum)}</Text> : null}
               </View>
-              {g.orders.map((o) => (
+              {g.orders.map((o, i) => (
                 <Animated.View
                   key={o.id}
-                  entering={FadeIn.duration(300)}
+                  entering={enterItem(i)}
                   exiting={FadeOut.duration(160)}
                   layout={LinearTransition.duration(260)}>
                   <OperationCard
                     order={o}
                     onPress={() => router.push({ pathname: '/operation/[key]', params: { key: o.id } })}
+                    onDeliver={
+                      deliverable(o)
+                        ? () => router.push({ pathname: '/deliver/[id]', params: { id: o.id } })
+                        : undefined
+                    }
                   />
                 </Animated.View>
               ))}

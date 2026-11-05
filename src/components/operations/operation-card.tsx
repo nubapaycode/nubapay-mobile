@@ -1,6 +1,17 @@
 import * as Haptics from 'expo-haptics';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
+import Animated, {
+  Easing,
+  interpolate,
+  interpolateColor,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { PaymentMethodIcon } from '@/components/dashboard/payment-method-icon';
@@ -17,6 +28,9 @@ const KIND_ICON: Record<ReturnType<typeof orderKind>, IconName> = {
   mixed: 'receipt',
 };
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
+const BACK = { duration: 280, easing: Easing.out(Easing.cubic) };
+/** Fracción del ancho a cruzar para que soltar ejecute la acción. */
+const TRIGGER = 0.36;
 
 export function toneColors(tone: OperationTone, c: Palette) {
   if (tone === 'danger') return { fg: c.danger, bg: c.dangerMuted };
@@ -47,17 +61,119 @@ const clock = (iso: string) => {
  * Pedido en su propia card (estilo movimientos de Revolut): avatar del cliente con el tipo de compra
  * en la esquina, nombre, número y qué compró; monto y hora a la derecha; abajo el estado y el medio.
  */
-export function OperationCard({ order: o, onPress }: { order: Order; onPress: () => void }) {
+export function OperationCard({
+  order: o,
+  onPress,
+  onDeliver,
+}: {
+  order: Order;
+  onPress: () => void;
+  /** Si se puede entregar: deslizar a la derecha lo hace (a la izquierda abre el detalle). */
+  onDeliver?: () => void;
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   const scale = useSharedValue(1);
-  const press = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const tx = useSharedValue(0);
+  const width = useSharedValue(1);
+  const past = useSharedValue(0);
+  const pop = useSharedValue(1);
+  const canDeliver = !!onDeliver;
+  const tickets = o.items.every((i) => i.isTicket);
+
+  // Al cruzar el umbral (en cualquier dirección): háptico y "pop" del ícono; al volver, se apaga.
+  useAnimatedReaction(
+    () => (Math.abs(tx.value) >= width.value * TRIGGER ? Math.sign(tx.value) : 0),
+    (now, prev) => {
+      if (now === prev) return;
+      past.value = withTiming(now !== 0 ? 1 : 0, { duration: 140 });
+      if (now !== 0) {
+        pop.value = withSequence(
+          withTiming(1.25, { duration: 110, easing: Easing.out(Easing.quad) }),
+          withTiming(1, { duration: 160, easing: Easing.inOut(Easing.quad) }),
+        );
+        scheduleOnRN(Haptics.impactAsync, Haptics.ImpactFeedbackStyle.Medium);
+      }
+    },
+  );
+
+  const run = (dir: number) => {
+    if (dir > 0) onDeliver?.();
+    else onPress();
+  };
+
+  const pan = usePanGesture({
+    activeOffsetX: [-12, 12],
+    failOffsetY: [-10, 10],
+    onUpdate: (e) => {
+      'worklet';
+      let x = e.translationX;
+      if (x > 0 && !canDeliver) x = x / 6; // sin entrega: apenas cede
+      // Más allá de la mitad, resistencia.
+      const max = width.get() * 0.55;
+      if (Math.abs(x) > max) x = Math.sign(x) * (max + (Math.abs(x) - max) / 3);
+      tx.set(x);
+    },
+    onDeactivate: () => {
+      'worklet';
+      const x = tx.get();
+      const dir = Math.abs(x) >= width.get() * TRIGGER ? Math.sign(x) : 0;
+      tx.set(withTiming(0, BACK));
+      if (dir > 0 && !canDeliver) return;
+      if (dir !== 0) scheduleOnRN(run, dir);
+    },
+  });
+
+  const press = useAnimatedStyle(() => ({
+    transform: [{ translateX: tx.value }, { scale: scale.value }],
+  }));
+  // Fondo de cada lado: aparece con el arrastre y se intensifica al pasar el umbral.
+  const leftTrack = useAnimatedStyle(() => ({
+    opacity: interpolate(tx.value, [0, 24], [0, 1], 'clamp'),
+    backgroundColor: interpolateColor(past.value, [0, 1], [colors.successMuted, colors.success]),
+  }));
+  const rightTrack = useAnimatedStyle(() => ({
+    opacity: interpolate(-tx.value, [0, 24], [0, 1], 'clamp'),
+    backgroundColor: interpolateColor(past.value, [0, 1], [colors.raised, colors.ink]),
+  }));
+  const leftIcon = useAnimatedStyle(() => {
+    const p = Math.min(1, Math.max(0, tx.value) / (width.value * TRIGGER));
+    return { opacity: p, transform: [{ scale: (0.6 + p * 0.4) * pop.value }] };
+  });
+  const rightIcon = useAnimatedStyle(() => {
+    const p = Math.min(1, Math.max(0, -tx.value) / (width.value * TRIGGER));
+    return { opacity: p, transform: [{ scale: (0.6 + p * 0.4) * pop.value }] };
+  });
+  const leftFg = useAnimatedStyle(() => ({
+    color: interpolateColor(past.value, [0, 1], [colors.success, '#ffffff']),
+  }));
+  const rightFg = useAnimatedStyle(() => ({
+    color: interpolateColor(past.value, [0, 1], [colors.textSecondary, colors.onInk]),
+  }));
   const cancelled = o.status === 'cancelled';
   const kind = orderKind(o);
   const name = o.customerName || o.customerEmail || 'Sin nombre';
   const summary = o.items.map((i) => `${i.quantity}× ${i.name}`).join(', ');
 
   return (
+    <View onLayout={(e) => width.set(e.nativeEvent.layout.width || 1)}>
+      {canDeliver ? (
+        <Animated.View style={[styles.track, styles.trackLeft, leftTrack]}>
+          <Animated.View style={[styles.trackContent, leftIcon]}>
+            <Icon name="checkmark" size={18} color={colors.success} />
+            <Animated.Text style={[styles.trackText, leftFg]}>
+              {tickets ? 'Registrar ingreso' : 'Entregar'}
+            </Animated.Text>
+          </Animated.View>
+        </Animated.View>
+      ) : null}
+      <Animated.View style={[styles.track, styles.trackRight, rightTrack]}>
+        <Animated.View style={[styles.trackContent, rightIcon]}>
+          <Animated.Text style={[styles.trackText, rightFg]}>Ver pedido</Animated.Text>
+          <Icon name="receipt" size={17} color={colors.textSecondary} />
+        </Animated.View>
+      </Animated.View>
+    <GestureDetector gesture={pan}>
     <Animated.View style={press}>
       <Pressable
         onPress={() => {
@@ -70,6 +186,8 @@ export function OperationCard({ order: o, onPress }: { order: Order; onPress: ()
         accessibilityLabel={`Pedido ${o.orderNumber ?? ''}, ${name}, ${formatMoney(o.total)}, ${
           orderState(o).label
         }. Ver detalle`}
+        accessibilityActions={canDeliver ? [{ name: 'deliver', label: tickets ? 'Registrar ingreso' : 'Entregar' }] : undefined}
+        onAccessibilityAction={(e) => e.nativeEvent.actionName === 'deliver' && onDeliver?.()}
         style={[styles.card, cancelled && styles.cardCancelled]}>
         <View style={styles.top}>
           <View>
@@ -120,6 +238,8 @@ export function OperationCard({ order: o, onPress }: { order: Order; onPress: ()
         </View>
       </Pressable>
     </Animated.View>
+    </GestureDetector>
+    </View>
   );
 }
 
@@ -127,6 +247,18 @@ const AVATAR = 42;
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
+    track: {
+      ...StyleSheet.absoluteFill,
+      borderRadius: Radius.xl,
+      borderCurve: 'continuous',
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 22,
+    },
+    trackLeft: { justifyContent: 'flex-start' },
+    trackRight: { justifyContent: 'flex-end' },
+    trackContent: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    trackText: { fontSize: 14, fontFamily: DisplayFont.semibold },
     card: {
       gap: 12,
       padding: 14,

@@ -12,6 +12,7 @@ import { formatInt } from '@/features/dashboard/format';
 import { removeCategory, renameCategory, useCategories, useProducts } from '@/features/manage/manage';
 import type { Category } from '@/lib/api/organizer';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 /**
  * Categorías del catálogo: cada una en su card con cuántos productos tiene. Se renombran en el
@@ -65,8 +66,7 @@ function CategoryCard({
     const res = await renameCategory(eventId, category.id, name);
     setBusy(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo renombrar', res.error);
+      toast.error('No se pudo renombrar', res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -90,8 +90,7 @@ function CategoryCard({
           if (!eventId) return;
           const res = await removeCategory(eventId, category.id);
           if (!res.ok) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            Alert.alert('No se pudo eliminar', res.error);
+            toast.error('No se pudo eliminar', res.error);
             return;
           }
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);

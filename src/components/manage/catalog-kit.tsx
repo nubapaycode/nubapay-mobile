@@ -22,6 +22,7 @@ import { Icon, type IconName } from "@/components/dashboard/icon";
 import { DisplayFont, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
+import { Lottie } from "@/components/fx/lottie";
 
 /**
  * Piezas compartidas del catálogo (lista, formulario y sus hojas): miniatura, buscador, lista
@@ -232,9 +233,15 @@ export function EmptyState({
   const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <View style={styles.emptyIcon}>
-        <Icon name={icon} size={24} color={colors.ink} />
-      </View>
+      <Lottie
+        name={icon === "search" ? "search" : "empty"}
+        size={132}
+        fallback={
+          <View style={styles.emptyIcon}>
+            <Icon name={icon} size={24} color={colors.ink} />
+          </View>
+        }
+      />
       <View style={{ gap: 4, alignItems: "center" }}>
         <Text style={styles.emptyTitle}>{title}</Text>
         {text ? <Text style={styles.emptyText}>{text}</Text> : null}

@@ -38,6 +38,7 @@ import {
 } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { makeStyles, useTheme } from "@/theme";
+import { toast } from "@/components/ui/toast";
 
 const LAYOUT = LinearTransition.duration(240);
 const STOCK_PRESETS = [100, 250, 500, 1000];
@@ -153,11 +154,10 @@ function TicketForm({
     );
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("No se pudo guardar", res.error);
+      toast.error("No se pudo guardar", res.error);
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toast.success(isNew ? "Entrada creada" : "Cambios guardados", name.trim(), { celebrate: isNew });
     router.back();
   };
 
@@ -176,8 +176,7 @@ function TicketForm({
             if (!ticket || !eventId) return;
             const res = await removeTicket(eventId, ticket.id);
             if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert("No se pudo eliminar", res.error);
+              toast.error("No se pudo eliminar", res.error);
               return;
             }
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);

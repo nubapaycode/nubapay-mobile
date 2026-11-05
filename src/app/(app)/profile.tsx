@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useThemeReveal } from '@/components/fx/theme-reveal';
 import { AppearancePicker } from '@/components/ui/appearance-picker';
 import { LogoutButton } from '@/components/ui/logout-button';
 import { NavCard } from '@/components/ui/nav-card';
@@ -26,7 +27,9 @@ export default function ProfileSheet() {
 function ProfileContent() {
   const styles = useStyles();
   const { dismiss } = useSheet();
-  const { colors, preference, setPreference } = useTheme();
+  const { colors, preference } = useTheme();
+  // Cambio de tema con revelado circular desde la opción tocada.
+  const reveal = useThemeReveal();
   const { user } = useAuth();
   const name = user?.name ?? 'Organizador';
 
@@ -50,7 +53,7 @@ function ProfileContent() {
 
       <View style={styles.appearance}>
         <Text style={styles.sectionTitle}>Apariencia</Text>
-        <AppearancePicker value={preference} onChange={setPreference} />
+        <AppearancePicker value={preference} onChange={reveal} />
         {preference === 'system' ? (
           <Text style={styles.hint}>Automático sigue el modo claro u oscuro de tu teléfono.</Text>
         ) : null}

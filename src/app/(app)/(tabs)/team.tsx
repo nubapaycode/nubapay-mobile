@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
-import { enter } from '@/components/dashboard/detail-kit';
+import { enter, enterItem } from '@/components/dashboard/detail-kit';
+import { Lottie } from '@/components/fx/lottie';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { MemberCard } from '@/components/team/member-card';
@@ -136,9 +137,15 @@ function TeamContent() {
         <Text style={styles.empty}>{error ?? 'Cargando equipo…'}</Text>
       ) : members.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
-          <View style={styles.emptyIcon}>
-            <Icon name={query ? 'search' : 'people'} size={20} color={colors.textSecondary} />
-          </View>
+          <Lottie
+            name={query ? 'search' : 'empty'}
+            size={124}
+            fallback={
+              <View style={styles.emptyIcon}>
+                <Icon name={query ? 'search' : 'people'} size={20} color={colors.textSecondary} />
+              </View>
+            }
+          />
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {query ? `Nadie coincide con “${query.trim()}”.` : 'Nadie tiene ese rol o permiso.'}
@@ -152,10 +159,10 @@ function TeamContent() {
                 <Text style={styles.groupTitle}>{g.role}</Text>
                 <Text style={styles.groupCount}>{g.members.length}</Text>
               </View>
-              {g.members.map((m) => (
+              {g.members.map((m, i) => (
                 <Animated.View
                   key={m.id}
-                  entering={FadeIn.duration(300)}
+                  entering={enterItem(i)}
                   exiting={FadeOut.duration(160)}
                   layout={LinearTransition.duration(260)}>
                   <MemberCard

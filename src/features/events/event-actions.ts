@@ -5,6 +5,7 @@ import { setSelectedEventId } from '@/features/dashboard/selected-event';
 import type { EventSummary } from '@/features/dashboard/types';
 import { deleteEvent } from '@/lib/api/organizer';
 import { invalidate } from '@/lib/query';
+import { toast } from '@/components/ui/toast';
 
 /** "2026-11-04T22:00:00" en hora local, sin zona (como guarda el backend `starts_at`). */
 export function toLocalIso(d: Date): string {
@@ -32,8 +33,7 @@ export function confirmDeleteEvent(
           onPress: async () => {
             const res = await deleteEvent(event.id);
             if (!res.ok) {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('No se pudo eliminar', res.error);
+              toast.error('No se pudo eliminar', res.error);
               resolve(false);
               return;
             }

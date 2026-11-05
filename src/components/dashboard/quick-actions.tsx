@@ -3,6 +3,7 @@ import { type Href, router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -40,20 +41,26 @@ export function QuickActions() {
 
   return (
     <View style={styles.row}>
-      {actions.map((a) => (
-        <QuickAction key={a.key} action={a} />
+      {actions.map((a, i) => (
+        <QuickAction key={a.key} action={a} index={i} />
       ))}
     </View>
   );
 }
 
-function QuickAction({ action }: { action: Action }) {
+function QuickAction({ action, index }: { action: Action; index: number }) {
   const styles = useStyles();
   const { colors } = useTheme();
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
+    <Animated.View
+      style={styles.slot}
+      entering={FadeInDown.delay(60 + index * 45)
+        .duration(380)
+        .easing(Easing.out(Easing.cubic))
+        .withInitialValues({ opacity: 0, transform: [{ translateY: 14 }] })}>
     <Pressable
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -71,6 +78,7 @@ function QuickAction({ action }: { action: Action }) {
         {action.label}
       </Text>
     </Pressable>
+    </Animated.View>
   );
 }
 
@@ -79,7 +87,8 @@ const SIZE = 52;
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     row: { flexDirection: 'row', justifyContent: 'space-around' },
-    action: { flex: 1, alignItems: 'center', gap: 7 },
+    slot: { flex: 1 },
+    action: { alignItems: 'center', gap: 7 },
     circle: {
       width: SIZE,
       height: SIZE,

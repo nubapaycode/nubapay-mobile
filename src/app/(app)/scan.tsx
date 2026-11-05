@@ -1,21 +1,26 @@
 import { requireOptionalNativeModule } from 'expo';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type ComponentRef, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
   SlideInDown,
+  useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withRepeat,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
+import { Confetti } from '@/components/fx/confetti';
 import { DeliverPanel } from '@/components/operations/deliver-panel';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
@@ -38,6 +43,9 @@ const Camera: CameraModule | null = requireOptionalNativeModule('ExpoCamera')
 
 const FRAME = 248;
 
+/** Rectángulo del QR detectado, en coordenadas de pantalla. */
+type Box = { x: number; y: number; width: number; height: number };
+
 type Result =
   | { kind: 'scanning' }
   | { kind: 'loading' }
@@ -56,18 +64,21 @@ export default function ScanScreen() {
   const { eventId, can } = useEventAccess();
   const [torch, setTorch] = useState(false);
   const [result, setResult] = useState<Result>({ kind: 'scanning' });
+  const [target, setTarget] = useState<Box | null>(null);
   const lock = useRef(false);
   useFocusStatusBar('light');
 
   const reset = useCallback(() => {
     lock.current = false;
+    setTarget(null);
     setResult({ kind: 'scanning' });
   }, []);
 
   const onCode = useCallback(
-    async (data: string) => {
+    async (data: string, box: Box | null) => {
       if (lock.current || !eventId) return;
       lock.current = true;
+      setTarget(box);
       const orderId = parseOrderId(data);
       if (!orderId) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -133,7 +144,7 @@ export default function ScanScreen() {
         ) : (
           <>
             <View style={styles.center}>
-              <Viewfinder active={scanning} />
+              <Viewfinder active={scanning} target={target} />
               <Text style={styles.hint}>
                 {result.kind === 'loading' ? 'Verificando pedido…' : 'Apuntá al código QR de la entrada o del pedido'}
               </Text>
@@ -155,6 +166,8 @@ export default function ScanScreen() {
           />
         </BottomCard>
       ) : result.kind === 'done' ? (
+        <>
+        <Confetti />
         <BottomCard>
           <Outcome
             tone="success"
@@ -171,6 +184,7 @@ export default function ScanScreen() {
             onNext={reset}
           />
         </BottomCard>
+        </>
       ) : result.kind === 'already' ? (
         <BottomCard>
           <Outcome
@@ -207,7 +221,7 @@ function CameraLayer({
   camera: CameraModule;
   torch: boolean;
   active: boolean;
-  onCode: (data: string) => void;
+  onCode: (data: string, box: Box | null) => void;
 }) {
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = camera.useCameraPermissions();
@@ -241,27 +255,96 @@ function CameraLayer({
       facing="back"
       enableTorch={torch}
       barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-      onBarcodeScanned={active ? ({ data }) => onCode(data) : undefined}
+      onBarcodeScanned={
+        active
+          ? ({ data, bounds }) =>
+              onCode(
+                data,
+                bounds && bounds.size.width > 0 && bounds.size.height > 0
+                  ? { x: bounds.origin.x, y: bounds.origin.y, width: bounds.size.width, height: bounds.size.height }
+                  : null,
+              )
+          : undefined
+      }
     />
   );
 }
 
-/** Marco del visor con la línea de escaneo (suave, ida y vuelta). */
-function Viewfinder({ active }: { active: boolean }) {
+const LOCK = { duration: 240, easing: Easing.out(Easing.cubic) };
+/** Margen alrededor del QR cuando las esquinas lo enganchan. */
+const LOCK_PAD = 14;
+
+/**
+ * Marco del visor con la línea de escaneo (suave, ida y vuelta). Al detectar un QR, cada esquina
+ * se mueve hasta la esquina del código ("engancha") y la línea se apaga; al reiniciar vuelven.
+ */
+function Viewfinder({ active, target }: { active: boolean; target: Box | null }) {
   const reduceMotion = useReducedMotion();
+  const ref = useRef<ComponentRef<typeof View>>(null);
+  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const line = useSharedValue(0);
+  const lineOpacity = useSharedValue(1);
+  // Desplazamiento de cada esquina respecto de su lugar en el marco.
+  const tl = { x: useSharedValue(0), y: useSharedValue(0) };
+  const tr = { x: useSharedValue(0), y: useSharedValue(0) };
+  const bl = { x: useSharedValue(0), y: useSharedValue(0) };
+  const br = { x: useSharedValue(0), y: useSharedValue(0) };
+
   useEffect(() => {
     if (reduceMotion) return;
     line.set(withRepeat(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }), -1, true));
   }, [line, reduceMotion]);
-  const lineStyle = useAnimatedStyle(() => ({ transform: [{ translateY: line.value * (FRAME - 4) }] }));
+
+  useEffect(() => {
+    lineOpacity.set(withTiming(target ? 0 : 1, { duration: 160 }));
+    const move = (sv: { x: { set: (v: number) => void }; y: { set: (v: number) => void } }, x: number, y: number) => {
+      sv.x.set(reduceMotion ? x : withTiming(x, LOCK));
+      sv.y.set(reduceMotion ? y : withTiming(y, LOCK));
+    };
+    if (!target || !origin) {
+      move(tl, 0, 0);
+      move(tr, 0, 0);
+      move(bl, 0, 0);
+      move(br, 0, 0);
+      return;
+    }
+    // Caja del QR relativa al marco, con margen y sin achicarse más que dos esquinas juntas.
+    const size = Math.max(CORNER * 2 + 8, Math.max(target.width, target.height) + LOCK_PAD * 2);
+    const cx = target.x + target.width / 2 - origin.x;
+    const cy = target.y + target.height / 2 - origin.y;
+    const left = cx - size / 2;
+    const top = cy - size / 2;
+    const right = cx + size / 2 - FRAME;
+    const bottom = cy + size / 2 - FRAME;
+    move(tl, left, top);
+    move(tr, right, top);
+    move(bl, left, bottom);
+    move(br, right, bottom);
+    // Los shared values son estables: solo importan el objetivo y la posición medida.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, origin, reduceMotion]);
+
+  const lineStyle = useAnimatedStyle(() => ({
+    opacity: lineOpacity.value,
+    transform: [{ translateY: line.value * (FRAME - 4) }],
+  }));
+  const tlStyle = useAnimatedStyle(() => ({ transform: [{ translateX: tl.x.value }, { translateY: tl.y.value }] }));
+  const trStyle = useAnimatedStyle(() => ({ transform: [{ translateX: tr.x.value }, { translateY: tr.y.value }] }));
+  const blStyle = useAnimatedStyle(() => ({ transform: [{ translateX: bl.x.value }, { translateY: bl.y.value }] }));
+  const brStyle = useAnimatedStyle(() => ({ transform: [{ translateX: br.x.value }, { translateY: br.y.value }] }));
+
   return (
-    <View style={styles.frame}>
-      <View style={[styles.corner, styles.tl]} />
-      <View style={[styles.corner, styles.tr]} />
-      <View style={[styles.corner, styles.bl]} />
-      <View style={[styles.corner, styles.br]} />
-      {active ? <Animated.View style={[styles.scanLine, lineStyle]} /> : null}
+    <View
+      ref={ref}
+      style={styles.frame}
+      onLayout={() => ref.current?.measureInWindow((x, y) => setOrigin({ x, y }))}>
+      <View style={styles.frameClip}>
+        {active ? <Animated.View style={[styles.scanLine, lineStyle]} /> : null}
+      </View>
+      <Animated.View style={[styles.corner, styles.tl, tlStyle]} />
+      <Animated.View style={[styles.corner, styles.tr, trStyle]} />
+      <Animated.View style={[styles.corner, styles.bl, blStyle]} />
+      <Animated.View style={[styles.corner, styles.br, brStyle]} />
     </View>
   );
 }
@@ -316,6 +399,13 @@ function BottomCard({ children }: { children: React.ReactNode }) {
   );
 }
 
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const CHECK_LEN = 20;
+
+/**
+ * Resultado del escaneo. El ícono entra creciendo con una onda alrededor; según el tono:
+ * éxito dibuja el check, advertencia se balancea y error hace temblar la tarjeta.
+ */
 function Outcome({
   tone,
   title,
@@ -329,11 +419,66 @@ function Outcome({
   onNext: () => void;
   onOpen?: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   const color = tone === 'success' ? light.success : tone === 'warning' ? light.warning : light.danger;
+  const pop = useSharedValue(reduceMotion ? 1 : 0.4);
+  const ring = useSharedValue(0);
+  const check = useSharedValue(reduceMotion ? 1 : 0);
+  const shake = useSharedValue(0);
+  const wobble = useSharedValue(0);
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    pop.set(
+      withSequence(
+        withTiming(1.12, { duration: 220, easing: Easing.out(Easing.cubic) }),
+        withTiming(1, { duration: 160, easing: Easing.inOut(Easing.quad) }),
+      ),
+    );
+    ring.set(withDelay(80, withTiming(1, { duration: 700, easing: Easing.out(Easing.cubic) })));
+    if (tone === 'success') {
+      check.set(withDelay(180, withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })));
+    } else if (tone === 'danger') {
+      const step = (x: number) => withTiming(x, { duration: 55, easing: Easing.inOut(Easing.quad) });
+      shake.set(withDelay(120, withSequence(step(-10), step(9), step(-7), step(5), step(-3), step(0))));
+    } else {
+      const step = (r: number) => withTiming(r, { duration: 90, easing: Easing.inOut(Easing.quad) });
+      wobble.set(withDelay(160, withSequence(step(-12), step(10), step(-6), step(3), step(0))));
+    }
+  }, [tone, reduceMotion, pop, ring, check, shake, wobble]);
+
+  const cardStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pop.value }, { rotate: `${wobble.value}deg` }],
+  }));
+  const ringStyle = useAnimatedStyle(() => ({
+    opacity: ring.value > 0 && ring.value < 1 ? 0.6 * (1 - ring.value) : 0,
+    transform: [{ scale: 1 + ring.value * 0.9 }],
+  }));
+  const checkProps = useAnimatedProps(() => ({ strokeDashoffset: CHECK_LEN * (1 - check.value) }));
+
   return (
-    <Animated.View entering={FadeIn.duration(200)} style={{ gap: 12, alignItems: 'center' }}>
-      <View style={[styles.outcomeIcon, { backgroundColor: color }]}>
-        <Icon name={tone === 'success' ? 'checkmark' : tone === 'warning' ? 'warning' : 'close'} size={22} color="#ffffff" />
+    <Animated.View entering={FadeIn.duration(200)} style={[{ gap: 12, alignItems: 'center' }, cardStyle]}>
+      <View style={styles.outcomeIconSlot}>
+        <Animated.View style={[styles.outcomeRing, { borderColor: color }, ringStyle]} />
+        <Animated.View style={[styles.outcomeIcon, { backgroundColor: color }, iconStyle]}>
+          {tone === 'success' ? (
+            <Svg width={26} height={26} viewBox="0 0 24 24">
+              <AnimatedPath
+                d="M6 12.5l4 4 8-8.5"
+                stroke="#ffffff"
+                strokeWidth={2.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                strokeDasharray={`${CHECK_LEN} ${CHECK_LEN}`}
+                animatedProps={checkProps}
+              />
+            </Svg>
+          ) : (
+            <Icon name={tone === 'warning' ? 'warning' : 'close'} size={22} color="#ffffff" />
+          )}
+        </Animated.View>
       </View>
       <Text style={styles.outcomeTitle}>{title}</Text>
       <Text style={styles.outcomeText}>{text}</Text>
@@ -367,7 +512,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.45)',
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.four },
-  frame: { width: FRAME, height: FRAME, borderRadius: Radius.xl, overflow: 'hidden' },
+  frame: { width: FRAME, height: FRAME },
+  frameClip: { ...StyleSheet.absoluteFill, borderRadius: Radius.xl, overflow: 'hidden' },
   corner: { position: 'absolute', width: CORNER, height: CORNER, borderColor: '#ffffff' },
   tl: { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 18 },
   tr: { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 18 },
@@ -420,6 +566,8 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     backgroundColor: '#ffffff',
   },
+  outcomeIconSlot: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center' },
+  outcomeRing: { position: 'absolute', width: 52, height: 52, borderRadius: 26, borderWidth: 2 },
   outcomeIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
   outcomeTitle: { color: '#000000', fontSize: 20, fontFamily: DisplayFont.bold, textAlign: 'center' },
   outcomeText: { color: light.textSecondary, fontSize: 14, lineHeight: 20, textAlign: 'center' },

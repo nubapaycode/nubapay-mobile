@@ -2,7 +2,7 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -10,6 +10,7 @@ import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addPickupPoint, addTicket, type ManageKind } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 type SheetKind = Exclude<ManageKind, 'product'>;
 
@@ -77,11 +78,10 @@ function NewItemContent() {
         : await addPickupPoint(eventId, { name: name.trim(), description: description.trim() || null });
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo crear', res.error);
+      toast.error('No se pudo crear', res.error);
       return;
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toast.success(kind === 'ticket' ? 'Entrada creada' : 'Creado', name.trim(), { celebrate: true });
     dismiss();
   };
 

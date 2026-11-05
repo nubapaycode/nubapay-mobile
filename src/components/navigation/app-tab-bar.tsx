@@ -1,10 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import type { BottomTabBarProps } from 'expo-router/tabs';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -35,7 +38,6 @@ export function AppTabBar({
   onScan,
 }: BottomTabBarProps & { onScan: () => void }) {
   const styles = useStyles();
-  const { colors } = useTheme();
   const routes = state.routes.filter((r) => TABS[r.name]);
   const half = Math.ceil(routes.length / 2);
 
@@ -50,20 +52,14 @@ export function AppTabBar({
       }
     };
     return (
-      <Pressable
+      <TabItem
         key={route.key}
+        focused={focused}
+        icon={meta.icon}
+        activeIcon={meta.active}
+        label={descriptors[route.key]?.options.tabBarAccessibilityLabel ?? meta.label}
         onPress={onPress}
-        accessibilityRole="tab"
-        accessibilityState={{ selected: focused }}
-        accessibilityLabel={descriptors[route.key]?.options.tabBarAccessibilityLabel ?? meta.label}
-        style={styles.tab}>
-        <Icon
-          name={focused ? meta.active : meta.icon}
-          size={23}
-          color={focused ? colors.ink : colors.textMuted}
-        />
-        <View style={[styles.indicator, focused && styles.indicatorOn]} />
-      </Pressable>
+      />
     );
   };
 
@@ -75,6 +71,71 @@ export function AppTabBar({
     </View>
   );
 }
+
+/**
+ * Pestaña: al activarse el ícono hace un "pop" corto (se achica y vuelve) y el indicador crece
+ * de punto a guion; al desactivarse vuelve a punto y se desvanece.
+ */
+function TabItem({
+  focused,
+  icon,
+  activeIcon,
+  label,
+  onPress,
+}: {
+  focused: boolean;
+  icon: IconName;
+  activeIcon: IconName;
+  label: string;
+  onPress: () => void;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const reduceMotion = useReducedMotion();
+  const on = useSharedValue(focused ? 1 : 0);
+  const pop = useSharedValue(1);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    on.set(reduceMotion ? (focused ? 1 : 0) : withTiming(focused ? 1 : 0, SWITCH));
+    if (focused && mounted.current && !reduceMotion) {
+      pop.set(
+        withSequence(
+          withTiming(0.82, { duration: 90, easing: Easing.out(Easing.quad) }),
+          withTiming(1.08, { duration: 150, easing: Easing.out(Easing.cubic) }),
+          withTiming(1, { duration: 140, easing: Easing.inOut(Easing.quad) }),
+        ),
+      );
+    }
+    mounted.current = true;
+  }, [focused, on, pop, reduceMotion]);
+
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: on.value,
+    width: 4 + on.value * 12,
+  }));
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: focused }}
+      accessibilityLabel={label}
+      style={styles.tab}>
+      <Animated.View style={iconStyle}>
+        <Icon
+          name={focused ? activeIcon : icon}
+          size={23}
+          color={focused ? colors.ink : colors.textMuted}
+        />
+      </Animated.View>
+      <Animated.View style={[styles.indicator, indicatorStyle]} />
+    </Pressable>
+  );
+}
+
+const SWITCH = { duration: 240, easing: Easing.out(Easing.cubic) };
 
 /** Botón central elevado: círculo azul de marca con el ícono de QR. */
 function ScanButton({ onPress }: { onPress: () => void }) {
@@ -113,8 +174,7 @@ const useStyles = makeStyles((c) =>
       borderTopColor: c.border,
     },
     tab: { flex: 1, alignItems: 'center', gap: 6, paddingTop: 6, height: 44 },
-    indicator: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent' },
-    indicatorOn: { backgroundColor: c.ink },
+    indicator: { height: 4, borderRadius: 2, backgroundColor: c.ink },
 
     scanSlot: { flex: 1, alignItems: 'center' },
     scanRing: {

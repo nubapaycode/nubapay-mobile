@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -8,6 +8,7 @@ import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addCategory, useCategories } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 const SUGGESTIONS = ['Bebidas', 'Tragos', 'Cervezas', 'Comida', 'Snacks', 'Merch'];
 
@@ -50,8 +51,7 @@ function NewCategoryContent() {
     const res = await addCategory(eventId, trimmed);
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo crear la categoría', res.error);
+      toast.error('No se pudo crear la categoría', res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

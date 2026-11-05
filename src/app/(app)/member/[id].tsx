@@ -15,6 +15,7 @@ import { PERMISSION_LABEL, PERMISSIONS, removeMember, resendAccess } from '@/fea
 import { useTeam } from '@/features/team/use-team';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 /**
  * Detalle de una persona del equipo (routes/event_staff.py), mismo lenguaje que el detalle de
@@ -59,8 +60,7 @@ export default function MemberScreen() {
           const res = await removeMember(eventId, member);
           setBusy(null);
           if (!res.ok) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            Alert.alert('No se pudo quitar', res.error);
+            toast.error('No se pudo quitar', res.error);
             return;
           }
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, FadeIn } from 'react-native-reanimated';
+import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { formatInt } from '@/features/dashboard/format';
@@ -14,15 +14,25 @@ import { RollingNumber } from './rolling-number';
  * desglose clave–valor, métricas en fila y secciones con lista de borde fino.
  */
 
-/** Entrada: fundido puro y lento (1200 ms, curva suave), sin desplazamiento ni resorte. */
+/** Fundido puro y lento (1200 ms, curva suave): cambios de contenido en el mismo lugar. */
 export const FADE_MS = 1200;
 export const FADE_EASING = Easing.inOut(Easing.quad);
 
-export const enter = (i: number) =>
-  FadeIn.delay(60 + i * 70).duration(FADE_MS).easing(FADE_EASING);
+/** Entrada de bloques y filas: fundido con una subida corta, desacelerando al llegar. */
+export const RISE_MS = 620;
+export const RISE_EASING = Easing.out(Easing.cubic);
+const rise = (delay: number, distance = 14) =>
+  FadeInDown.delay(delay)
+    .duration(RISE_MS)
+    .easing(RISE_EASING)
+    .withInitialValues({ opacity: 0, transform: [{ translateY: distance }] });
 
-export const enterRow = (i: number) =>
-  FadeIn.delay(220 + i * 50).duration(FADE_MS).easing(FADE_EASING);
+export const enter = (i: number) => rise(60 + i * 70);
+
+export const enterRow = (i: number) => rise(220 + Math.min(i, 10) * 45, 10);
+
+/** Ítem de lista larga: escalonado corto y con tope, para que el final no tarde en aparecer. */
+export const enterItem = (i: number) => rise(Math.min(i, 8) * 40, 10);
 
 export function DetailHero({
   caption,

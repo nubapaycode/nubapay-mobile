@@ -22,6 +22,8 @@ export default function AppLayout() {
       <Stack.Screen
         name="detail/[section]"
         options={{
+          // Se llega expandiendo la tarjeta del inicio: el detalle aparece con fundido debajo.
+          animation: 'fade',
           headerLargeTitle: true,
           headerLargeTitleShadowVisible: false,
           headerLargeTitleStyle: { fontFamily: DisplayFont.bold, color: colors.text },

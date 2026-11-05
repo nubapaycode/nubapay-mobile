@@ -1,6 +1,13 @@
 import * as Haptics from 'expo-haptics';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { type LayoutRectangle, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { type DashboardPeriod, isCustom, type RangePreset } from '@/features/dashboard/filters';
@@ -19,9 +26,12 @@ const RANGES: { preset: RangePreset; label: string }[] = [
   { preset: 'event', label: 'Evento' },
 ];
 
+const SLIDE = { duration: 320, easing: Easing.out(Easing.cubic) };
+
 type Props = {
   summary: DashboardSummary;
-  chartKey: string;
+  /** Evento en vivo: la curva muestra la punta que late y el ping de cada venta. */
+  live: boolean;
   period: DashboardPeriod;
   /** Período elegido ("Últimos 30 días", "Hoy", rango personalizado…). */
   periodLabel: string;
@@ -36,7 +46,7 @@ type Props = {
  */
 export function PulseHero({
   summary,
-  chartKey,
+  live,
   period,
   periodLabel,
   scopeLabel,
@@ -81,8 +91,8 @@ export function PulseHero({
 
       <View style={styles.chart}>
         <AreaChart
-          key={chartKey}
           points={points}
+          live={live}
           height={150}
           color={colors.hero.line}
           onScrub={setScrub}
@@ -90,26 +100,72 @@ export function PulseHero({
         />
       </View>
 
-      <View style={styles.ranges} accessibilityRole="tablist">
-        {RANGES.map((r) => {
-          const on = selected === r.preset;
-          return (
-            <Pressable
-              key={r.preset}
-              onPress={() => {
-                if (on) return;
-                Haptics.selectionAsync();
-                onSelectPreset(r.preset);
-              }}
-              hitSlop={4}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: on }}
-              style={[styles.range, on && styles.rangeOn]}>
-              <Text style={[styles.rangeText, on && styles.rangeTextOn]}>{r.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <RangeTabs selected={selected} onSelect={onSelectPreset} />
+    </View>
+  );
+}
+
+/** Atajos de período con una píldora que se desliza hasta el elegido. */
+function RangeTabs({
+  selected,
+  onSelect,
+}: {
+  selected: RangePreset | null;
+  onSelect: (preset: RangePreset) => void;
+}) {
+  const styles = useStyles();
+  const reduceMotion = useReducedMotion();
+  const [frames, setFrames] = useState<Partial<Record<RangePreset, LayoutRectangle>>>({});
+  const x = useSharedValue(0);
+  const w = useSharedValue(0);
+  const shown = useSharedValue(0);
+  const target = selected ? frames[selected] : undefined;
+
+  const tx = target?.x;
+  const tw = target?.width;
+  // Al aparecer se ubica sin animar; después se desliza de un período al otro.
+  useEffect(() => {
+    if (tx == null || tw == null) {
+      shown.set(withTiming(0, { duration: 160 }));
+      return;
+    }
+    const jump = shown.get() === 0 || reduceMotion;
+    x.set(jump ? tx : withTiming(tx, SLIDE));
+    w.set(jump ? tw : withTiming(tw, SLIDE));
+    shown.set(withTiming(1, { duration: 160 }));
+  }, [tx, tw, reduceMotion, x, w, shown]);
+
+  const pill = useAnimatedStyle(() => ({
+    opacity: shown.value,
+    width: w.value,
+    transform: [{ translateX: x.value }],
+  }));
+
+  return (
+    <View style={styles.ranges} accessibilityRole="tablist">
+      <Animated.View pointerEvents="none" style={[styles.rangePill, pill]} />
+      {RANGES.map((r) => {
+        const on = selected === r.preset;
+        return (
+          <Pressable
+            key={r.preset}
+            onLayout={(e) => {
+              const f = e.nativeEvent.layout;
+              setFrames((prev) => ({ ...prev, [r.preset]: f }));
+            }}
+            onPress={() => {
+              if (on) return;
+              Haptics.selectionAsync();
+              onSelect(r.preset);
+            }}
+            hitSlop={4}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: on }}
+            style={styles.range}>
+            <Text style={[styles.rangeText, on && styles.rangeTextOn]}>{r.label}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -166,10 +222,17 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: 'transparent',
     },
-    rangeOn: { backgroundColor: c.hero.glass, borderColor: c.hero.glassBorder },
+    rangePill: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      height: 30,
+      borderRadius: Radius.pill,
+      backgroundColor: c.hero.glass,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.hero.glassBorder,
+    },
     rangeText: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
     rangeTextOn: { color: c.text, fontWeight: '700' },
   }),

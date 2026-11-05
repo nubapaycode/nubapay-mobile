@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import {
+  type ComponentRef,
   createContext,
   type ReactNode,
   useCallback,
@@ -22,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { makeStyles } from '@/theme';
+import { useRevealSurface } from '@/components/fx/theme-reveal';
 
 const OPEN = { duration: 380, easing: Easing.out(Easing.cubic) };
 const CLOSE = { duration: 260, easing: Easing.in(Easing.cubic) };
@@ -56,6 +58,9 @@ export function Sheet({ children }: { children: ReactNode }) {
   const closing = useRef(false);
   // Lo que corre después de cerrar se guarda acá (del lado JS), no viaja al hilo de UI.
   const pending = useRef<(() => void) | undefined>(undefined);
+  // Entra en la foto del cambio de tema (en iOS el modal no está dentro de la raíz).
+  const surface = useRef<ComponentRef<typeof View>>(null);
+  useRevealSurface(surface);
 
   useEffect(() => {
     y.set(reduceMotion ? 0 : withTiming(0, OPEN));
@@ -139,7 +144,7 @@ export function Sheet({ children }: { children: ReactNode }) {
 
   return (
     <SheetContext.Provider value={api}>
-      <View style={StyleSheet.absoluteFill}>
+      <View ref={surface} collapsable={false} style={StyleSheet.absoluteFill}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdrop]}>
           <Pressable
             style={StyleSheet.absoluteFill}

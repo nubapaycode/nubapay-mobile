@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { type GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   interpolateColor,
@@ -30,7 +30,8 @@ export function AppearancePicker({
   onChange,
 }: {
   value: AppearancePreference;
-  onChange: (v: AppearancePreference) => void;
+  /** `origin`: punto tocado en pantalla (de ahí crece el revelado del tema). */
+  onChange: (v: AppearancePreference, origin?: { x: number; y: number }) => void;
 }) {
   const styles = useStyles();
   return (
@@ -41,10 +42,10 @@ export function AppearancePicker({
           value={o.value}
           label={o.label}
           selected={o.value === value}
-          onPress={() => {
+          onPress={(e) => {
             if (o.value === value) return;
             Haptics.selectionAsync();
-            onChange(o.value);
+            onChange(o.value, { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY });
           }}
         />
       ))}
@@ -61,7 +62,7 @@ function Option({
   value: AppearancePreference;
   label: string;
   selected: boolean;
-  onPress: () => void;
+  onPress: (e: GestureResponderEvent) => void;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();

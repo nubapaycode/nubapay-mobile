@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  Extrapolation,
   FadeIn,
   interpolate,
   useAnimatedScrollHandler,
@@ -11,11 +12,14 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BentoGrid } from '@/components/dashboard/bento-grid';
+import { CompactBar } from '@/components/dashboard/compact-bar';
 import { FADE_EASING, FADE_MS } from '@/components/dashboard/detail-kit';
 import { HeroBackdrop } from '@/components/dashboard/hero-backdrop';
+import { Lottie } from '@/components/fx/lottie';
 import { LastHourCard } from '@/components/dashboard/last-hour-card';
 import { PulseHeader } from '@/components/dashboard/pulse-header';
 import { PulseHero } from '@/components/dashboard/pulse-hero';
+import { hiddenNativeSpinner, PulseRefresh } from '@/components/dashboard/pulse-refresh';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { DashboardSkeleton } from '@/components/dashboard/skeleton';
 import { Button } from '@/components/ui';
@@ -25,7 +29,6 @@ import { Spacing } from '@/constants/theme';
 import {
   activeFilterCount,
   defaultFilters,
-  filtersKey,
   periodLabel,
   type RangePreset,
   SCOPE_LABEL,
@@ -54,14 +57,22 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   useFocusStatusBar();
 
-  // La franja bajo la barra de estado aparece al scrollear (arriba se ve el degradé).
+  // El scroll maneja la barra compacta de arriba y el parallax de la cabecera.
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.set(e.contentOffset.y);
   });
-  const scrimStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, 140], [0, 1], 'clamp'),
-  }));
+  // La cabecera se queda un poco atrás y se desvanece al subir; al estirar hacia abajo, baja con el dedo.
+  const headerStyle = useAnimatedStyle(() => {
+    const y = scrollY.value;
+    return {
+      opacity: interpolate(y, [0, 90], [1, 0], Extrapolation.CLAMP),
+      transform: [
+        { translateY: y > 0 ? y * 0.35 : 0 },
+        { scale: interpolate(y, [0, 90], [1, 0.96], Extrapolation.CLAMP) },
+      ],
+    };
+  });
   const { user } = useAuth();
   const { events, error: eventsError } = useEvents();
   const selectedId = useSelectedEventId();
@@ -116,11 +127,17 @@ export default function HomeScreen() {
             refreshing={refreshing}
             onRefresh={refresh}
             tintColor={colors.textSecondary}
+            {...hiddenNativeSpinner}
             colors={[colors.primary]}
             progressBackgroundColor={colors.surface}
           />
         }>
-        <HeroBackdrop height={insets.top + HERO_HEIGHT} />
+        <HeroBackdrop
+          height={insets.top + HERO_HEIGHT}
+          scrollY={scrollY}
+          live={(data?.insights.event.phase ?? phase) === 'live'}
+        />
+        <Animated.View style={headerStyle}>
         <PulseHeader
           event={event}
           phase={data?.insights.event.phase ?? phase}
@@ -131,6 +148,7 @@ export default function HomeScreen() {
           onOpenProfile={() => router.push('/profile')}
           onOpenFilters={() => router.push('/dashboard-filters')}
         />
+        </Animated.View>
 
         {eventsError ? (
           <ErrorState message={eventsError} />
@@ -147,7 +165,7 @@ export default function HomeScreen() {
             style={styles.sections}>
             <PulseHero
               summary={data.summary}
-              chartKey={`${event.id}-${filtersKey(filters)}`}
+              live={data.insights.event.phase === 'live'}
               period={filters.period}
               periodLabel={periodLabel(filters.period)}
               scopeLabel={scopeLabel}
@@ -156,17 +174,20 @@ export default function HomeScreen() {
 
             <QuickActions />
 
-            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} /> : null}
+            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} activity={data.insights.recent_activity} /> : null}
 
             <BentoGrid data={data} />
 
           </Animated.View>
         )}
       </Animated.ScrollView>
-      {/* Franja fija bajo la barra de estado: el contenido no se superpone con la hora/batería al scrollear. */}
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.statusScrim, { height: insets.top }, scrimStyle]}
+      {Platform.OS === 'ios' ? <PulseRefresh scrollY={scrollY} refreshing={refreshing} /> : null}
+      {/* Franja fija bajo la barra de estado; cuando el hero se va, muestra evento y recaudación. */}
+      <CompactBar
+        scrollY={scrollY}
+        eventName={event?.name ?? null}
+        revenue={data?.summary.total_revenue ?? null}
+        live={(data?.insights.event.phase ?? phase) === 'live'}
       />
     </View>
   );
@@ -176,6 +197,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
   const styles = useStyles();
   return (
     <View style={styles.error}>
+      <Lottie name="offline" size={112} />
       <Text style={styles.errorTitle}>No pudimos cargar las métricas</Text>
       <Text style={styles.errorText}>{message}</Text>
       {onRetry ? <Button title="Reintentar" variant="ghost" onPress={onRetry} /> : null}
@@ -186,13 +208,6 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: c.background },
-    statusScrim: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: c.backgroundTranslucent,
-    },
     content: { paddingHorizontal: Spacing.three, gap: Spacing.four },
     sections: { gap: Spacing.four },
     error: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },

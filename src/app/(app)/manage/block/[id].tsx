@@ -28,6 +28,7 @@ import { type CatalogBlock, removeBlock, saveBlock, useBlocks, useProducts } fro
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { loadImagePicker } from '@/lib/native-modules';
 import { makeStyles, useTheme } from '@/theme';
+import { toast } from '@/components/ui/toast';
 
 const LAYOUT = LinearTransition.duration(240);
 const PICK: ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [3, 1], quality: 0.8 };
@@ -98,8 +99,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
     const res = await saveBlock(eventId, { title, isActive: active, productIds: ids, bannerUri: banner }, block);
     setSaving(false);
     if (!res.ok) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('No se pudo guardar', res.error);
+      toast.error('No se pudo guardar', res.error);
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -116,8 +116,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
           if (!block || !eventId) return;
           const res = await removeBlock(eventId, block.id);
           if (!res.ok) {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            Alert.alert('No se pudo eliminar', res.error);
+            toast.error('No se pudo eliminar', res.error);
             return;
           }
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -132,7 +131,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
     if (source === 'camera') {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
       if (!perm.granted) {
-        Alert.alert('Sin acceso a la cámara', 'Habilitá el permiso de cámara desde Ajustes.');
+        toast.error('Sin acceso a la cámara', 'Habilitá el permiso de cámara desde Ajustes.');
         return;
       }
     }
