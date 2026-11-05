@@ -30,6 +30,19 @@ import { useNow } from "@/hooks/use-now";
 import { loadClipboard } from "@/lib/native-modules";
 import { makeStyles, useTheme } from "@/theme";
 
+/** Solo acepta URLs https; cualquier otro esquema (intent:, tel:, javascript:…) se descarta. */
+function safeHttpsUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const dateFmt = new Intl.DateTimeFormat("es-AR", {
   day: "numeric",
   month: "short",
@@ -73,6 +86,9 @@ export default function RegretScreen() {
   }
   const pending = regret.status === "pending";
   const whatsappNumber = regret.whatsapp.replace(/[^\d]/g, "");
+  const screenshotUrl = safeHttpsUrl(regret.screenshotUrl);
+  const email = regret.email?.trim();
+  const validEmail = email && EMAIL_RE.test(email) ? email : null;
 
   const copyAlias = async () => {
     const Clipboard = await loadClipboard();
@@ -154,12 +170,14 @@ export default function RegretScreen() {
                 }
               />
             ) : null}
-            {regret.email ? (
+            {validEmail ? (
               <QuickAction
                 icon="mail"
                 label="Email"
-                value={regret.email}
-                onPress={() => Linking.openURL(`mailto:${regret.email}`)}
+                value={validEmail}
+                onPress={() =>
+                  Linking.openURL(`mailto:${encodeURIComponent(validEmail)}`)
+                }
               />
             ) : null}
           </Animated.View>
@@ -217,15 +235,15 @@ export default function RegretScreen() {
           {/* Comprobante */}
           <Animated.View entering={enter(4)} style={styles.section}>
             <GroupHeader title="Comprobante" />
-            {regret.screenshotUrl ? (
+            {screenshotUrl ? (
               <Pressable
-                onPress={() => Linking.openURL(regret.screenshotUrl!)}
+                onPress={() => Linking.openURL(screenshotUrl)}
                 accessibilityRole="imagebutton"
                 accessibilityLabel="Abrir comprobante"
                 style={styles.receipt}
               >
                 <Image
-                  source={{ uri: regret.screenshotUrl }}
+                  source={{ uri: screenshotUrl }}
                   style={StyleSheet.absoluteFill}
                   contentFit="cover"
                   transition={200}
