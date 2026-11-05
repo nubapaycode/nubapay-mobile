@@ -58,7 +58,7 @@ export function HeroBackdrop({ height, scrollY, live = false }: Props) {
             background: colors.background,
             accent: colors.primary,
           }}
-          amount={colors.scheme === 'dark' ? 1 : 0.15}
+          amount={colors.scheme === 'dark' ? 0.45 : 0.15}
           live={live}
           scrollY={scrollY}
         />

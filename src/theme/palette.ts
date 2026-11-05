@@ -10,6 +10,8 @@ export type Palette = {
   background: string;
   backgroundTranslucent: string;
   surface: string;
+  /** Cards flotantes sobre blur: deja ver lo de atrás difuminado. */
+  surfaceGlass: string;
   /** Pieza que se apoya sobre `raised` (pulgar de segmentado, botón chico sobre una card). */
   elevated: string;
   raised: string;
@@ -74,6 +76,7 @@ export const dark: Palette = {
   background: '#080b11',
   backgroundTranslucent: 'rgba(8, 11, 17, 0.94)',
   surface: '#0e1219',
+  surfaceGlass: 'rgba(14, 18, 25, 0.55)',
   elevated: '#262d3a',
   raised: '#161b25',
   border: '#232a36',
@@ -101,8 +104,8 @@ export const dark: Palette = {
   cardShadow: '0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 16px rgba(0, 0, 0, 0.22)',
   cardShadowSubtle: '0 1px 3px rgba(0, 0, 0, 0.16)',
   hero: {
-    top: '#0b3ea8',
-    mid: '#082159',
+    top: '#0a3591',
+    mid: '#071c4b',
     line: '#ffffff',
     glass: 'rgba(255, 255, 255, 0.08)',
     glassBorder: 'rgba(255, 255, 255, 0.10)',
@@ -126,6 +129,7 @@ export const light: Palette = {
   background: '#ffffff',
   backgroundTranslucent: 'rgba(255, 255, 255, 0.94)',
   surface: '#ffffff',
+  surfaceGlass: 'rgba(255, 255, 255, 0.6)',
   elevated: '#ffffff',
   raised: '#eef0f4',
   border: '#e2e5ea',

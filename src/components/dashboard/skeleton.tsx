@@ -36,7 +36,9 @@ function Block({
   const { width: screen } = useWindowDimensions();
   const ref = useRef<ComponentRef<typeof View>>(null);
   const [left, setLeft] = useState(0);
-  const highlight = colors.scheme === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.75)';
+  // La intensidad va en stopOpacity: react-native-svg no siempre respeta el alfa de un rgba en stopColor
+  // (en oscuro pintaba una franja blanca opaca).
+  const peak = colors.scheme === 'dark' ? 0.06 : 0.75;
 
   const band = useAnimatedStyle(() => ({
     transform: [{ translateX: (sweep?.value ?? -1) * (screen + BAND) - BAND - left }],
@@ -58,9 +60,9 @@ function Block({
           <Svg width={BAND} height="100%">
             <Defs>
               <LinearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor={highlight} stopOpacity={0} />
-                <Stop offset="0.5" stopColor={highlight} stopOpacity={1} />
-                <Stop offset="1" stopColor={highlight} stopOpacity={0} />
+                <Stop offset="0" stopColor="#ffffff" stopOpacity={0} />
+                <Stop offset="0.5" stopColor="#ffffff" stopOpacity={peak} />
+                <Stop offset="1" stopColor="#ffffff" stopOpacity={0} />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width={BAND} height="100%" fill="url(#shine)" />

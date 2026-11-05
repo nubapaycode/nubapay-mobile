@@ -187,6 +187,8 @@ export default function HomeScreen() {
         scrollY={scrollY}
         eventName={event?.name ?? null}
         revenue={data?.summary.total_revenue ?? null}
+        periodLabel={data ? periodLabel(filters.period) : null}
+        orderCount={data?.summary.order_count ?? null}
         live={(data?.insights.event.phase ?? phase) === 'live'}
       />
     </View>
