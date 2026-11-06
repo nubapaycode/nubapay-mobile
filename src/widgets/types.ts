@@ -10,9 +10,9 @@
  */
 export type EventPulseProps = {
   eventName: string;
-  /** "$ 1.284.500" */
+  /** "$ 950" o, desde $1.000, compacto: "$1,2k", "$340k", "$1,3M". */
   revenue: string;
-  /** "$1,3M": para lugares chicos (Dynamic Island compacta). */
+  /** Siempre compacto ("$950", "$12k", "$1,3M"): Dynamic Island compacta. */
   revenueShort: string;
   /** "Todo el evento" */
   period: string;

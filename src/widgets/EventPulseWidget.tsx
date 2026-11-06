@@ -25,7 +25,7 @@ const EventPulseWidget = (props: EventPulseProps) => {
       spacing={4}
       modifiers={[containerBackground('#080b11', 'widget'), widgetURL('nubapaybusiness://')]}>
       <HStack spacing={5}>
-        <Image systemName={props.icon} size={11} color="#c6ff00" />
+        <Image assetName="NubapayCloud" />
         <Text
           modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>
           {props.eventName}

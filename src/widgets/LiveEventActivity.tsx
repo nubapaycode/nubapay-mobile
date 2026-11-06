@@ -16,7 +16,7 @@ import type { EventPulseProps } from './types';
  * Live Activity del evento en vivo, adaptada a lo que vende:
  * - pantalla bloqueada: recaudación grande, el dato principal (entradas o productos) a la
  *   derecha, la barra de aforo si hay entradas con tope, y abajo última hora + segundo dato;
- * - Dynamic Island compacta: ícono según lo que vende + recaudación corta;
+ * - Dynamic Island compacta: la nube de Nubapay + recaudación corta;
  * - expandida: recaudación, dato principal y, abajo, barra + última hora + segundo dato.
  */
 const LiveEventActivity = (props: EventPulseProps) => {
@@ -25,7 +25,7 @@ const LiveEventActivity = (props: EventPulseProps) => {
     banner: (
       <VStack alignment="leading" spacing={8} modifiers={[padding({ all: 16 }), activityBackgroundTint('#080b11')]}>
         <HStack spacing={6}>
-          <Image systemName={props.icon} size={12} color="#c6ff00" />
+          <Image assetName="NubapayCloud" />
           <Text modifiers={[font({ size: 12, weight: 'bold' }), foregroundStyle('#c6ff00')]}>EN VIVO</Text>
           <Text modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>
             {props.eventName}
@@ -56,7 +56,10 @@ const LiveEventActivity = (props: EventPulseProps) => {
               ]}>
               {props.mainValue}
             </Text>
-            <Text modifiers={[font({ size: 11 }), foregroundStyle('#636c7c')]}>{props.mainLabel}</Text>
+            <HStack spacing={4}>
+              <Image systemName={props.icon} size={10} color="#636c7c" />
+              <Text modifiers={[font({ size: 11 }), foregroundStyle('#636c7c')]}>{props.mainLabel}</Text>
+            </HStack>
           </VStack>
         </HStack>
         {props.ratio >= 0 ? <Gauge value={props.ratio} modifiers={[foregroundStyle('#c6ff00')]} /> : null}
@@ -73,13 +76,14 @@ const LiveEventActivity = (props: EventPulseProps) => {
         </HStack>
       </VStack>
     ),
-    compactLeading: <Image systemName={props.icon} color="#c6ff00" />,
+    // La nube de Nubapay (catálogo de assets del widget, ver plugins/with-widget-assets.js).
+    compactLeading: <Image assetName="NubapayCloud" />,
     compactTrailing: (
       <Text modifiers={[font({ size: 14, weight: 'semibold' }), foregroundStyle('#ffffff'), monospacedDigit()]}>
         {props.revenueShort}
       </Text>
     ),
-    minimal: <Image systemName={props.icon} color="#c6ff00" />,
+    minimal: <Image assetName="NubapayCloud" />,
     expandedLeading: (
       <VStack alignment="leading" spacing={2}>
         <Text modifiers={[font({ size: 11 }), foregroundStyle('#9aa3b2')]}>Recaudado</Text>

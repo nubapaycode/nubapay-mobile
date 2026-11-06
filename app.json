@@ -70,6 +70,7 @@
           "enableBackgroundRemoteNotifications": true
         }
       ],
+      "./plugins/with-widget-assets",
       [
         "expo-widgets",
         {
