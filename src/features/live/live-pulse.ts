@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 
 import { apiFetch, authPaths, eventPaths } from '@/lib/api';
 import { loadSession } from '@/lib/authSession';
-import type { EventPulseProps } from '@/widgets/types';
+import { EMPTY_PULSE, type EventPulseProps } from '@/widgets/types';
 
 /**
  * Pulso del evento fuera de la app (iOS): widget de inicio y Live Activity.
@@ -177,16 +177,7 @@ export async function clearPulse() {
   if (!native) return;
   try {
     native.activity.getInstances().forEach((a) => a.end('immediate').catch(() => {}));
-    native.widget.updateSnapshot({
-      eventName: 'Abrí Nubapay',
-      revenue: '$ 0',
-      revenueShort: '$0',
-      period: '',
-      sold: 'Sin datos todavía',
-      ratio: -1,
-      orders: '',
-      updated: '',
-    });
+    native.widget.updateSnapshot(EMPTY_PULSE);
   } catch {
     // Nada que limpiar.
   }

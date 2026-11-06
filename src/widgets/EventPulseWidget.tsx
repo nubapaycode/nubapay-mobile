@@ -1,4 +1,4 @@
-import { Gauge, HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { Gauge, HStack, Image, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   containerBackground,
   font,
@@ -10,11 +10,11 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget } from 'expo-widgets';
 
-import type { EventPulseProps } from './types';
+import { EMPTY_PULSE, type EventPulseProps } from './types';
 
 /**
- * Widget de pantalla de inicio / bloqueo: lo recaudado en el período y las entradas vendidas
- * del evento elegido en la app. Se actualiza cada vez que la app carga el inicio.
+ * Widget de pantalla de inicio: lo recaudado en el evento elegido en la app y, abajo, el dato
+ * principal según lo que vende (entradas o productos) junto con lo vendido en la última hora.
  * Corre en el runtime aislado de widgets: solo componentes de @expo/ui y nada de módulo.
  */
 const EventPulseWidget = (props: EventPulseProps) => {
@@ -23,23 +23,14 @@ const EventPulseWidget = (props: EventPulseProps) => {
     <VStack
       alignment="leading"
       spacing={4}
-      modifiers={[
-        containerBackground('#080b11', 'widget'),
-        widgetURL('nubapaybusiness://'),
-      ]}>
-      <HStack spacing={6}>
-        <Text modifiers={[font({ size: 11, weight: 'bold' }), foregroundStyle('#c6ff00')]}>NUBAPAY</Text>
-        <Spacer />
-        <Text modifiers={[font({ size: 11, weight: 'medium' }), foregroundStyle('#9aa3b2')]}>{props.period}</Text>
+      modifiers={[containerBackground('#080b11', 'widget'), widgetURL('nubapaybusiness://')]}>
+      <HStack spacing={5}>
+        <Image systemName={props.icon} size={11} color="#c6ff00" />
+        <Text
+          modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>
+          {props.eventName}
+        </Text>
       </HStack>
-      <Text
-        modifiers={[
-          font({ size: 12, weight: 'semibold' }),
-          foregroundStyle('#9aa3b2'),
-          lineLimit(1),
-        ]}>
-        {props.eventName}
-      </Text>
       <Spacer />
       <Text
         modifiers={[
@@ -51,27 +42,44 @@ const EventPulseWidget = (props: EventPulseProps) => {
         ]}>
         {props.revenue}
       </Text>
-      {props.ratio >= 0 ? (
-        <Gauge value={props.ratio} modifiers={[foregroundStyle('#c6ff00')]} />
-      ) : null}
-      <HStack>
-        <Text modifiers={[font({ size: 11, weight: 'semibold' }), foregroundStyle('#f5f7fa'), monospacedDigit()]}>
-          {props.sold}
-        </Text>
+      <Text modifiers={[font({ size: 10 }), foregroundStyle('#636c7c'), lineLimit(1)]}>
+        {props.orders} · {props.updated}
+      </Text>
+      {props.ratio >= 0 ? <Gauge value={props.ratio} modifiers={[foregroundStyle('#c6ff00')]} /> : null}
+      <HStack alignment="top">
+        <VStack alignment="leading" spacing={1}>
+          <Text modifiers={[font({ size: 9, weight: 'medium' }), foregroundStyle('#9aa3b2')]}>
+            {props.mainLabel}
+          </Text>
+          <Text
+            modifiers={[
+              font({ size: 13, weight: 'semibold' }),
+              foregroundStyle('#f5f7fa'),
+              monospacedDigit(),
+              minimumScaleFactor(0.7),
+              lineLimit(1),
+            ]}>
+            {props.mainValue}
+          </Text>
+        </VStack>
         <Spacer />
-        <Text modifiers={[font({ size: 10 }), foregroundStyle('#636c7c')]}>{props.updated}</Text>
+        <VStack alignment="trailing" spacing={1}>
+          <Text modifiers={[font({ size: 9, weight: 'medium' }), foregroundStyle('#9aa3b2')]}>
+            {props.paceLabel}
+          </Text>
+          <Text
+            modifiers={[
+              font({ size: 13, weight: 'semibold' }),
+              foregroundStyle('#c6ff00'),
+              monospacedDigit(),
+              lineLimit(1),
+            ]}>
+            {props.paceValue}
+          </Text>
+        </VStack>
       </HStack>
     </VStack>
   );
 };
 
-export default createWidget<EventPulseProps>('EventPulse', EventPulseWidget, {
-  eventName: 'Abrí Nubapay',
-  revenue: '$ 0',
-  revenueShort: '$0',
-  period: 'Hoy',
-  sold: 'Sin datos todavía',
-  ratio: -1,
-  orders: '',
-  updated: '',
-});
+export default createWidget<EventPulseProps>('EventPulse', EventPulseWidget, EMPTY_PULSE);
