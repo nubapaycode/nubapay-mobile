@@ -1,31 +1,34 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 
-import { Button, TextField } from '@/components/ui';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { AuthField, AuthScreen, AuthTitle, isEmail, PillButton } from '@/components/auth';
+import { Icon } from '@/components/dashboard/icon';
 import { apiFetch, authPaths } from '@/lib/api';
-import { makeStyles } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
+
+const RESEND_SECONDS = 30;
 
 /**
  * Recuperar contraseña (POST /api/auth/forgot-password). El backend responde igual exista o no la
- * cuenta y manda un mail con el link para elegir una nueva clave en la web.
+ * cuenta y manda un mail con el link para elegir una nueva clave en la web; el texto de
+ * confirmación tampoco dice si la cuenta existe.
  */
 export default function ForgotPasswordScreen() {
-  const styles = useStyles();
   const params = useLocalSearchParams<{ email?: string }>();
   const [email, setEmail] = useState(params.email ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [left, setLeft] = useState(0);
 
-  async function onSubmit() {
-    const value = email.trim().toLowerCase();
-    if (!value.includes('@')) {
-      setError('Ingresá un email válido');
-      return;
-    }
+  useEffect(() => {
+    if (left <= 0) return;
+    const t = setTimeout(() => setLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [left]);
+
+  async function send(value: string) {
     setLoading(true);
     setError(null);
     const res = await apiFetch<{ ok: true; message?: string }>(authPaths.forgotPassword(), {
@@ -38,52 +41,209 @@ export default function ForgotPasswordScreen() {
       setError(res.error);
       return;
     }
-    setSent(res.data.message ?? 'Si hay una cuenta con ese email, te enviamos las instrucciones.');
+    setSentTo(value);
+    setLeft(RESEND_SECONDS);
+  }
+
+  function onSubmit() {
+    const value = email.trim().toLowerCase();
+    if (!isEmail(value)) {
+      setError('Ingresá un email válido');
+      return;
+    }
+    send(value);
+  }
+
+  if (sentTo) {
+    return (
+      <SentState
+        email={sentTo}
+        secondsLeft={left}
+        resending={loading}
+        error={error}
+        onResend={() => send(sentTo)}
+      />
+    );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Recuperar contraseña</Text>
-          <Text style={styles.text}>
-            {sent ?? 'Te mandamos un mail con un link para elegir una contraseña nueva.'}
-          </Text>
-        </View>
+    <FormState
+      email={email}
+      onChangeEmail={(v) => {
+        setEmail(v);
+        if (error) setError(null);
+      }}
+      error={error}
+      loading={loading}
+      onSubmit={onSubmit}
+    />
+  );
+}
 
-        <View style={styles.form}>
-          {sent ? null : (
-            <TextField
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="tu@email.com"
-              autoCapitalize="none"
-              autoComplete="email"
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              onSubmitEditing={onSubmit}
-            />
-          )}
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          {sent ? null : <Button title="Enviar link" onPress={onSubmit} loading={loading} />}
-          <Button title="Volver a ingresar" variant="ghost" onPress={() => router.back()} />
+function FormState({
+  email,
+  onChangeEmail,
+  error,
+  loading,
+  onSubmit,
+}: {
+  email: string;
+  onChangeEmail: (v: string) => void;
+  error: string | null;
+  loading: boolean;
+  onSubmit: () => void;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <AuthScreen
+      onBack={router.back}
+      footer={<PillButton title="Enviar link" onPress={onSubmit} loading={loading} disabled={!email.trim()} />}>
+      <View style={styles.header}>
+        <View style={styles.tile}>
+          <Icon name="key" size={24} color={colors.brand} />
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <AuthTitle
+          title="Recuperar contraseña"
+          subtitle="Te mandamos un link por email para que elijas una nueva."
+        />
+      </View>
+      <AuthField
+        label="Email"
+        value={email}
+        onChangeText={onChangeEmail}
+        error={error}
+        accessory="clear"
+        placeholder="tu@email.com"
+        autoFocus={!email}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="email"
+        keyboardType="email-address"
+        textContentType="emailAddress"
+        returnKeyType="send"
+        onSubmitEditing={onSubmit}
+      />
+    </AuthScreen>
+  );
+}
+
+function SentState({
+  email,
+  secondsLeft,
+  resending,
+  error,
+  onResend,
+}: {
+  email: string;
+  secondsLeft: number;
+  resending: boolean;
+  error: string | null;
+  onResend: () => void;
+}) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const waiting = secondsLeft > 0;
+  const resendLabel = waiting
+    ? `Reenviar en 0:${String(secondsLeft).padStart(2, '0')}`
+    : 'Reenviar email';
+
+  return (
+    <AuthScreen
+      onClose={router.back}
+      footer={
+        <>
+          {Platform.OS === 'ios' ? (
+            <PillButton
+              title="Abrir app de email"
+              onPress={() => Linking.openURL('message://').catch(() => {})}
+            />
+          ) : (
+            <PillButton title="Volver al ingreso" onPress={() => router.back()} />
+          )}
+          <PillButton
+            title={resendLabel}
+            variant="ghost"
+            onPress={onResend}
+            loading={resending}
+            disabled={waiting}
+          />
+        </>
+      }>
+      <View style={styles.sentHero}>
+        <View style={styles.mailTile}>
+          <Icon name="mail" size={52} color={colors.text} />
+          <View style={styles.badge}>
+            <Icon name="checkmark" size={18} color={colors.onBrand} />
+          </View>
+        </View>
+        <AuthTitle
+          center
+          title="Revisá tu email"
+          subtitle={
+            <>
+              Si hay una cuenta con <Text style={styles.strong}>{email}</Text>, te llega un link para
+              elegir una contraseña nueva.
+            </>
+          }
+        />
+      </View>
+      <View style={styles.notice}>
+        <Icon name="alert" size={18} color={colors.warning} />
+        <Text style={styles.noticeText}>¿No lo ves? Fijate en la carpeta de spam o promociones.</Text>
+      </View>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+    </AuthScreen>
   );
 }
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    safe: { flex: 1, backgroundColor: c.canvas },
-    container: { flex: 1, justifyContent: 'center', padding: Spacing.four, gap: Spacing.five },
-    header: { gap: Spacing.two },
-    title: { color: c.text, fontSize: 28, fontFamily: DisplayFont.bold, letterSpacing: -0.8 },
-    text: { color: c.textSecondary, fontSize: 15, lineHeight: 21 },
-    form: { gap: Spacing.three },
-    error: { color: c.danger, fontSize: 14 },
+    header: { gap: 18 },
+    tile: {
+      width: 56,
+      height: 56,
+      borderRadius: 18,
+      backgroundColor: c.brandMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sentHero: { alignItems: 'center', gap: 28, paddingTop: 12 },
+    mailTile: {
+      width: 128,
+      height: 128,
+      borderRadius: 36,
+      backgroundColor: c.hero.glass,
+      borderWidth: 1,
+      borderColor: c.hero.glassBorder,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badge: {
+      position: 'absolute',
+      right: -10,
+      bottom: -10,
+      width: 44,
+      height: 44,
+      borderRadius: 999,
+      backgroundColor: c.brand,
+      borderWidth: 4,
+      borderColor: c.background,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    strong: { color: c.text, fontWeight: '600' },
+    notice: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 12,
+      padding: 16,
+      borderRadius: 18,
+      backgroundColor: c.warningMuted,
+      borderWidth: 1,
+      borderColor: c.warningMuted,
+    },
+    noticeText: { flex: 1, color: c.text, fontSize: 14, lineHeight: 20 },
+    error: { color: c.danger, fontSize: 14, textAlign: 'center' },
   }),
 );

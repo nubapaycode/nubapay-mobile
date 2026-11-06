@@ -1,14 +1,24 @@
+import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useThemeReveal } from '@/components/fx/theme-reveal';
 import { AppearancePicker } from '@/components/ui/appearance-picker';
 import { LogoutButton } from '@/components/ui/logout-button';
 import { NavCard } from '@/components/ui/nav-card';
 import { Sheet, useSheet } from '@/components/ui/sheet';
+import { toast } from '@/components/ui/toast';
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { initials } from '@/features/dashboard/format';
+import {
+  allowBiometricOffer,
+  type BiometricKind,
+  disableBiometricLogin,
+  getBiometricEmail,
+  getBiometricKind,
+} from '@/lib/biometrics';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -60,6 +70,7 @@ function ProfileContent() {
       </View>
 
       <View style={styles.menu}>
+        <BiometricCard email={user?.email} />
         <NavCard
           icon="bank"
           title="Cobros"
@@ -82,6 +93,60 @@ function ProfileContent() {
 
       <LogoutButton onPress={(signOut) => dismiss(signOut)} />
     </ScrollView>
+  );
+}
+
+/**
+ * Ingreso con Face ID / huella en este teléfono. Activarlo necesita la contraseña, así que desde acá
+ * solo se apaga; prenderlo deja la oferta lista para el próximo ingreso con contraseña.
+ */
+function BiometricCard({ email }: { email?: string }) {
+  const { colors } = useTheme();
+  const [kind, setKind] = useState<BiometricKind | null>(null);
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    Promise.all([getBiometricKind(), getBiometricEmail()]).then(([k, saved]) => {
+      setKind(k);
+      setEnabled(!!email && saved === email);
+    });
+  }, [email]);
+
+  if (!kind || !email) return null;
+
+  async function toggle() {
+    if (!kind) return;
+    if (enabled) {
+      await disableBiometricLogin();
+      setEnabled(false);
+      toast.info(`Ingreso con ${kind.name} desactivado`);
+      return;
+    }
+    await allowBiometricOffer();
+    toast.info(
+      `Activá ${kind.name} al ingresar`,
+      'La próxima vez que entres con tu contraseña te lo vamos a ofrecer.',
+    );
+  }
+
+  return (
+    <NavCard
+      icon={kind.icon}
+      title={`Ingreso con ${kind.name}`}
+      subtitle={enabled ? 'Activado en este teléfono' : 'Desactivado'}
+      onPress={toggle}
+      right={
+        <Switch
+          value={enabled}
+          onValueChange={() => {
+            Haptics.selectionAsync();
+            toggle();
+          }}
+          trackColor={{ true: colors.primary, false: colors.border }}
+          accessibilityLabel={`Ingreso con ${kind.name}: ${enabled ? 'activado' : 'desactivado'}`}
+        />
+      }
+    />
   );
 }
 

@@ -35,7 +35,12 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Nubapay usa Face ID para que ingreses sin escribir tu contraseña."
+        }
+      ],
       [
         "expo-image-picker",
         {
@@ -50,7 +55,13 @@
           "recordAudioAndroid": false
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Nubapay usa Face ID para que ingreses sin escribir tu contraseña."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

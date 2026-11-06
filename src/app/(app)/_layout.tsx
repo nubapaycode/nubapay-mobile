@@ -1,10 +1,36 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { useEffect } from 'react';
 
 import { DisplayFont } from '@/constants/theme';
-import { useTheme } from '@/theme';
+import {
+  peekPendingBiometricOffer,
+  setPendingBiometricOffer,
+  shouldOfferBiometrics,
+} from '@/lib/biometrics';
+import { dark, useTheme } from '@/theme';
+
+/** Recién ingresado con contraseña: ofrece activar Face ID / huella (una vez que se ve el inicio). */
+function useBiometricOffer() {
+  useEffect(() => {
+    const offer = peekPendingBiometricOffer();
+    if (!offer) return;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const show = await shouldOfferBiometrics(offer.email);
+      if (cancelled) return;
+      if (show) router.push('/enable-biometrics');
+      else setPendingBiometricOffer(null);
+    }, 700);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, []);
+}
 
 export default function AppLayout() {
   const { colors } = useTheme();
+  useBiometricOffer();
   return (
     <Stack
       screenOptions={{
@@ -15,6 +41,15 @@ export default function AppLayout() {
         contentStyle: { backgroundColor: colors.canvas },
       }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Inicio' }} />
+      <Stack.Screen
+        name="enable-biometrics"
+        options={{
+          headerShown: false,
+          presentation: 'fullScreenModal',
+          gestureEnabled: false,
+          contentStyle: { backgroundColor: dark.background },
+        }}
+      />
       <Stack.Screen
         name="scan"
         options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }}

@@ -3,34 +3,38 @@ import {
   BricolageGrotesque_700Bold,
   BricolageGrotesque_800ExtraBold,
   useFonts,
-} from '@expo-google-fonts/bricolage-grotesque';
+} from "@expo-google-fonts/bricolage-grotesque";
 import {
   DarkTheme,
   DefaultTheme,
   Stack,
   ThemeProvider as NavigationThemeProvider,
-} from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo } from 'react';
-import { LogBox } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+} from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useMemo } from "react";
+import { LogBox } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { ThemeReveal } from '@/components/fx/theme-reveal';
-import { CardExpandHost } from '@/components/motion/card-expand';
-import { ToastHost } from '@/components/ui/toast';
-import { DisplayFont } from '@/constants/theme';
-import { AuthProvider, useAuth } from '@/providers/auth-provider';
-import { ThemeProvider, useTheme } from '@/theme';
+import { ThemeReveal } from "@/components/fx/theme-reveal";
+import { CardExpandHost } from "@/components/motion/card-expand";
+import { ToastHost } from "@/components/ui/toast";
+import { DisplayFont } from "@/constants/theme";
+import { AuthProvider, useAuth } from "@/providers/auth-provider";
+import { dark, PaletteScope, ThemeProvider, useTheme } from "@/theme";
 
 // Ruido de librerías con native driver (no viene de código propio).
-LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered']);
+LogBox.ignoreLogs([
+  "Sending `onAnimatedValueUpdate` with no listeners registered",
+]);
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
   const { isLoading, token } = useAuth();
-  const { colors, loaded: themeLoaded } = useTheme();
+  const { colors: themeColors, loaded: themeLoaded } = useTheme();
+  // Sin sesión (bienvenida, login, recuperar contraseña) siempre en oscuro, sin importar el tema elegido.
+  const colors = token ? themeColors : dark;
   // Bricolage Grotesque (títulos, igual que nubapay-frontend). Si falla la carga se sigue con la del sistema.
   const [fontsLoaded, fontError] = useFonts({
     [DisplayFont.semibold]: BricolageGrotesque_600SemiBold,
@@ -44,7 +48,7 @@ function RootNavigator() {
   }, [ready]);
 
   const navTheme = useMemo(() => {
-    const base = colors.scheme === 'dark' ? DarkTheme : DefaultTheme;
+    const base = colors.scheme === "dark" ? DarkTheme : DefaultTheme;
     return {
       ...base,
       colors: {
@@ -61,19 +65,21 @@ function RootNavigator() {
   if (!ready) return null;
 
   return (
-    <NavigationThemeProvider value={navTheme}>
-      <StatusBar style={colors.scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!!token} redirectTo="/login">
-          <Stack.Screen name="(app)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!token} redirectTo="/">
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-      </Stack>
-      <CardExpandHost />
-      <ToastHost />
-    </NavigationThemeProvider>
+    <PaletteScope palette={colors}>
+      <NavigationThemeProvider value={navTheme}>
+        <StatusBar style={colors.scheme === "dark" ? "light" : "dark"} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={!!token} redirectTo="/welcome">
+            <Stack.Screen name="(app)" />
+          </Stack.Protected>
+          <Stack.Protected guard={!token} redirectTo="/">
+            <Stack.Screen name="(auth)" />
+          </Stack.Protected>
+        </Stack>
+        <CardExpandHost />
+        <ToastHost />
+      </NavigationThemeProvider>
+    </PaletteScope>
   );
 }
 

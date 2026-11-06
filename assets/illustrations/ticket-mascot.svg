@@ -1,0 +1,55 @@
+<!--
+  Mascota "entrada" de nubapay (boceto del canvas de auth, variante F · Personaje).
+  Entrada lima con cara, saludando con una mano y sosteniendo un celular con QR, con confeti alrededor.
+  Pensada sobre fondo oscuro (#080b11 / #0b0f17). viewBox 240×260.
+
+  Grupos con id para animarla (en el boceto, con easing suave, sin resortes):
+    #mascot-body  → salto: translateY 0 → -14px → 0, 1.6 s en loop.
+    #mascot-wave  → brazo que saluda: rotate 0° → -22° → 0°, 0.8 s en loop, pivote en (62, 118).
+    #mascot-shadow → sombra: scaleX 1 → 0.75 y opacidad 0.5 → 0.3 al ritmo del salto, pivote en (120, 246).
+  Respetar "reducir movimiento": quieta.
+
+  Colores de la paleta: lima #c6ff00, tinta #0b0f17, blanco #f5f7fa, azul #0069ff, celeste #6cb0ff,
+  superficie #161b25; confeti extra #ff5c9a y #ffb020.
+  El texto usa Bricolage Grotesque (ADMIT 1) e Inter (NUBAPAY); al implementarla conviene pasarlo a
+  trazos o a <Text> de la app.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="260" viewBox="0 0 240 260" fill="none">
+  <g id="mascot-confetti">
+    <rect x="22" y="40" width="10" height="10" rx="2" fill="#0069ff" transform="rotate(20 27 45)"/>
+    <rect x="196" y="28" width="12" height="6" rx="3" fill="#c6ff00" transform="rotate(-30 202 31)"/>
+    <circle cx="210" cy="96" r="5" fill="#ff5c9a"/>
+    <circle cx="30" cy="150" r="4" fill="#c6ff00"/>
+    <rect x="198" y="168" width="10" height="10" rx="2" fill="#6cb0ff" transform="rotate(35 203 173)"/>
+    <rect x="40" y="14" width="12" height="5" rx="2.5" fill="#ffb020" transform="rotate(15 46 16)"/>
+  </g>
+  <ellipse id="mascot-shadow" cx="120" cy="246" rx="58" ry="8" fill="#000000" opacity="0.5"/>
+  <g id="mascot-body">
+    <!-- Piernas y zapatillas -->
+    <path d="M100 200 L96 232" stroke="#f5f7fa" stroke-width="7" stroke-linecap="round"/>
+    <path d="M140 200 L144 232" stroke="#f5f7fa" stroke-width="7" stroke-linecap="round"/>
+    <rect x="80" y="228" width="24" height="12" rx="6" fill="#0069ff"/>
+    <rect x="136" y="228" width="24" height="12" rx="6" fill="#0069ff"/>
+    <!-- Brazo derecho con el celular (QR) -->
+    <path d="M178 130 C196 138 200 154 196 166" stroke="#f5f7fa" stroke-width="7" stroke-linecap="round"/>
+    <rect x="184" y="160" width="22" height="34" rx="5" fill="#161b25" stroke="#f5f7fa" stroke-width="3"/>
+    <rect x="189" y="166" width="12" height="12" rx="2" fill="#c6ff00"/>
+    <!-- Brazo izquierdo saludando -->
+    <g id="mascot-wave">
+      <path d="M62 118 C44 108 36 90 40 72" stroke="#f5f7fa" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="40" cy="68" r="9" fill="#f5f7fa"/>
+    </g>
+    <!-- Cuerpo: entrada con muescas a los costados -->
+    <path d="M70 70 H170 A10 10 0 0 1 180 80 V112 A14 14 0 0 0 180 140 V190 A10 10 0 0 1 170 200 H70 A10 10 0 0 1 60 190 V140 A14 14 0 0 0 60 112 V80 A10 10 0 0 1 70 70 Z" fill="#c6ff00" stroke="#0b0f17" stroke-width="3"/>
+    <path d="M76 126 H164" stroke="#0b0f17" stroke-width="3" stroke-dasharray="6 6" stroke-linecap="round" opacity="0.35"/>
+    <!-- Cara -->
+    <ellipse cx="100" cy="98" rx="10" ry="12" fill="#ffffff" stroke="#0b0f17" stroke-width="3"/>
+    <ellipse cx="140" cy="98" rx="10" ry="12" fill="#ffffff" stroke="#0b0f17" stroke-width="3"/>
+    <circle cx="103" cy="101" r="5" fill="#0b0f17"/>
+    <circle cx="143" cy="101" r="5" fill="#0b0f17"/>
+    <path d="M108 112 Q120 122 132 112" stroke="#0b0f17" stroke-width="3" stroke-linecap="round"/>
+    <!-- Texto impreso en la entrada -->
+    <text x="120" y="168" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="20" fill="#0b0f17">ADMIT 1</text>
+    <text x="120" y="186" text-anchor="middle" font-family="Inter, sans-serif" font-weight="600" font-size="9" letter-spacing="2" fill="#0b0f17" opacity="0.6">NUBAPAY</text>
+  </g>
+</svg>

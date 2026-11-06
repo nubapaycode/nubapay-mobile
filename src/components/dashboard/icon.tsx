@@ -67,6 +67,12 @@ const ICONS = {
   blocks: { ios: 'rectangle.stack', android: 'view_agenda' },
   lock: { ios: 'lock', android: 'lock' },
   warning: { ios: 'exclamationmark.triangle', android: 'warning' },
+  back: { ios: 'arrow.left', android: 'arrow_back' },
+  key: { ios: 'key', android: 'key' },
+  alert: { ios: 'exclamationmark.circle', android: 'error' },
+  faceid: { ios: 'faceid', android: 'face' },
+  fingerprint: { ios: 'touchid', android: 'fingerprint' },
+  shield: { ios: 'lock.shield', android: 'shield' },
 } as const;
 
 export type IconName = keyof typeof ICONS;

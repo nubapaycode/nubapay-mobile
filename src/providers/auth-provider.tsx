@@ -14,7 +14,11 @@ type AuthState = {
   isLoading: boolean;
   token: string | null;
   user: AuthUser | null;
-  signIn: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  /** `status`: código HTTP cuando el backend rechazó (para distinguir credenciales malas de un error de red). */
+  signIn: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string; status?: number }>;
   signOut: () => Promise<void>;
 };
 
@@ -72,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
     });
-    if (!res.ok) return { ok: false, error: res.error };
+    if (!res.ok) return { ok: false, error: res.error, status: res.status };
     if (!res.data.token) return { ok: false, error: 'Respuesta inválida del servidor' };
     const nextUser = toAuthUser(res.data);
     await saveSession(res.data.token, nextUser);
