@@ -41,7 +41,16 @@ export type DashboardSummary = DashboardTotals & {
   hourly: { hour: string; revenue: number }[];
   series: { kind: 'hourly' | 'daily'; points: SeriesPoint[] };
   range: { from: string; to: string } | null;
-  comparison: (DashboardTotals & { range: { from: string; to: string } }) | null;
+  /**
+   * Contra qué se compara: con rango, el período anterior de igual duración; sin rango (todo el
+   * evento), el evento anterior del organizador hasta la misma altura (`event`, sin `range`).
+   */
+  comparison:
+    | (DashboardTotals & {
+        range: { from: string; to: string } | null;
+        event?: { id: string; name: string };
+      })
+    | null;
   filters: { payment: PaymentKey | null; product: string | null };
   payment_breakdown: { key: PaymentKey; count: number; revenue: number }[];
   top_products: { name: string; quantity: number; revenue: number }[];

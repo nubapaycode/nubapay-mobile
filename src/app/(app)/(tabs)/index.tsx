@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -15,15 +15,17 @@ import { BentoGrid } from '@/components/dashboard/bento-grid';
 import { CompactBar } from '@/components/dashboard/compact-bar';
 import { FADE_EASING, FADE_MS } from '@/components/dashboard/detail-kit';
 import { HeroBackdrop } from '@/components/dashboard/hero-backdrop';
-import { Lottie } from '@/components/fx/lottie';
 import { LastHourCard } from '@/components/dashboard/last-hour-card';
+import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { SoldOutParty } from '@/components/dashboard/live-moments';
 import { PulseHeader } from '@/components/dashboard/pulse-header';
 import { PulseHero } from '@/components/dashboard/pulse-hero';
 import { hiddenNativeSpinner, PulseRefresh } from '@/components/dashboard/pulse-refresh';
 import { QuickActions } from '@/components/dashboard/quick-actions';
+import { RecapCard } from '@/components/dashboard/recap-card';
 import { DashboardSkeleton } from '@/components/dashboard/skeleton';
 import { Button } from '@/components/ui';
+import { CoachTip } from '@/components/ui/coach-tip';
 import { NoAccess } from '@/components/ui/no-access';
 import { useEventAccess } from '@/features/access/access';
 import { Spacing } from '@/constants/theme';
@@ -37,10 +39,15 @@ import {
   useDashboardFilters,
 } from '@/features/dashboard/filters';
 import { eventPhase } from '@/features/dashboard/format';
+import { mascotLines } from '@/features/dashboard/mascot-lines';
 import { eventOffer, singleOffer } from '@/features/dashboard/offer';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
-import { useLivePulse } from '@/features/live/live-pulse';
+import { openAddEvent } from '@/features/events/add-event';
+import { hasLivePulse, useLivePulse } from '@/features/live/live-pulse';
+import { hasSeenOnboarding } from '@/features/onboarding/onboarding-seen';
+import { useFirstTip } from '@/features/tips/tips';
+import { AUTO_RECAP_WINDOW_MS, eventEndedAt, hasSeenRecap } from '@/features/recap/recap-seen';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
@@ -100,7 +107,7 @@ export default function HomeScreen() {
   }, [selectedId]);
 
   // Sin permiso de métricas no se piden (el backend respondería 403 en cada actualización).
-  const { can } = useEventAccess();
+  const { can, canCreateEvents } = useEventAccess();
   const canView = can('dashboard');
   const { state, refreshing, refresh } = useEventDashboard(canView ? selectedId : null, filters);
   const data = state.status === 'ready' ? state.data : null;
@@ -115,6 +122,36 @@ export default function HomeScreen() {
     event?.id ?? null,
     data ? `${data.summary.total_revenue}|${data.summary.order_count}|${data.insights.event.phase}` : null,
   );
+
+  // Tips de una sola vez: como mucho uno a la vez, el primero que no se vio.
+  const liveNow = data?.insights.event.phase === 'live';
+  const { tip, dismiss: dismissTip } = useFirstTip([
+    liveNow && Platform.OS === 'ios' && hasLivePulse && 'live-activity',
+    liveNow && !!pulse?.mascot && 'mascot-tap',
+    Platform.OS === 'ios' && !!data && 'bento-preview',
+  ]);
+
+  // Cuenta nueva sin eventos: la bienvenida se abre sola una vez.
+  const noEvents = !!events && events.length === 0;
+  useEffect(() => {
+    if (!noEvents || !user?.id || !canCreateEvents) return;
+    hasSeenOnboarding(user.id).then((seen) => {
+      if (!seen) router.push('/onboarding');
+    });
+  }, [noEvents, user?.id, canCreateEvents]);
+
+  // Al terminar el evento, el resumen se abre solo una vez (si terminó hace poco).
+  const endedPhase = data?.insights.event.phase === 'ended';
+  const autoRecapFor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!event || !endedPhase || autoRecapFor.current === event.id) return;
+    autoRecapFor.current = event.id;
+    const endedAt = eventEndedAt(event);
+    if (!endedAt || Date.now() - endedAt.getTime() > AUTO_RECAP_WINDOW_MS) return;
+    hasSeenRecap(event.id).then((seen) => {
+      if (!seen) router.push({ pathname: '/event-recap/[id]', params: { id: event.id } });
+    });
+  }, [event, endedPhase]);
 
   const selectPreset = (preset: RangePreset) =>
     setDashboardFilters({ ...filters, period: { preset } });
@@ -161,6 +198,8 @@ export default function HomeScreen() {
 
         {eventsError ? (
           <ErrorState message={eventsError} />
+        ) : events && events.length === 0 ? (
+          <NoEventsState canCreate={canCreateEvents} />
         ) : !canView ? (
           <NoAccess text="Tu rol en este evento no incluye ver las métricas. Usá el escáner o las otras herramientas que tengas habilitadas." />
         ) : state.status === 'error' ? (
@@ -183,8 +222,32 @@ export default function HomeScreen() {
 
             <QuickActions />
 
-            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} activity={data.insights.recent_activity} mood={pulse?.mascot ?? null} /> : null}
+            {data.insights.event.phase === 'ended' ? (
+              <RecapCard
+                eventId={event.id}
+                eventName={event.name}
+                soldOut={!!data.insights.tickets.capacity && data.insights.tickets.sold >= data.insights.tickets.capacity}
+              />
+            ) : null}
 
+            {tip === 'live-activity' ? (
+              <CoachTip strong="Bloqueá el teléfono:" text="vas a ver las ventas en vivo en la pantalla bloqueada." onClose={dismissTip} />
+            ) : tip === 'mascot-tap' ? (
+              <CoachTip strong="Tocame" text="y te cuento cómo viene el evento." arrowAlign="right" onClose={dismissTip} />
+            ) : null}
+
+            {data.insights.event.phase === 'live' ? <LastHourCard
+                live={data.summary.live}
+                activity={data.insights.recent_activity}
+                mood={pulse?.mascot ?? null}
+                eventId={event.id}
+                lines={pulse?.mascot ? mascotLines(data, pulse.mascot) : []}
+                onMascotPress={tip === 'mascot-tap' ? dismissTip : undefined}
+              /> : null}
+
+            {tip === 'bento-preview' ? (
+              <CoachTip strong="Mantené apretada" text="una card del resumen para ver el detalle sin entrar." onClose={dismissTip} />
+            ) : null}
             <BentoGrid data={data} />
 
           </Animated.View>
@@ -212,11 +275,30 @@ export default function HomeScreen() {
   );
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+/** Sin eventos: la mascota esperando y crear el primero (o, para el equipo, que te sumen a uno). */
+function NoEventsState({ canCreate }: { canCreate: boolean }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.error}>
-      <Lottie name="offline" size={112} />
+      <MoodMascot mood="waiting" size={120} onLight={colors.scheme === 'light'} />
+      <Text style={styles.errorTitle}>Todavía no tenés eventos</Text>
+      <Text style={styles.errorText}>
+        {canCreate
+          ? 'Creá tu primer evento y te guío paso a paso hasta que tu tienda esté lista.'
+          : 'Cuando el organizador te sume a un evento, lo vas a ver acá.'}
+      </Text>
+      {canCreate ? <Button title="Crear mi primer evento" onPress={openAddEvent} /> : null}
+    </View>
+  );
+}
+
+function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <View style={styles.error}>
+      <MoodMascot mood="offline" size={104} onLight={colors.scheme === 'light'} />
       <Text style={styles.errorTitle}>No pudimos cargar las métricas</Text>
       <Text style={styles.errorText}>{message}</Text>
       {onRetry ? <Button title="Reintentar" variant="ghost" onPress={onRetry} /> : null}

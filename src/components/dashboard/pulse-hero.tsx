@@ -119,6 +119,7 @@ export function PulseHero({
 
       {hasPrev ? (
         <ChartLegend
+          prevEventName={summary.comparison?.event?.name ?? null}
           showPrev={showPrev}
           onToggle={() => {
             Haptics.selectionAsync();
@@ -133,31 +134,42 @@ export function PulseHero({
 }
 
 /**
- * Qué es cada línea: la de este período y la punteada del anterior (mismo tramo, corrido). Tocar
- * "Anterior" la muestra u oculta.
+ * Qué es cada línea: la de este período y la punteada del anterior (mismo tramo, corrido). En la
+ * vista de todo el evento, la punteada es el evento anterior a la misma altura y lleva su nombre.
+ * Tocarla la muestra u oculta.
  */
-function ChartLegend({ showPrev, onToggle }: { showPrev: boolean; onToggle: () => void }) {
+function ChartLegend({
+  showPrev,
+  onToggle,
+  prevEventName,
+}: {
+  showPrev: boolean;
+  onToggle: () => void;
+  prevEventName: string | null;
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   return (
     <View style={styles.legend}>
       <View style={styles.legendItem}>
         <View style={[styles.legendLine, { backgroundColor: colors.hero.line }]} />
-        <Text style={styles.legendText}>Este período</Text>
+        <Text style={styles.legendText}>{prevEventName ? 'Este evento' : 'Este período'}</Text>
       </View>
       <Pressable
         onPress={onToggle}
         hitSlop={8}
         accessibilityRole="switch"
         accessibilityState={{ checked: showPrev }}
-        accessibilityLabel="Comparar con el período anterior"
+        accessibilityLabel={prevEventName ? `Comparar con ${prevEventName}` : 'Comparar con el período anterior'}
         style={({ pressed }) => [styles.legendItem, styles.legendToggle, pressed && { opacity: 0.6 }]}>
         <View style={styles.legendDash}>
           {[0, 1, 2].map((i) => (
             <View key={i} style={[styles.legendDot, { backgroundColor: colors.chart.previous }]} />
           ))}
         </View>
-        <Text style={[styles.legendText, !showPrev && styles.legendOff]}>Anterior</Text>
+        <Text style={[styles.legendText, styles.legendName, !showPrev && styles.legendOff]} numberOfLines={1}>
+          {prevEventName ?? 'Anterior'}
+        </Text>
       </Pressable>
     </View>
   );
@@ -270,6 +282,7 @@ const useStyles = makeStyles((c) =>
     legendDot: { width: 4, height: 2, borderRadius: 1 },
     legendText: { color: c.textSecondary, fontSize: 12, fontWeight: '500' },
     legendOff: { color: c.textMuted, textDecorationLine: 'line-through' },
+    legendName: { flexShrink: 1, maxWidth: 160 },
     meta: { color: c.textSecondary, fontSize: 13, fontVariant: ['tabular-nums'] },
     delta: {
       flexDirection: 'row',

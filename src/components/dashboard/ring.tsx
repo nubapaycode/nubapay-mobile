@@ -14,18 +14,28 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type RingSpec = { ratio: number; color: string };
 
-/** Anillos concéntricos de progreso (el exterior primero). Se llenan con ease-out al montar/cambiar. */
+/**
+ * Anillos concéntricos de progreso (el exterior primero). Se llenan con ease-out al montar/cambiar.
+ * Con `ticks` (p. ej. [0.25, 0.5, 0.75]) el anillo exterior lleva puntos de hito: apagados sobre
+ * la pista y encendidos cuando el progreso los pasa.
+ */
 export function Rings({
   rings,
   size = 132,
   stroke = 12,
   gap = 5,
+  ticks,
 }: {
   rings: RingSpec[];
   size?: number;
   stroke?: number;
   gap?: number;
+  ticks?: number[];
 }) {
+  const { colors } = useTheme();
+  const center = size / 2;
+  const outer = size / 2 - stroke / 2;
+  const reached = rings[0]?.ratio ?? 0;
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {rings.map((r, i) => {
@@ -34,11 +44,24 @@ export function Rings({
           <RingArc
             key={i}
             radius={radius}
-            center={size / 2}
+            center={center}
             stroke={stroke}
             ratio={r.ratio}
             color={r.color}
             delay={i * 140}
+          />
+        );
+      })}
+      {ticks?.map((t) => {
+        const angle = (t * 360 - 90) * (Math.PI / 180);
+        const on = reached >= t;
+        return (
+          <Circle
+            key={t}
+            cx={center + outer * Math.cos(angle)}
+            cy={center + outer * Math.sin(angle)}
+            r={Math.max(1.4, stroke * 0.3)}
+            fill={on ? colors.surface : colors.borderStrong}
           />
         );
       })}

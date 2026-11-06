@@ -70,7 +70,13 @@ export function TicketsDetail({ insights }: { insights: DashboardInsights }) {
       {/* En vivo importa quién está adentro; antes y después, cuánto se vendió. */}
       <Animated.View entering={enter(0)} style={styles.hero}>
         <View style={{ width: RING, height: RING }}>
-          <Rings rings={rings} size={RING} stroke={STROKE} gap={RING_GAP} />
+          <Rings
+            rings={rings}
+            size={RING}
+            stroke={STROKE}
+            gap={RING_GAP}
+            ticks={soldRatio != null ? [0.25, 0.5, 0.75] : undefined}
+          />
           <View style={styles.center} pointerEvents="none">
             <Text style={styles.centerCaption}>{live ? 'Adentro ahora' : 'Vendidas'}</Text>
             <RollingNumber

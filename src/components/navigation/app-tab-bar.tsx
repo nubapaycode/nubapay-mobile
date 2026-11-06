@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -14,6 +14,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
+import { SetupDot } from '@/components/dashboard/setup-checklist';
+import { useCanSetup } from '@/features/setup/event-setup';
 import { makeStyles, useTheme } from '@/theme';
 
 /** Ícono (normal / activo) y nombre accesible de cada pestaña, por nombre de ruta. */
@@ -42,6 +44,8 @@ export function AppTabBar({
   const styles = useStyles();
   const width = useSharedValue(0);
   const routes = state.routes.filter((r) => TABS[r.name]);
+  // Punto azul en Más mientras el evento tenga el checklist pendiente (ni completo ni salteado).
+  const canSetup = useCanSetup();
   const half = Math.ceil(routes.length / 2);
 
   const renderTab = (route: (typeof state.routes)[number]) => {
@@ -62,6 +66,7 @@ export function AppTabBar({
         activeIcon={meta.active}
         label={descriptors[route.key]?.options.tabBarAccessibilityLabel ?? meta.label}
         onPress={onPress}
+        badge={route.name === 'more' && canSetup ? <SetupDot style={styles.dot} /> : null}
       />
     );
   };
@@ -136,12 +141,15 @@ function TabItem({
   activeIcon,
   label,
   onPress,
+  badge,
 }: {
   focused: boolean;
   icon: IconName;
   activeIcon: IconName;
   label: string;
   onPress: () => void;
+  /** Marca arriba a la derecha del ícono (p. ej. el punto de pasos pendientes). */
+  badge?: ReactNode;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -177,6 +185,7 @@ function TabItem({
           size={23}
           color={focused ? colors.ink : colors.textMuted}
         />
+        {badge}
       </Animated.View>
     </Pressable>
   );
@@ -236,6 +245,7 @@ const useStyles = makeStyles((c) =>
       borderTopColor: c.border,
     },
     tab: { flex: 1, alignItems: 'center', gap: 6, paddingTop: 6, height: 44 },
+    dot: { position: 'absolute', top: -2, right: -4 },
     // Debajo del ícono: padding de la barra (10) + de la pestaña (6) + ícono (23) + separación (6).
     indicator: {
       position: 'absolute',

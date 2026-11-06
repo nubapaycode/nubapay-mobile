@@ -7,11 +7,11 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { CountBadge } from '@/components/motion/count-badge';
 import { enter, enterItem } from '@/components/dashboard/detail-kit';
 import { CardListSkeleton } from '@/components/dashboard/skeleton';
-import { Lottie } from '@/components/fx/lottie';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { MemberCard } from '@/components/team/member-card';
 import { NoAccess } from '@/components/ui/no-access';
+import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { useEventAccess } from '@/features/access/access';
 import { DisplayFont, Radius } from '@/constants/theme';
 import {
@@ -143,15 +143,7 @@ function TeamContent() {
         <Text style={styles.empty}>{error}</Text>
       ) : members.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
-          <Lottie
-            name={query ? 'search' : 'empty'}
-            size={124}
-            fallback={
-              <View style={styles.emptyIcon}>
-                <Icon name={query ? 'search' : 'people'} size={20} color={colors.textSecondary} />
-              </View>
-            }
-          />
+          <MoodMascot mood="search" size={112} onLight={colors.scheme === 'light'} />
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {query ? `Nadie coincide con “${query.trim()}”.` : 'Nadie tiene ese rol o permiso.'}

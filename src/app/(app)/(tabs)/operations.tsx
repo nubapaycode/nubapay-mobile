@@ -7,13 +7,14 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { CountBadge } from '@/components/motion/count-badge';
 import { enter, enterItem } from '@/components/dashboard/detail-kit';
 import { CardListSkeleton } from '@/components/dashboard/skeleton';
-import { Lottie } from '@/components/fx/lottie';
 import { TicketMascot } from '@/components/illustrations/ticket-mascot';
+import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { NoAccess } from '@/components/ui/no-access';
+import { CoachTip } from '@/components/ui/coach-tip';
 import { useEventAccess } from '@/features/access/access';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
@@ -32,6 +33,7 @@ import { listOrders, type Order } from '@/lib/api/organizer';
 import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { awaitingCash, hasPending } from '@/features/operations/scan';
+import { useFirstTip } from '@/features/tips/tips';
 
 /**
  * Operaciones (referencias: Mercury y Revolut Business): buscador, el total de resultados y los pedidos agrupados por día con lo cobrado en cada uno, cada
@@ -135,6 +137,8 @@ function OperationsContent() {
   const active = activeOperationFilters(filters);
   const list = orders.data?.orders ?? [];
   const groups = groupByDay(list, now);
+  // Tip de una sola vez: deslizar para entregar (solo si hay algo para entregar en la lista).
+  const { tip, dismiss: dismissTip } = useFirstTip([list.some(deliverable) && 'operations-swipe']);
 
   const filterButton = (
     <Pressable
@@ -216,15 +220,7 @@ function OperationsContent() {
         </Animated.View>
       ) : list.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
-          <Lottie
-            name={debounced.trim() ? 'search' : 'empty'}
-            size={124}
-            fallback={
-              <View style={styles.emptyIcon}>
-                <Icon name={debounced.trim() ? 'search' : 'receipt'} size={20} color={colors.textSecondary} />
-              </View>
-            }
-          />
+          <MoodMascot mood="search" size={112} onLight={colors.scheme === 'light'} />
           <Text style={styles.emptyTitle}>Sin resultados</Text>
           <Text style={styles.emptyText}>
             {debounced.trim()
@@ -234,6 +230,9 @@ function OperationsContent() {
         </Animated.View>
       ) : (
         <View style={styles.groups}>
+          {tip === 'operations-swipe' ? (
+            <CoachTip strong="Deslizá un pedido" text="hacia la derecha para entregarlo o registrar el ingreso más rápido." onClose={dismissTip} />
+          ) : null}
           {groups.map((g) => (
             <Animated.View key={g.key} layout={LinearTransition.duration(260)} style={styles.group}>
               <View style={styles.groupHead}>

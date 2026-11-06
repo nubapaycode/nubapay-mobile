@@ -1,60 +1,47 @@
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
+import { EventSetupCard } from '@/components/dashboard/setup-checklist';
 import { TabPage } from '@/components/navigation/tab-page';
 import { LogoutButton } from '@/components/ui/logout-button';
 import { NavCard } from '@/components/ui/nav-card';
 import { useEventAccess } from '@/features/access/access';
-import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { useRegrets } from '@/features/manage/manage';
-import { apiFetch } from '@/lib/api';
-import { apiUrl, publicCatalogUrl, publicTicketsUrl } from '@/lib/api/url';
+import { storeBlocker, useEventSetup, usePublicStore } from '@/features/setup/event-setup';
 import { usePullRefresh } from '@/hooks/use-pull-refresh';
-import { useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 
 const HELP_URL = 'https://www.nubapay.app/ayuda';
 
-type PublicStorefront = { products: unknown[]; combos: unknown[]; tickets: unknown[] };
-
 /**
- * Links a la tienda pública del evento seleccionado: el catálogo solo si tiene productos o combos
- * activos y la venta de entradas solo si tiene entradas activas (si no, la página estaría vacía).
- * Se consulta la tienda pública (lo mismo que ve un comprador, sin sesión), así lo ve todo el
- * equipo aunque no tenga permiso de catálogo. Se refresca al volver a la pestaña.
+ * Con la tienda cerrada, en lugar de esconder el link se avisa qué falta (portada o catálogo) y se
+ * lleva a resolverlo. Solo para quien puede editar el evento (pide el catálogo).
  */
-function usePublicStoreLinks() {
+function StoreBlockedCard() {
+  const setup = useEventSetup();
   const { eventId } = useEventAccess();
-  const { events } = useEvents();
-  const slug = events?.find((e) => e.id === eventId)?.slug?.trim() || null;
-  const { data, refresh } = useQuery<PublicStorefront>(slug ? `storefront:${slug}` : null, () =>
-    apiFetch<PublicStorefront>(apiUrl(`/catalog/storefront/${encodeURIComponent(slug!)}`), {
-      token: null,
-    }),
+  if (!setup.ready || !eventId) return null;
+  const blocker = storeBlocker(setup.steps);
+  return (
+    <NavCard
+      icon="store"
+      title="Tu tienda todavía no abre"
+      subtitle={blocker ? `${blocker.label} para abrirla` : 'Revisá que el evento esté activo'}
+      onPress={() =>
+        router.push(blocker?.href ?? { pathname: '/edit-event/[id]', params: { id: eventId } })
+      }
+    />
   );
-  useFocusEffect(
-    useCallback(() => {
-      if (slug) refresh();
-    }, [slug, refresh]),
-  );
-  if (!slug || !data) return { catalogUrl: null, ticketsUrl: null, refresh };
-  const hasProducts = (data.products?.length ?? 0) + (data.combos?.length ?? 0) > 0;
-  return {
-    catalogUrl: hasProducts ? publicCatalogUrl(slug) : null,
-    ticketsUrl: data.tickets?.length ? publicTicketsUrl(slug) : null,
-    refresh,
-  };
 }
 
 /** Más: accesos a todo lo que no está en la barra (eventos, cobros, cuenta y ayuda). */
 export default function MoreScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { can, isStaff } = useEventAccess();
+  const { can, isStaff, eventId } = useEventAccess();
   const canOrders = can('orders');
   const regrets = useRegrets(canOrders);
   const pendingRegrets = regrets.regrets?.filter((r) => r.status === 'pending').length ?? 0;
@@ -62,7 +49,10 @@ export default function MoreScreen() {
   const showSales = canProducts || canOrders;
   const canMethods = !isStaff || can('storefront');
   const showPayouts = canMethods || can('payments');
-  const { catalogUrl, ticketsUrl, refresh: refreshLinks } = usePublicStoreLinks();
+  const store = usePublicStore();
+  const { catalogUrl, ticketsUrl, refresh: refreshLinks } = store;
+  const canSetup = !isStaff || (canProducts && can('storefront'));
+  const showBlocked = !store.open && store.loaded && !!store.slug && canSetup;
   const pull = usePullRefresh(() => Promise.all([refreshLinks(), regrets.refresh()]));
   const openPublic = (url: string) =>
     WebBrowser.openBrowserAsync(url, {
@@ -72,6 +62,9 @@ export default function MoreScreen() {
 
   return (
     <TabPage title="Más" refreshing={pull.refreshing} onRefresh={pull.onRefresh}>
+      {/* Qué le falta al evento para vender: se va al completarlo o saltearlo (ver el punto azul). */}
+      {canSetup && eventId ? <EventSetupCard eventId={eventId} /> : null}
+
       <Animated.View entering={enter(1)} style={styles.group}>
         <Text style={styles.groupTitle}>Eventos</Text>
         <NavCard
@@ -82,10 +75,11 @@ export default function MoreScreen() {
         />
       </Animated.View>
 
-      {catalogUrl || ticketsUrl ? (
+      {catalogUrl || ticketsUrl || showBlocked ? (
         <Animated.View entering={enter(2)} style={styles.group}>
           <Text style={styles.groupTitle}>Tu tienda</Text>
           <View style={styles.list}>
+            {showBlocked ? <StoreBlockedCard /> : null}
             {catalogUrl ? (
               <NavCard
                 icon="store"

@@ -22,7 +22,7 @@ import { Icon, type IconName } from "@/components/dashboard/icon";
 import { DisplayFont, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
-import { Lottie } from "@/components/fx/lottie";
+import { MoodMascot } from "@/components/illustrations/mood-mascot";
 import { TicketMascot } from "@/components/illustrations/ticket-mascot";
 
 /**
@@ -236,15 +236,7 @@ export function EmptyState({
     <View style={styles.empty}>
       {/* Sin búsqueda es que todavía no hay nada: ahí saluda la mascota. */}
       {icon === "search" ? (
-        <Lottie
-          name="search"
-          size={132}
-          fallback={
-            <View style={styles.emptyIcon}>
-              <Icon name={icon} size={24} color={colors.ink} />
-            </View>
-          }
-        />
+        <MoodMascot mood="search" size={120} onLight={colors.scheme === "light"} />
       ) : (
         <TicketMascot size={120} onLight={colors.scheme === "light"} />
       )}

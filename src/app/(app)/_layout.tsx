@@ -97,6 +97,14 @@ export default function AppLayout() {
         options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }}
       />
       <Stack.Screen
+        name="onboarding"
+        options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }}
+      />
+      <Stack.Screen
+        name="event-recap/[id]"
+        options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }}
+      />
+      <Stack.Screen
         name="detail/[section]"
         options={{
           // Se llega expandiendo la tarjeta del inicio: el detalle aparece con fundido debajo.

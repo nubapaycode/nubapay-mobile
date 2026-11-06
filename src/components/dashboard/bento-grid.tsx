@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
-import { type Href, router } from 'expo-router';
-import { type ComponentRef, type ReactNode, useRef } from 'react';
+import { type Href, Link, router } from 'expo-router';
+import { type ComponentRef, type ReactNode, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -46,21 +46,13 @@ export function BentoGrid({ data }: { data: DashboardData }) {
   const styles = useStyles();
   const { insights } = data;
   const offer = eventOffer(insights);
-  const both = offer.tickets && offer.bar;
 
   return (
     <View style={styles.grid}>
       <Text style={styles.sectionLabel}>Resumen</Text>
-      {both ? (
-        <View style={styles.row}>
-          <TicketsTile data={data} index={0} />
-          <BarTile data={data} index={1} />
-        </View>
-      ) : offer.tickets ? (
-        <TicketsTile data={data} index={0} wide />
-      ) : (
-        <BarTile data={data} index={0} wide />
-      )}
+      {/* Una card por fila, a lo ancho: lado a lado quedaban apretadas. */}
+      {offer.tickets ? <TicketsTile data={data} index={0} wide /> : null}
+      {offer.bar ? <BarTile data={data} index={offer.tickets ? 1 : 0} wide /> : null}
       <SalesTile data={data} index={2} />
       {insights.recent_activity.length > 0 ? (
         <ActivityTile
@@ -74,6 +66,9 @@ export function BentoGrid({ data }: { data: DashboardData }) {
 }
 
 /* ───────────────────────── Tiles ───────────────────────── */
+
+/** Hitos de aforo marcados sobre el anillo (se encienden al pasarlos). */
+const MILESTONE_TICKS = [0.25, 0.5, 0.75];
 
 function TicketsTile({ data, index, wide }: { data: DashboardData; index: number; wide?: boolean }) {
   const styles = useStyles();
@@ -91,6 +86,7 @@ function TicketsTile({ data, index, wide }: { data: DashboardData; index: number
         size={76}
         stroke={4.5}
         gap={3.5}
+        ticks={ratio != null ? MILESTONE_TICKS : undefined}
         rings={[
           { ratio: ratio ?? 1, color: colors.chart.ramp[0] },
           ...(showCheckin ? [{ ratio: inside, color: colors.chart.ramp[1] }] : []),
@@ -430,6 +426,7 @@ function Tile({
   const pressStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const ref = useRef<ComponentRef<typeof View>>(null);
   const opening = useRef(false);
+  const [pressed, setPressed] = useState(false);
 
   // La tarjeta se expande hasta cubrir la pantalla y ahí se abre el detalle (con fundido).
   const open = () => {
@@ -454,27 +451,45 @@ function Tile({
         .withInitialValues({ opacity: 0, transform: [{ translateY: 18 }] })}
       style={styles.tileOuter}>
       <Animated.View ref={ref} collapsable={false} style={[styles.tileOuter, pressStyle]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${title}. ${a11y}. Ver detalle`}
-          onPressIn={() => scale.set(withTiming(0.97, PRESS))}
-          onPressOut={() => scale.set(withTiming(1, PRESS))}
-          onPress={() => {
+        {/* Tocar abre el detalle con la expansión propia (por eso se cancela la navegación del
+            Link); mantener apretado en iOS muestra la vista previa nativa del detalle. */}
+        <Link
+          href={href}
+          asChild
+          onPress={(e) => {
+            e.preventDefault();
             Haptics.selectionAsync();
             open();
-          }}
-          style={({ pressed }) => [styles.tile, pressed && { backgroundColor: colors.raised }]}>
-          <View style={styles.tileHeader}>
-            <View style={styles.iconChip}>
-              <Icon name={icon} size={13} color={colors.textSecondary} />
-            </View>
-            <Text style={styles.tileTitle}>{title}</Text>
-            <View style={{ flex: 1 }} />
-            {right}
-            <Icon name="chevronRight" size={12} color={colors.textMuted} />
-          </View>
-          {children}
-        </Pressable>
+          }}>
+          <Link.Trigger>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${title}. ${a11y}. Ver detalle`}
+              onPressIn={() => {
+                setPressed(true);
+                scale.set(withTiming(0.97, PRESS));
+              }}
+              onPressOut={() => {
+                setPressed(false);
+                scale.set(withTiming(1, PRESS));
+              }}
+              // El Link con `asChild` pasa el estilo por un Slot que solo acepta un objeto plano:
+              // una función o un array se pierden (la card quedaba sin fondo, sombra ni padding).
+              style={StyleSheet.flatten([styles.tile, pressed && { backgroundColor: colors.raised }])}>
+              <View style={styles.tileHeader}>
+                <View style={styles.iconChip}>
+                  <Icon name={icon} size={13} color={colors.textSecondary} />
+                </View>
+                <Text style={styles.tileTitle}>{title}</Text>
+                <View style={{ flex: 1 }} />
+                {right}
+                <Icon name="chevronRight" size={12} color={colors.textMuted} />
+              </View>
+              {children}
+            </Pressable>
+          </Link.Trigger>
+          <Link.Preview />
+        </Link>
       </Animated.View>
     </Animated.View>
   );
@@ -508,7 +523,7 @@ function Chip({ label }: { label: string }) {
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
-    grid: { gap: 12 },
+    grid: { gap: Spacing.three },
     sectionLabel: {
       color: c.textSecondary,
       fontSize: 13,
@@ -516,7 +531,6 @@ const useStyles = makeStyles((c) =>
       letterSpacing: 0.2,
       marginLeft: 4,
     },
-    row: { flexDirection: 'row', gap: 12 },
     tileOuter: { flex: 1 },
     tile: {
       flex: 1,
@@ -526,8 +540,8 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
-      padding: Spacing.three,
-      gap: 14,
+      padding: 20,
+      gap: Spacing.three,
       justifyContent: 'space-between',
     },
     tileHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },

@@ -1,5 +1,6 @@
+import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -16,6 +17,9 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import type { MascotMood } from '@/widgets/types';
 
+/** Las poses del backend (`MascotMood`) más las de estados de la app: sin conexión y buscando. */
+export type MascotPose = MascotMood | 'offline' | 'search';
+
 /**
  * Mascota "entrada" según cómo viene la venta, con las mismas poses que la Live Activity
  * (`assets/illustrations/mascot-moods/*.svg`, exportadas a `assets/widgets/NubapayMascot*.imageset`):
@@ -23,7 +27,9 @@ import type { MascotMood } from '@/widgets/types';
  * - `selling`: saluda con una mano, rebota suave y parpadea;
  * - `hot`: salta con los brazos arriba entre confeti;
  * - `slow`: duerme respirando lento, con "z" que suben;
- * - `soldout`: corona que se mece y destellos.
+ * - `soldout`: corona que se mece y destellos;
+ * - `offline` (sin conexión): triste, con el enchufe desconectado que se balancea;
+ * - `search` (búsqueda sin resultados): recorre con una lupa de lado a lado.
  *
  * Cada parte animada va en su propia capa con el mismo viewBox (pivotes en coordenadas del dibujo).
  * Solo timing, sin resortes; con "reducir movimiento" queda quieta. Al cambiar de pose, funde.
@@ -48,22 +54,47 @@ export function MoodMascot({
   mood,
   size = 72,
   onLight = false,
+  hopKey = 0,
+  onPress,
 }: {
-  mood: MascotMood;
+  mood: MascotPose;
   /** Ancho en px (el alto sale de la proporción del dibujo). */
   size?: number;
   /** Sobre fondos claros, brazos, piernas y "z" van oscuros para que se vean. */
   onLight?: boolean;
+  /** Cada vez que cambia, la mascota pega un saltito (p. ej. cuando empieza a hablar). */
+  hopKey?: number;
+  /** Al tocarla: salta, da un toque háptico y llama a esto. Sin `onPress` no es tocable. */
+  onPress?: () => void;
 }) {
   const reduceMotion = useReducedMotion();
   const height = (VB_H / VB_W) * size;
   const limb = onLight ? '#2a3140' : WHITE;
   const Pose = POSES[mood];
-  return (
-    <View
-      style={{ width: size, height }}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants">
+  const hop = useSharedValue(0);
+
+  const jump = () => {
+    if (reduceMotion) return;
+    hop.set(
+      withSequence(
+        withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 220, easing: Easing.in(Easing.quad) }),
+      ),
+    );
+  };
+  useEffect(() => {
+    if (hopKey) jump();
+    // `jump` solo usa valores estables; el salto depende de que cambie `hopKey`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hopKey]);
+
+  const k = size / VB_W;
+  const hopStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -16 * k * hop.value }, { rotate: `${-4 * hop.value}deg` }],
+  }));
+
+  const body = (
+    <Animated.View style={[{ width: size, height }, hopStyle]}>
       <Animated.View
         key={mood}
         entering={reduceMotion ? undefined : FadeIn.duration(280)}
@@ -71,7 +102,29 @@ export function MoodMascot({
         style={[styles.layer, { width: size, height }]}>
         <Pose size={size} height={height} limb={limb} quiet={reduceMotion} />
       </Animated.View>
-    </View>
+    </Animated.View>
+  );
+
+  if (!onPress) {
+    return (
+      <View style={{ width: size, height }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {body}
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Mascota de Nubapay. Tocala para que te cuente algo del evento"
+      hitSlop={8}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        jump();
+        onPress();
+      }}
+      style={{ width: size, height }}>
+      {body}
+    </Pressable>
   );
 }
 
@@ -447,12 +500,75 @@ function SoldOut({ size, height, limb, quiet }: PoseProps) {
   );
 }
 
-const POSES: Record<MascotMood, (p: PoseProps) => React.ReactElement> = {
+function Offline({ size, height, limb, quiet }: PoseProps) {
+  const sway = useYoyo(900, quiet);
+  const sigh = useYoyo(1800, quiet);
+  const arm = useAnimatedStyle(() => ({ transform: [{ rotate: `${-5 + 10 * sway.value}deg` }] }));
+  const body = useAnimatedStyle(() => ({ transform: [{ scaleY: 1 - 0.025 * sigh.value }] }));
+  return (
+    <Animated.View style={[styles.layer, { width: size, height }, pivot(120, 240), body]}>
+      <Layer size={size} height={height}>
+        <Legs limb={limb} />
+        {/* Cable del enchufe al celular, por el piso. */}
+        <Path d="M50 182 C44 238 188 240 195 194" stroke="#9aa3b2" strokeWidth={3} strokeLinecap="round" fill="none" />
+        <PhoneArm limb={limb} />
+        <Body />
+        <Path d="M89 86 L109 81 M151 86 L131 81" stroke={INK} strokeWidth={3} strokeLinecap="round" />
+      </Layer>
+      <Layer size={size} height={height}>
+        <OpenEyes px={0} py={5} />
+        <Path d="M108 121 Q120 113 132 121" stroke={INK} strokeWidth={3} strokeLinecap="round" fill="none" />
+      </Layer>
+      <Layer size={size} height={height} style={[pivot(62, 130), arm]}>
+        <Arm d="M62 130 C48 140 46 158 50 172" color={limb} />
+        <Circle cx="50" cy="176" r="9" fill={limb} />
+        {/* El enchufe cuelga de la mano, desconectado. */}
+        <Rect x="42" y="186" width="16" height="14" rx="3" fill="#9aa3b2" stroke={INK} strokeWidth={2} />
+        <Path d="M46.5 200 V207 M53.5 200 V207" stroke={INK} strokeWidth={2.5} strokeLinecap="round" />
+      </Layer>
+    </Animated.View>
+  );
+}
+
+function Search({ size, height, limb, quiet }: PoseProps) {
+  const scan = useYoyo(900, quiet);
+  const k = size / VB_W;
+  const lens = useAnimatedStyle(() => ({ transform: [{ translateX: (-10 + 20 * scan.value) * k }] }));
+  const look = useAnimatedStyle(() => ({ transform: [{ translateX: (-3 + 6 * scan.value) * k }] }));
+  return (
+    <View style={[styles.layer, { width: size, height }]}>
+      <Layer size={size} height={height}>
+        <Legs limb={limb} />
+        <Arm d="M62 128 C44 126 42 148 60 154" color={limb} />
+        <Circle cx="60" cy="154" r="9" fill={limb} />
+        <Body />
+        <Ellipse cx="100" cy="98" rx="10" ry="12" fill="#ffffff" stroke={INK} strokeWidth={3} />
+        <Ellipse cx="120" cy="118" rx="4" ry="4.5" fill={INK} />
+      </Layer>
+      <Layer size={size} height={height} style={look}>
+        <Circle cx="103" cy="100" r="5" fill={INK} />
+      </Layer>
+      <Layer size={size} height={height} style={lens}>
+        <Arm d="M178 142 C200 146 202 128 186 128" color={limb} />
+        <Path d="M152 110 L182 128" stroke={INK} strokeWidth={8} strokeLinecap="round" />
+        <Ellipse cx="140" cy="98" rx="14" ry="16" fill="#ffffff" stroke={INK} strokeWidth={3} />
+        <Circle cx="144" cy="101" r="7" fill={INK} />
+        <Circle cx="140" cy="98" r="20" fill={SKY} fillOpacity={0.18} stroke={INK} strokeWidth={4.5} />
+        <Path d="M128 88 Q132 82 139 81" stroke="#ffffff" strokeWidth={3} strokeLinecap="round" fill="none" />
+        <Circle cx="184" cy="128" r="9" fill={limb} />
+      </Layer>
+    </View>
+  );
+}
+
+const POSES: Record<MascotPose, (p: PoseProps) => React.ReactElement> = {
   waiting: Waiting,
   selling: Selling,
   hot: Hot,
   slow: Slow,
   soldout: SoldOut,
+  offline: Offline,
+  search: Search,
 };
 
 /** Texto corto para acompañar cada pose. */

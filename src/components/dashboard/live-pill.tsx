@@ -58,8 +58,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.brandMuted,
     },
     dotWrap: { width: 8, height: 8, alignItems: 'center', justifyContent: 'center' },
-    halo: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: c.brand },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.brand },
-    label: { color: c.brandText, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+    halo: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: c.hero.accent },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.hero.accent },
+    label: { color: c.hero.accent, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
   }),
 );

@@ -224,7 +224,7 @@ const useStyles = makeStyles((c) =>
       fontVariant: ['tabular-nums'],
       flexShrink: 1,
     },
-    statusLive: { color: c.brandText, fontWeight: '700' },
+    statusLive: { color: c.hero.accent, fontWeight: '700' },
     chevron: {
       width: 24,
       height: 24,
