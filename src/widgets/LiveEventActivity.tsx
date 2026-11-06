@@ -1,10 +1,13 @@
 import { Chart, Gauge, HStack, Image, Spacer, Text, VStack, ZStack } from '@expo/ui/swift-ui';
 import {
   activityBackgroundTint,
+  animation,
+  Animation,
   font,
   foregroundStyle,
   frame,
   gaugeStyle,
+  id,
   layoutPriority,
   lineLimit,
   minimumScaleFactor,
@@ -21,7 +24,7 @@ import type { EventPulseProps } from './types';
  * Live Activity del evento en vivo:
  * - pantalla bloqueada: el nombre como título, la recaudación con lo vendido en la última hora
  *   (lima si viene subiendo, ámbar si se frenó), el gráfico de esa hora en tramos de 5 min y la
- *   mascota. Solo datos que tiene cualquier evento, sin los de entradas o barra;
+ *   mascota en la pose que corresponde (esperando, vendiendo, en racha, frenada o agotado). Solo datos que tiene cualquier evento, sin los de entradas o barra;
  * - Dynamic Island compacta: aro de aforo (o la nube si no hay entradas con tope) + recaudación corta;
  * - expandida: recaudación, dato principal y, abajo, barra + última hora + segundo dato.
  *
@@ -30,6 +33,10 @@ import type { EventPulseProps } from './types';
  */
 const LiveEventActivity = (props: EventPulseProps) => {
   'widget';
+  // Pose de la mascota que decide el backend (`mascot`); sin el campo, la de vender.
+  const poses = ['Waiting', 'Selling', 'Hot', 'Slow', 'SoldOut'];
+  const poseIndex = Math.max(0, ['waiting', 'selling', 'hot', 'slow', 'soldout'].indexOf(props.mascot ?? 'selling'));
+  const pose = poses[poseIndex] ?? 'Selling';
   return {
     banner: (
       <VStack alignment="leading" spacing={8} modifiers={[padding({ all: 16 }), activityBackgroundTint('#080b11')]}>
@@ -95,7 +102,11 @@ const LiveEventActivity = (props: EventPulseProps) => {
               />
             </ZStack>
           ) : null}
-          <Image assetName="NubapayMascot" modifiers={[frame({ width: 54, height: 56 })]} />
+          {/* Una pose por estado (assets/widgets/NubapayMascot*.imageset); el `id` hace que iOS
+              funda una pose con la otra cuando cambia el estado. */}
+          <ZStack modifiers={[frame({ width: 54, height: 58 }), animation(Animation.easeInOut({ duration: 0.5 }), poseIndex)]}>
+            <Image assetName={`NubapayMascot${pose}`} modifiers={[id(pose), frame({ width: 54, height: 58 })]} />
+          </ZStack>
         </HStack>
       </VStack>
     ),

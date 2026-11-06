@@ -8,6 +8,8 @@
  * - productos: "Productos 312" y "Por entregar 45";
  * - las dos cosas: entradas vendidas y productos por entregar.
  */
+export type MascotMood = 'waiting' | 'selling' | 'hot' | 'slow' | 'soldout';
+
 export type EventPulseProps = {
   eventName: string;
   /** "$ 950" o, desde $1.000, compacto: "$1,2k", "$340k", "$1,3M". */
@@ -30,6 +32,11 @@ export type EventPulseProps = {
   paceSeries: number[];
   /** Últimos 15 min contra los 15 anteriores; "flat" si no se vendió nada en media hora. */
   paceTrend: 'up' | 'down' | 'flat';
+  /**
+   * Pose de la mascota (`_mascot` en services/live_pulse.py): esperando la primera venta, vendiendo,
+   * en racha, sin ventas hace media hora o entradas agotadas. Puede faltar con un backend anterior.
+   */
+  mascot?: MascotMood;
   /** Segundo dato según el catálogo ("Ingresaron" / "Por entregar"). */
   extraLabel: string;
   extraValue: string;
@@ -53,6 +60,7 @@ export const EMPTY_PULSE: EventPulseProps = {
   paceValue: '',
   paceSeries: [],
   paceTrend: 'flat',
+  mascot: 'waiting',
   extraLabel: '',
   extraValue: '',
   ratio: -1,

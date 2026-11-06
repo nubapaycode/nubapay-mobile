@@ -1,6 +1,6 @@
 import { requireOptionalNativeModule } from 'expo';
 import * as SecureStore from 'expo-secure-store';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { apiFetch, authPaths, eventPaths } from '@/lib/api';
@@ -155,15 +155,34 @@ export async function syncPulse(eventId?: string | null): Promise<boolean> {
 }
 
 /**
- * Con la app abierta: sincroniza cada vez que cambian los datos del inicio (`version`) y recuerda
- * el evento para la tarea en segundo plano.
+ * Con la app abierta: trae el pulso cada vez que cambian los datos del inicio (`version`), lo aplica
+ * al widget y a la Live Activity (iOS) y recuerda el evento para la tarea en segundo plano.
+ * Devuelve el pulso en cualquier plataforma: el inicio lo usa para la pose de la mascota.
  */
-export function useLivePulse(eventId: string | null, version: string | null) {
+export function useLivePulse(eventId: string | null, version: string | null): EventPulseProps | null {
+  const [pulse, setPulse] = useState<{ eventId: string; props: EventPulseProps } | null>(null);
   useEffect(() => {
-    if (!native || !eventId || !version) return;
-    if (canStore) SecureStore.setItemAsync(EVENT_KEY, eventId).catch(() => {});
-    syncPulse(eventId);
+    if (!eventId || !version) return;
+    let cancelled = false;
+    if (native && canStore) SecureStore.setItemAsync(EVENT_KEY, eventId).catch(() => {});
+    (async () => {
+      try {
+        const { token } = await loadSession();
+        if (!token) return;
+        const res = await apiFetch<Pulse>(eventPaths.livePulse(eventId), { token });
+        if (!res.ok || cancelled) return;
+        setPulse({ eventId, props: res.data.props });
+        apply(eventId, res.data, token);
+      } catch (e) {
+        if (__DEV__) console.warn('[live-pulse]', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [eventId, version]);
+  // Al cambiar de evento no se muestra el pulso del anterior.
+  return pulse && pulse.eventId === eventId ? pulse.props : null;
 }
 
 /** Al cerrar sesión: se cierra la Live Activity, el widget vuelve al estado vacío y se olvidan los tokens. */

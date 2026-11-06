@@ -110,7 +110,8 @@ export default function HomeScreen() {
     filters.scope !== 'all' ? SCOPE_LABEL[filters.scope] : only ? SCOPE_LABEL[only] : null;
 
   // Widget de inicio y Live Activity (iOS): se sincronizan cada vez que llegan datos nuevos.
-  useLivePulse(
+  // También trae la pose de la mascota para la card de la última hora (en cualquier plataforma).
+  const pulse = useLivePulse(
     event?.id ?? null,
     data ? `${data.summary.total_revenue}|${data.summary.order_count}|${data.insights.event.phase}` : null,
   );
@@ -182,7 +183,7 @@ export default function HomeScreen() {
 
             <QuickActions />
 
-            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} activity={data.insights.recent_activity} /> : null}
+            {data.insights.event.phase === 'live' ? <LastHourCard live={data.summary.live} activity={data.insights.recent_activity} mood={pulse?.mascot ?? null} /> : null}
 
             <BentoGrid data={data} />
 
