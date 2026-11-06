@@ -128,7 +128,7 @@ export default function HomeScreen() {
   const { tip, dismiss: dismissTip } = useFirstTip([
     liveNow && Platform.OS === 'ios' && hasLivePulse && 'live-activity',
     liveNow && !!pulse?.mascot && 'mascot-tap',
-    Platform.OS === 'ios' && !!data && 'bento-preview',
+    !!data && 'bento-preview',
   ]);
 
   // Cuenta nueva sin eventos: la bienvenida se abre sola una vez.

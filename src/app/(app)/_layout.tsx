@@ -116,6 +116,18 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen
+        name="peek/[section]"
+        options={{
+          // Mantener apretada una card del inicio: el detalle en una hoja, sin salir del inicio.
+          presentation: 'formSheet',
+          sheetAllowedDetents: [0.6, 1],
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 24,
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      />
+      <Stack.Screen
         name="events"
         options={{
           title: 'Eventos',

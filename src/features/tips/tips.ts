@@ -11,6 +11,7 @@ import { Platform } from 'react-native';
  * leerlo directo de un Map en el render lo memoriza el React Compiler y nunca se actualiza.
  */
 export type TipId = 'bento-preview' | 'mascot-tap' | 'live-activity' | 'operations-swipe';
+const ALL_TIPS: TipId[] = ['bento-preview', 'mascot-tap', 'live-activity', 'operations-swipe'];
 
 const canStore = Platform.OS !== 'web';
 const key = (id: TipId) => `nubapay.tipSeen.${id}`;
@@ -47,6 +48,13 @@ const getSnapshot = () => seen;
 export function dismissTip(id: TipId) {
   update(id, true);
   if (canStore) SecureStore.setItemAsync(key(id), '1').catch(() => {});
+}
+
+/** "Volver a ver los consejos" (Perfil): borra lo visto y los tips vuelven a aparecer. */
+export async function resetTips() {
+  seen = Object.fromEntries(ALL_TIPS.map((id) => [id, false]));
+  listeners.forEach((l) => l());
+  if (canStore) await Promise.all(ALL_TIPS.map((id) => SecureStore.deleteItemAsync(key(id)).catch(() => {})));
 }
 
 /**

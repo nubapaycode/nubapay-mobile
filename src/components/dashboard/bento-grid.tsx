@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { type Href, Link, router } from 'expo-router';
+import { type Href, router } from 'expo-router';
 import { type ComponentRef, type ReactNode, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -451,45 +451,40 @@ function Tile({
         .withInitialValues({ opacity: 0, transform: [{ translateY: 18 }] })}
       style={styles.tileOuter}>
       <Animated.View ref={ref} collapsable={false} style={[styles.tileOuter, pressStyle]}>
-        {/* Tocar abre el detalle con la expansión propia (por eso se cancela la navegación del
-            Link); mantener apretado en iOS muestra la vista previa nativa del detalle. */}
-        <Link
-          href={href}
-          asChild
-          onPress={(e) => {
-            e.preventDefault();
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${title}. ${a11y}. Ver detalle`}
+          // Tocar abre el detalle con la expansión; mantener apretado, una vista rápida en hoja.
+          onPress={() => {
             Haptics.selectionAsync();
             open();
-          }}>
-          <Link.Trigger>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`${title}. ${a11y}. Ver detalle`}
-              onPressIn={() => {
-                setPressed(true);
-                scale.set(withTiming(0.97, PRESS));
-              }}
-              onPressOut={() => {
-                setPressed(false);
-                scale.set(withTiming(1, PRESS));
-              }}
-              // El Link con `asChild` pasa el estilo por un Slot que solo acepta un objeto plano:
-              // una función o un array se pierden (la card quedaba sin fondo, sombra ni padding).
-              style={StyleSheet.flatten([styles.tile, pressed && { backgroundColor: colors.raised }])}>
-              <View style={styles.tileHeader}>
-                <View style={styles.iconChip}>
-                  <Icon name={icon} size={13} color={colors.textSecondary} />
-                </View>
-                <Text style={styles.tileTitle}>{title}</Text>
-                <View style={{ flex: 1 }} />
-                {right}
-                <Icon name="chevronRight" size={12} color={colors.textMuted} />
-              </View>
-              {children}
-            </Pressable>
-          </Link.Trigger>
-          <Link.Preview />
-        </Link>
+          }}
+          onLongPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            const section = String(href).split('/').pop() ?? 'activity';
+            router.push({ pathname: '/peek/[section]', params: { section } });
+          }}
+          delayLongPress={350}
+          onPressIn={() => {
+            setPressed(true);
+            scale.set(withTiming(0.97, PRESS));
+          }}
+          onPressOut={() => {
+            setPressed(false);
+            scale.set(withTiming(1, PRESS));
+          }}
+          style={[styles.tile, pressed && { backgroundColor: colors.raised }]}>
+          <View style={styles.tileHeader}>
+            <View style={styles.iconChip}>
+              <Icon name={icon} size={13} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.tileTitle}>{title}</Text>
+            <View style={{ flex: 1 }} />
+            {right}
+            <Icon name="chevronRight" size={12} color={colors.textMuted} />
+          </View>
+          {children}
+        </Pressable>
       </Animated.View>
     </Animated.View>
   );

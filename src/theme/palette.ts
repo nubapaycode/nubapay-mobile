@@ -157,8 +157,9 @@ export const light: Palette = {
   cardShadow: '0 1px 2px rgba(11, 15, 23, 0.04), 0 6px 16px rgba(11, 15, 23, 0.05)',
   cardShadowSubtle: '0 1px 3px rgba(11, 15, 23, 0.035)',
   hero: {
-    top: '#d8e6ff',
-    mid: '#edf3ff',
+    // Degradé del inicio en claro: suave, para que no tiña tanto la pantalla.
+    top: '#e3edff',
+    mid: '#f2f6ff',
     line: '#0069ff',
     glass: '#ffffff',
     glassBorder: '#e3e7ee',

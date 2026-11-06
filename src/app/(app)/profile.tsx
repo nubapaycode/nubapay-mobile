@@ -19,6 +19,7 @@ import {
   getBiometricEmail,
   getBiometricKind,
 } from '@/lib/biometrics';
+import { resetTips } from '@/features/tips/tips';
 import { hasScanSounds, setScanSoundEnabled, useScanSoundEnabled, useSaleSoundEnabled, setSaleSoundEnabled } from '@/lib/sounds';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
@@ -79,6 +80,15 @@ function ProfileContent() {
           title="Cobros"
           subtitle="Métodos de pago y comisión"
           onPress={() => dismiss(() => router.push('/payouts'))}
+        />
+        <NavCard
+          icon="undo"
+          title="Volver a ver los consejos"
+          subtitle="Los tips de la app aparecen de nuevo, una vez cada uno"
+          onPress={() => {
+            Haptics.selectionAsync();
+            resetTips().then(() => toast.success('Listo', 'Vas a volver a ver los consejos'));
+          }}
         />
         <NavCard
           icon="help"
