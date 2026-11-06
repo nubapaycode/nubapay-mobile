@@ -3,6 +3,7 @@ import {
   activityBackgroundTint,
   animation,
   Animation,
+  contentTransition,
   font,
   foregroundStyle,
   frame,
@@ -60,6 +61,7 @@ const LiveEventActivity = (props: EventPulseProps) => {
                 font({ size: 30, weight: 'bold', design: 'rounded' }),
                 foregroundStyle('#ffffff'),
                 monospacedDigit(),
+                contentTransition('numericText'),
                 minimumScaleFactor(0.6),
                 lineLimit(1),
               ]}>
@@ -122,7 +124,13 @@ const LiveEventActivity = (props: EventPulseProps) => {
         <Image assetName="NubapayCloud" />
       ),
     compactTrailing: (
-      <Text modifiers={[font({ size: 14, weight: 'semibold' }), foregroundStyle('#ffffff'), monospacedDigit()]}>
+      <Text
+        modifiers={[
+          font({ size: 14, weight: 'semibold' }),
+          foregroundStyle('#ffffff'),
+          monospacedDigit(),
+          contentTransition('numericText'),
+        ]}>
         {props.revenueShort}
       </Text>
     ),
@@ -143,6 +151,7 @@ const LiveEventActivity = (props: EventPulseProps) => {
             font({ size: 20, weight: 'bold', design: 'rounded' }),
             foregroundStyle('#ffffff'),
             monospacedDigit(),
+            contentTransition('numericText'),
             minimumScaleFactor(0.6),
             lineLimit(1),
           ]}>

@@ -3,6 +3,7 @@ import {
   containerBackground,
   font,
   foregroundStyle,
+  frame,
   lineLimit,
   minimumScaleFactor,
   monospacedDigit,
@@ -15,21 +16,29 @@ import { EMPTY_PULSE, type EventPulseProps } from './types';
 /**
  * Widget de pantalla de inicio: lo recaudado en el evento elegido en la app y, abajo, el dato
  * principal según lo que vende (entradas o productos) junto con lo vendido en la última hora.
+ * Arriba a la derecha, la mascota en la pose de cómo viene la venta.
  * Corre en el runtime aislado de widgets: solo componentes de @expo/ui y nada de módulo.
  */
 const EventPulseWidget = (props: EventPulseProps) => {
   'widget';
+  const poses = ['Waiting', 'Selling', 'Hot', 'Slow', 'SoldOut'];
+  const pose =
+    poses[Math.max(0, ['waiting', 'selling', 'hot', 'slow', 'soldout'].indexOf(props.mascot ?? 'selling'))] ??
+    'Selling';
   return (
     <VStack
       alignment="leading"
       spacing={4}
       modifiers={[containerBackground('#080b11', 'widget'), widgetURL('nubapaybusiness://')]}>
-      <HStack spacing={5}>
+      <HStack alignment="top" spacing={5}>
         <Image assetName="NubapayCloud" />
         <Text
-          modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>
+          modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(2)]}>
           {props.eventName}
         </Text>
+        <Spacer />
+        {/* La misma pose que la Live Activity y el dashboard (assets/widgets/NubapayMascot*). */}
+        <Image assetName={`NubapayMascot${pose}`} modifiers={[frame({ width: 34, height: 37 })]} />
       </HStack>
       <Spacer />
       <Text
