@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Aurora } from '@/components/fx/aurora';
+import { hasKeyboardController, KeyboardScroll, KeyboardSticky } from '@/components/fx/keyboard';
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
@@ -19,23 +20,38 @@ type Props = {
   footer?: ReactNode;
 };
 
+/**
+ * Con keyboard-controller: el scroll lleva el campo enfocado arriba del teclado y las acciones
+ * suben pegadas a él. Sin el módulo (build viejo): el KeyboardAvoidingView de siempre.
+ */
+function Avoider({ children }: { children: ReactNode }) {
+  const styles = useStyles();
+  if (hasKeyboardController) return <View style={styles.flex}>{children}</View>;
+  return (
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {children}
+    </KeyboardAvoidingView>
+  );
+}
+
+const Scroll = hasKeyboardController ? KeyboardScroll : ScrollView;
+
 /** Esqueleto de las pantallas de acceso: fondo de luces tenue, barra de arriba, contenido y acciones. */
 export function AuthScreen({ onBack, onClose, children, footer }: Props) {
   const styles = useStyles();
+  const insets = useSafeAreaInsets();
   useFocusStatusBar();
 
   return (
     <View style={styles.root}>
       <Aurora strength={0.6} lime={0} />
       <SafeAreaView style={styles.safe}>
-        <KeyboardAvoidingView
-          style={styles.flex}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Avoider>
           <View style={[styles.bar, !onBack && onClose && styles.barEnd]}>
             {onBack ? <RoundButton icon="back" label="Volver" onPress={onBack} /> : null}
             {onClose ? <RoundButton icon="close" label="Cerrar" onPress={onClose} /> : null}
           </View>
-          <ScrollView
+          <Scroll
             style={styles.flex}
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
@@ -43,9 +59,18 @@ export function AuthScreen({ onBack, onClose, children, footer }: Props) {
             <Animated.View entering={rise(80)} style={styles.body}>
               {children}
             </Animated.View>
-          </ScrollView>
-          {footer ? <View style={styles.footer}>{footer}</View> : null}
-        </KeyboardAvoidingView>
+          </Scroll>
+          {footer ? (
+            hasKeyboardController ? (
+              // Las acciones suben pegadas al teclado (sin el margen del área segura de abajo).
+              <KeyboardSticky opened={insets.bottom}>
+                <View style={styles.footer}>{footer}</View>
+              </KeyboardSticky>
+            ) : (
+              <View style={styles.footer}>{footer}</View>
+            )
+          ) : null}
+        </Avoider>
       </SafeAreaView>
     </View>
   );

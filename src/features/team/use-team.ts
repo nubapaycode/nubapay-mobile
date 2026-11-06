@@ -12,7 +12,12 @@ import { type Member, memberFromStaff, OWNER_ROLE, PERMISSIONS, type Role, ROLE_
  * Equipo del evento actual: el organizador (sesión) + el staff del backend, con los escaneos de
  * cada uno (dashboard/insights). `members` es null mientras carga.
  */
-export function useTeam(): { members: Member[] | null; error: string | null; eventId: string | null } {
+export function useTeam(): {
+  members: Member[] | null;
+  error: string | null;
+  eventId: string | null;
+  refresh: () => Promise<void>;
+} {
   const eventId = useSelectedEventId();
   const snapshot = useDashboardSnapshot();
   const { user } = useAuth();
@@ -39,7 +44,7 @@ export function useTeam(): { members: Member[] | null; error: string | null; eve
     return owner ? [owner, ...rows] : rows;
   }, [staff.data, scans, user]);
 
-  return { members, error: staff.data ? null : staff.error, eventId };
+  return { members, error: staff.data ? null : staff.error, eventId, refresh: staff.refresh };
 }
 
 /** Roles para sugerir: las plantillas de la web + los que ya usa el equipo. */

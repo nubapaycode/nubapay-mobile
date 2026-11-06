@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import {
   ActivityIndicator,
@@ -150,36 +150,39 @@ export default function OperationScreen() {
         contentContainerStyle={[styles.content, showActions && { paddingBottom: 120 }]}
         contentInsetAdjustmentBehavior="automatic">
         {/* Cabecera centrada (estilo detalle de movimiento de Revolut). */}
-        <Animated.View entering={enter(0)} style={styles.hero}>
-          <View>
-            <View style={styles.heroAvatar}>
-              {o.customerName ? (
-                <Text style={styles.heroAvatarText}>{initials(o.customerName)}</Text>
-              ) : (
-                <Icon name="person" size={24} color={colors.textMuted} />
-              )}
+        {/* Destino del zoom desde la card: la card se transforma en esta cabecera (iOS 18+). */}
+        <Link.AppleZoomTarget>
+          <Animated.View entering={enter(0)} style={styles.hero}>
+            <View>
+              <View style={styles.heroAvatar}>
+                {o.customerName ? (
+                  <Text style={styles.heroAvatarText}>{initials(o.customerName)}</Text>
+                ) : (
+                  <Icon name="person" size={24} color={colors.textMuted} />
+                )}
+              </View>
+              <View style={[styles.heroKind, kind !== 'tickets' && { backgroundColor: colors.primary }]}>
+                <Icon
+                  name={KIND_ICON[kind]}
+                  size={12}
+                  color={kind !== 'tickets' ? colors.onPrimary : colors.onInk}
+                />
+              </View>
             </View>
-            <View style={[styles.heroKind, kind !== 'tickets' && { backgroundColor: colors.primary }]}>
-              <Icon
-                name={KIND_ICON[kind]}
-                size={12}
-                color={kind !== 'tickets' ? colors.onPrimary : colors.onInk}
-              />
-            </View>
-          </View>
-          <Text style={styles.heroName} numberOfLines={1}>
-            {name}
-          </Text>
-          <RollingNumber
-            value={o.total}
-            format={formatMoney}
-            style={cancelled ? { ...styles.heroValue, ...styles.heroCancelled } : styles.heroValue}
-          />
-          <Animated.View layout={LinearTransition.duration(260)} style={styles.heroMeta}>
-            <StatusChip order={o} />
-            <Text style={styles.date}>{relativeTime(o.createdAt, now) || fullDate(o.createdAt)}</Text>
+            <Text style={styles.heroName} numberOfLines={1}>
+              {name}
+            </Text>
+            <RollingNumber
+              value={o.total}
+              format={formatMoney}
+              style={cancelled ? { ...styles.heroValue, ...styles.heroCancelled } : styles.heroValue}
+            />
+            <Animated.View layout={LinearTransition.duration(260)} style={styles.heroMeta}>
+              <StatusChip order={o} />
+              <Text style={styles.date}>{relativeTime(o.createdAt, now) || fullDate(o.createdAt)}</Text>
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
+        </Link.AppleZoomTarget>
 
         <Animated.View entering={enter(1)}>
           <Timeline order={o} />

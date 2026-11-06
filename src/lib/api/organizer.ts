@@ -202,7 +202,7 @@ export const patchStaff = async (eventId: string, id: string, payload: Partial<{
 export const deleteStaff = (eventId: string, id: string) =>
   apiFetch<{ ok: true }>(ws(eventId, `staff/${id}`), json('DELETE'));
 export const resendStaffInvite = (eventId: string, id: string) =>
-  apiFetch<{ email_sent?: boolean }>(ws(eventId, `staff/${id}/resend-email`), json('POST'));
+  apiFetch<{ email_sent?: boolean; email_error?: string }>(ws(eventId, `staff/${id}/resend-email`), json('POST'));
 
 /* ───────────── Catálogo ───────────── */
 

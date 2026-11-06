@@ -1,5 +1,15 @@
-import { useState } from 'react';
+import * as Haptics from 'expo-haptics';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
 import { makeStyles, useTheme } from '@/theme';
@@ -11,19 +21,40 @@ type Props = Omit<TextInputProps, 'secureTextEntry'> & {
   accessory?: 'clear' | 'password';
 };
 
-/** Campo de las pantallas de acceso: relleno, radio grande y borde que marca foco o error. */
+/**
+ * Campo de las pantallas de acceso: relleno, radio grande y borde que marca foco o error.
+ * Cuando aparece un error (p. ej. contraseña incorrecta) el campo tiembla, como "no" con la cabeza,
+ * con un háptico de error.
+ */
 export function AuthField({ label, error, accessory, onFocus, onBlur, ...rest }: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [focused, setFocused] = useState(false);
   const [reveal, setReveal] = useState(false);
   const isPassword = accessory === 'password';
   const showClear = accessory === 'clear' && !!rest.value;
+  const shake = useSharedValue(0);
+  const hadError = useRef(false);
+
+  useEffect(() => {
+    const now = !!error;
+    if (now && !hadError.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (!reduceMotion) {
+        const step = (x: number) => withTiming(x, { duration: 55, easing: Easing.inOut(Easing.quad) });
+        shake.set(withSequence(step(-9), step(8), step(-6), step(4), step(-2), step(0)));
+      }
+    }
+    hadError.current = now;
+  }, [error, reduceMotion, shake]);
+
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
 
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
-      <View style={[styles.box, focused && styles.focused, !!error && styles.errored]}>
+      <Animated.View style={[styles.box, focused && styles.focused, !!error && styles.errored, shakeStyle]}>
         <TextInput
           accessibilityLabel={label}
           placeholderTextColor={colors.textMuted}
@@ -61,12 +92,12 @@ export function AuthField({ label, error, accessory, onFocus, onBlur, ...rest }:
             <Icon name={reveal ? 'eyeOff' : 'eye'} size={20} color={colors.textSecondary} />
           </Pressable>
         ) : null}
-      </View>
+      </Animated.View>
       {error ? (
-        <View style={styles.errorRow} accessibilityLiveRegion="polite">
+        <Animated.View entering={FadeIn.duration(180)} style={styles.errorRow} accessibilityLiveRegion="polite">
           <Icon name="alert" size={15} color={colors.danger} />
           <Text style={styles.errorText}>{error}</Text>
-        </View>
+        </Animated.View>
       ) : null}
     </View>
   );

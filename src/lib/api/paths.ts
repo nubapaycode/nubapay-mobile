@@ -9,6 +9,10 @@ export const authPaths = {
   login: () => apiUrl('/auth/login'),
   me: () => apiUrl('/auth/me'),
   forgotPassword: () => apiUrl('/auth/forgot-password'),
+  /** POST/DELETE `{ token, platform }`: Expo push token del dispositivo (routes/auth.py). */
+  pushToken: () => apiUrl('/auth/push-token'),
+  /** POST `{ token, kind: 'update' | 'start', event_id? }`: tokens APNs de la Live Activity. */
+  liveActivityToken: () => apiUrl('/auth/live-activity-token'),
 };
 
 export const eventPaths = {
@@ -19,6 +23,8 @@ export const eventPaths = {
     apiUrl(`/events/${eventId}/dashboard${query ? `?${query}` : ''}`),
   /** Aforo/ingreso por entrada, retiros pendientes, puntos de retiro, clientes, efectivo por cobrar, actividad. */
   dashboardInsights: (eventId: string) => apiUrl(`/events/${eventId}/dashboard/insights`),
+  /** Números ya formateados para la Live Activity y el widget (services/live_pulse.py). */
+  livePulse: (eventId: string) => apiUrl(`/events/${eventId}/live-pulse`),
   /** Herramientas del evento (routes/event_workspace.py, event_staff.py, event_regrets.py). */
   workspace: (eventId: string, sub: string, query?: Record<string, string | number | boolean | undefined>) => {
     const q = new URLSearchParams();

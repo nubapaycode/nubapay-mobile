@@ -12,10 +12,14 @@ import {
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import "@/features/live/background";
+import { KeyboardProvider } from "@/components/fx/keyboard";
+import { NetworkBanner } from "@/components/fx/network-banner";
+import { SplashHandoff } from "@/components/fx/splash-handoff";
 import { ThemeReveal } from "@/components/fx/theme-reveal";
 import { CardExpandHost } from "@/components/motion/card-expand";
 import { ToastHost } from "@/components/ui/toast";
@@ -43,9 +47,7 @@ function RootNavigator() {
   });
   const ready = !isLoading && themeLoaded && (fontsLoaded || !!fontError);
 
-  useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
-  }, [ready]);
+  // El splash nativo lo oculta `SplashHandoff` cuando su copia ya está dibujada encima.
 
   const navTheme = useMemo(() => {
     const base = colors.scheme === "dark" ? DarkTheme : DefaultTheme;
@@ -77,6 +79,8 @@ function RootNavigator() {
           </Stack.Protected>
         </Stack>
         <CardExpandHost />
+        {token ? <NetworkBanner /> : null}
+        <SplashHandoff />
         <ToastHost />
       </NavigationThemeProvider>
     </PaletteScope>
@@ -86,13 +90,15 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <ThemeReveal>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </ThemeReveal>
-      </ThemeProvider>
+      <KeyboardProvider>
+        <ThemeProvider>
+          <ThemeReveal>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </ThemeReveal>
+        </ThemeProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

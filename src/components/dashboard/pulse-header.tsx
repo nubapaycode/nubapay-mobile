@@ -9,13 +9,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { CountBadge } from '@/components/motion/count-badge';
 import { Radius } from '@/constants/theme';
 import { daysUntil, formatEventDate, initials } from '@/features/dashboard/format';
 import type { EventPhase, EventSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 
 import { Icon } from './icon';
-import { LivePill } from './live-pill';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 
@@ -77,9 +77,7 @@ export function PulseHeader({
           style={({ pressed }) => [styles.round, pressed && styles.pressed]}>
           <Icon name="filter" size={17} color={colors.text} />
           {filterCount > 0 ? (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{filterCount}</Text>
-            </View>
+            <CountBadge count={filterCount} style={styles.badge} textStyle={styles.badgeText} />
           ) : null}
         </Pressable>
       ) : (
@@ -138,7 +136,6 @@ function EventSelector({
           </Text>
           {status ? (
             <Animated.View key={status} entering={FadeIn.duration(180)} style={styles.statusRow}>
-              {phase === 'live' ? <LivePill compact /> : null}
               <Text
                 style={[styles.status, phase === 'live' && styles.statusLive]}
                 numberOfLines={1}>

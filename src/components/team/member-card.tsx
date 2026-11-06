@@ -1,8 +1,11 @@
 import * as Haptics from 'expo-haptics';
+import type { Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
+import { hasLinkPreview, PreviewLink } from '@/components/motion/preview-link';
+import { SwipeActions } from '@/components/motion/swipe-actions';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { formatInt, initials } from '@/features/dashboard/format';
 import {
@@ -15,6 +18,7 @@ import {
 import { makeStyles, useTheme } from '@/theme';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
+const LIFT = { duration: 180, easing: Easing.out(Easing.cubic) };
 const MAX_PERMS = 3;
 
 /** Ícono de cada permiso (cards del equipo y grilla del detalle). */
@@ -61,7 +65,19 @@ export function RoleChip({ member }: { member: Member }) {
  * Persona del equipo en su propia card: avatar, nombre y email; escaneos a la derecha; abajo sus
  * permisos como chips con ícono. El rol va en el título del grupo.
  */
-export function MemberCard({ member, onPress }: { member: Member; onPress: () => void }) {
+export function MemberCard({
+  member,
+  onPress,
+  onChangeRole,
+  href,
+}: {
+  member: Member;
+  onPress: () => void;
+  /** Ruta del detalle: en iOS, mantener apretado muestra la vista previa con acciones. */
+  href?: Href;
+  /** Si se le puede cambiar el rol: deslizar a la derecha (o mantener apretado) lo hace. */
+  onChangeRole?: () => void;
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   const scale = useSharedValue(1);
@@ -71,16 +87,57 @@ export function MemberCard({ member, onPress }: { member: Member; onPress: () =>
   const shown = all ? [] : perms.slice(0, MAX_PERMS);
   const extra = all ? 0 : perms.length - shown.length;
   const { scans } = member.stats;
+  const preview = !!href && hasLinkPreview;
 
   return (
+    <SwipeActions
+      start={
+        onChangeRole
+          ? {
+              label: 'Cambiar rol',
+              icon: 'key',
+              onTrigger: onChangeRole,
+              tone: { soft: colors.brandMuted, strong: colors.brand, fg: colors.brandText, onStrong: colors.onBrand },
+            }
+          : undefined
+      }
+      end={{
+        label: 'Ver detalle',
+        icon: 'person',
+        onTrigger: onPress,
+        tone: { soft: colors.raised, strong: colors.ink, fg: colors.textSecondary, onStrong: colors.onInk },
+      }}>
     <Animated.View style={press}>
+      <PreviewLink
+        href={href ?? '/'}
+        disabled={!href}
+        zoom
+        actions={[
+          ...(onChangeRole ? [{ title: 'Cambiar rol', icon: 'key' as const, onPress: onChangeRole }] : []),
+          { title: 'Ver detalle', icon: 'person.crop.circle' as const, onPress },
+        ]}>
       <Pressable
         onPress={() => {
           Haptics.selectionAsync();
-          onPress();
+          // Con vista previa navega el Link; acá solo el toque.
+          if (!preview) onPress();
         }}
+        onLongPress={
+          // En iOS el mantener apretado es la vista previa nativa (con "Cambiar rol" en el menú).
+          onChangeRole && !preview
+            ? () => {
+                // Se "levanta" un instante antes de abrir el cambio de rol.
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                scale.set(withTiming(1.03, LIFT));
+                onChangeRole();
+              }
+            : undefined
+        }
+        delayLongPress={380}
         onPressIn={() => scale.set(withTiming(0.98, PRESS))}
         onPressOut={() => scale.set(withTiming(1, PRESS))}
+        accessibilityActions={onChangeRole ? [{ name: 'changeRole', label: 'Cambiar rol' }] : undefined}
+        onAccessibilityAction={(e) => e.nativeEvent.actionName === 'changeRole' && onChangeRole?.()}
         accessibilityRole="button"
         accessibilityLabel={`${member.name}, ${member.roleId}${
           scans ? `, ${scans} escaneos` : ''
@@ -140,7 +197,9 @@ export function MemberCard({ member, onPress }: { member: Member; onPress: () =>
           )}
         </View>
       </Pressable>
+      </PreviewLink>
     </Animated.View>
+    </SwipeActions>
   );
 }
 

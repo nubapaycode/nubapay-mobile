@@ -1,9 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
+import { SlideToConfirm } from '@/components/motion/slide-to-confirm';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { awaitingCash, remainingOf, SCAN_COPY, scanKind } from '@/features/operations/scan';
@@ -102,7 +103,12 @@ export function DeliverPanel({
           </View>
           {error ? <Text style={styles.error}>{error}</Text> : null}
           {canConfirmCash ? (
-            <PrimaryButton label="Ya lo recibí" loading={busy === 'cash'} disabled={!!busy} onPress={receiveCash} />
+            <SlideToConfirm
+              label={`Recibí ${formatMoney(order.total)}`}
+              loading={busy === 'cash'}
+              disabled={!!busy}
+              onConfirm={receiveCash}
+            />
           ) : (
             <Text style={styles.note}>Tu rol no puede aprobar pagos en efectivo.</Text>
           )}
@@ -155,11 +161,11 @@ export function DeliverPanel({
             ))}
           </View>
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <PrimaryButton
+          <SlideToConfirm
             label={selected ? copy.confirm(selected) : 'Elegí qué entregar'}
             loading={busy === 'redeem'}
             disabled={!!busy || selected === 0}
-            onPress={redeem}
+            onConfirm={redeem}
           />
           <SecondaryButton label="Cancelar" disabled={!!busy} onPress={onCancel} />
         </>
@@ -190,30 +196,6 @@ function StepButton({
       accessibilityLabel={label}
       style={({ pressed }) => [styles.step, disabled && { opacity: 0.3 }, pressed && { opacity: 0.6 }]}>
       <Icon name={icon} size={14} color={colors.ink} />
-    </Pressable>
-  );
-}
-
-function PrimaryButton({
-  label,
-  loading,
-  disabled,
-  onPress,
-}: {
-  label: string;
-  loading?: boolean;
-  disabled?: boolean;
-  onPress: () => void;
-}) {
-  const styles = useStyles();
-  const { colors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      style={({ pressed }) => [styles.primary, disabled && !loading && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
-      {loading ? <ActivityIndicator color={colors.onInk} /> : <Text style={styles.primaryText}>{label}</Text>}
     </Pressable>
   );
 }
@@ -297,15 +279,6 @@ const useStyles = makeStyles((c) =>
     warnText: { flex: 1, color: c.warning, fontSize: 13 },
     error: { color: c.danger, fontSize: 14, textAlign: 'center' },
     note: { color: c.textMuted, fontSize: 13, textAlign: 'center' },
-    primary: {
-      height: 52,
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.ink,
-    },
-    primaryText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
     secondary: {
       height: 48,
       borderRadius: Radius.xl,

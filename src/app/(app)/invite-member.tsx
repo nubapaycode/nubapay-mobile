@@ -1,7 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
@@ -18,11 +17,14 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Icon } from "@/components/dashboard/icon";
+import { FieldCheck } from "@/components/motion/field-check";
+import { MorphButton, useMorphStatus } from "@/components/motion/morph-button";
 import { Sheet, useSheet } from "@/components/ui/sheet";
 import { DisplayFont, Radius, Spacing } from "@/constants/theme";
 import {
   DEFAULT_PERMISSIONS,
   inviteMember,
+  mailError,
   isEmail,
   PERMISSION_LABEL,
   PERMISSIONS,
@@ -62,7 +64,8 @@ function InviteContent() {
     n.trim()
       ? roles.find((r) => r.name.toLowerCase() === n.trim().toLowerCase())
       : undefined;
-  const [sending, setSending] = useState(false);
+  const morph = useMorphStatus();
+  const sent = useRef<{ emailSent?: boolean; emailError?: string } | null>(null);
   const emailRef = useRef<TextInputInstance>(null);
   const roleRef = useRef<TextInputInstance>(null);
 
@@ -107,29 +110,37 @@ function InviteContent() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
-    if (!eventId || sending) return;
-    setSending(true);
-    const res = await inviteMember(eventId, {
-      name,
-      email,
-      roleName,
-      permissions,
+    if (!eventId || morph.status !== "idle") return;
+    await morph.run(async () => {
+      const res = await inviteMember(eventId, {
+        name,
+        email,
+        roleName,
+        permissions,
+      });
+      if (!res.ok) {
+        toast.error("No se pudo agregar", res.error);
+        return false;
+      }
+      sent.current = res;
+      return true;
     });
-    setSending(false);
-    if (!res.ok) {
-      toast.error("No se pudo agregar", res.error);
-      return;
-    }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  // Después de que el avión sale volando se cierra la hoja (y, si el mail falló, se avisa).
+  const finish = () =>
     dismiss(() => {
-      if (!res.emailSent) {
+      const res = sent.current;
+      if (res && !res.emailSent) {
         Alert.alert(
           "Agregado al equipo",
-          "No pudimos mandarle el email con el acceso. Probá reenviarlo desde su detalle.",
+          mailError(
+            "No pudimos mandarle el email con el acceso. Probá reenviarlo desde su detalle.",
+            res.emailError,
+          ),
         );
       }
     });
-  };
 
   return (
     <ScrollView
@@ -148,7 +159,7 @@ function InviteContent() {
       {/* Datos: nombre y email, cada uno en su card */}
       <View style={styles.cards}>
         <View style={[styles.card, touched && errors.name && styles.cardError]}>
-          <Field label="Nombre" error={touched ? errors.name : null}>
+          <Field label="Nombre" error={touched ? errors.name : null} ok={!errors.name}>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -166,7 +177,7 @@ function InviteContent() {
         <View
           style={[styles.card, touched && errors.email && styles.cardError]}
         >
-          <Field label="Email" error={touched ? errors.email : null}>
+          <Field label="Email" error={touched ? errors.email : null} ok={!errors.email}>
             <TextInput
               ref={emailRef}
               value={email}
@@ -211,6 +222,7 @@ function InviteContent() {
             style={[styles.input, { flex: 1 }]}
             accessibilityLabel="Rol"
           />
+          <FieldCheck ok={!errors.role} />
           {roleName ? (
             <Pressable
               onPress={() => setRoleName("")}
@@ -315,23 +327,14 @@ function InviteContent() {
       </Animated.View>
 
       <Animated.View layout={LAYOUT}>
-        <Pressable
+        <MorphButton
+          label="Enviar invitación"
+          status={morph.status}
           onPress={submit}
-          accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.submit,
-            !valid && styles.submitOff,
-            pressed && { opacity: 0.85 },
-          ]}
-        >
-          {sending ? (
-            <ActivityIndicator color={colors.onInk} />
-          ) : (
-            <Text style={[styles.submitText, !valid && styles.submitTextOff]}>
-              Enviar invitación
-            </Text>
-          )}
-        </Pressable>
+          onDone={finish}
+          dimmed={!valid}
+          effect="fly"
+        />
       </Animated.View>
     </ScrollView>
   );
@@ -340,11 +343,14 @@ function InviteContent() {
 function Field({
   label,
   error,
+  ok = false,
   divider,
   children,
 }: {
   label: string;
   error: string | null;
+  /** Ya está bien completo: aparece el tilde verde. */
+  ok?: boolean;
   divider?: boolean;
   children: React.ReactNode;
 }) {
@@ -353,7 +359,11 @@ function Field({
     <View style={[styles.field, divider && styles.divider]}>
       <View style={styles.fieldHead}>
         <Text style={styles.fieldLabel}>{label}</Text>
-        {error ? <Text style={styles.fieldError}>{error}</Text> : null}
+        {error ? (
+          <Text style={styles.fieldError}>{error}</Text>
+        ) : (
+          <FieldCheck ok={ok} size={16} />
+        )}
       </View>
       {children}
     </View>
@@ -391,7 +401,7 @@ const useStyles = makeStyles((c) =>
       borderTopColor: c.borderSubtle,
     },
     field: { paddingTop: 11, paddingBottom: 7, gap: 2 },
-    fieldHead: { flexDirection: "row", justifyContent: "space-between" },
+    fieldHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", minHeight: 16 },
     fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
     fieldError: { color: c.danger, fontSize: 12 },
     input: {
@@ -461,20 +471,5 @@ const useStyles = makeStyles((c) =>
     },
     checkOn: { backgroundColor: c.ink, borderColor: c.ink },
 
-    submit: {
-      height: 54,
-      borderRadius: Radius.xl,
-      borderCurve: "continuous",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: c.ink,
-    },
-    submitOff: { backgroundColor: c.raised },
-    submitText: {
-      color: c.onInk,
-      fontSize: 16,
-      fontFamily: DisplayFont.semibold,
-    },
-    submitTextOff: { color: c.textMuted },
   }),
 );

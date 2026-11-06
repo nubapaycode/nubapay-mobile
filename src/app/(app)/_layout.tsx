@@ -1,12 +1,18 @@
+import * as QuickActions from 'expo-quick-actions';
+import { type RouterAction, useQuickActionRouting } from 'expo-quick-actions/router';
 import { router, Stack } from 'expo-router';
 import { useEffect } from 'react';
 
+import { DetailHeader } from '@/components/navigation/detail-header';
 import { DisplayFont } from '@/constants/theme';
 import {
   peekPendingBiometricOffer,
   setPendingBiometricOffer,
   shouldOfferBiometrics,
 } from '@/lib/biometrics';
+import { enableBackgroundPulse } from '@/features/live/background';
+import { flushStartToken } from '@/features/live/live-pulse';
+import { registerPush, usePushRouting } from '@/lib/push';
 import { dark, useTheme } from '@/theme';
 
 /** Recién ingresado con contraseña: ofrece activar Face ID / huella (una vez que se ve el inicio). */
@@ -28,9 +34,45 @@ function useBiometricOffer() {
   }, []);
 }
 
+/**
+ * Mantener apretado el ícono de la app: atajos directos. Escanear va primero (es lo que más se usa
+ * en la puerta). Sin el módulo nativo `setItems` no hace nada.
+ */
+function useHomeShortcuts() {
+  useQuickActionRouting();
+  useEffect(() => {
+    QuickActions.setItems<RouterAction>([
+      { id: 'scan', title: 'Escanear QR', icon: 'symbol:qrcode.viewfinder', params: { href: '/scan' } },
+      {
+        id: 'operations',
+        title: 'Operaciones',
+        icon: 'symbol:arrow.left.arrow.right',
+        params: { href: '/operations' },
+      },
+      { id: 'team', title: 'Equipo', icon: 'symbol:person.2', params: { href: '/team' } },
+    ]).catch(() => {});
+  }, []);
+}
+
+/** Push: se pide permiso un rato después de entrar (no apenas abre) y los toques navegan. */
+function usePush() {
+  usePushRouting();
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      await registerPush();
+      // Con el permiso y la sesión listos: refresco en segundo plano y push-to-start.
+      await enableBackgroundPulse();
+      flushStartToken();
+    }, 2500);
+    return () => clearTimeout(t);
+  }, []);
+}
+
 export default function AppLayout() {
   const { colors } = useTheme();
   useBiometricOffer();
+  useHomeShortcuts();
+  usePush();
   return (
     <Stack
       screenOptions={{
@@ -114,8 +156,8 @@ export default function AppLayout() {
         name="operation/[key]"
         options={{
           title: 'Operación',
-          headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: colors.background },
+          // Se abre con zoom desde su card: header propio, sin la barra nativa (ver DetailHeader).
+          header: (props) => <DetailHeader {...props} />,
           contentStyle: { backgroundColor: colors.background },
         }}
       />
@@ -177,8 +219,8 @@ export default function AppLayout() {
         name="member/[id]"
         options={{
           title: 'Equipo',
-          headerBackButtonDisplayMode: 'minimal',
-          headerStyle: { backgroundColor: colors.background },
+          // Se abre con zoom desde su card: header propio, sin la barra nativa (ver DetailHeader).
+          header: (props) => <DetailHeader {...props} />,
           contentStyle: { backgroundColor: colors.background },
         }}
       />

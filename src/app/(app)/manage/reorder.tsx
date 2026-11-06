@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
+import { MorphButton, useMorphStatus } from '@/components/motion/morph-button';
+import { SortableList } from '@/components/motion/sortable-list';
 import { GroupHeader } from '@/components/manage/catalog-kit';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
@@ -23,6 +24,9 @@ import { toast } from '@/components/ui/toast';
 type Item = { id: string; title: string; subtitle: string | null };
 type Group = { title: string | null; items: Item[] };
 
+/** Alto fijo de cada fila (la lista arrastrable lo necesita para calcular los saltos). */
+const ROW_H = 64;
+
 const TITLE: Record<ReorderKind, string> = {
   tickets: 'Ordenar entradas',
   products: 'Ordenar productos',
@@ -34,7 +38,10 @@ const HINT: Record<ReorderKind, string> = {
   blocks: 'El orden de los bloques arriba del catálogo.',
 };
 
-/** Ordenar entradas, productos (dentro de su categoría) o bloques con flechas. Guarda con /reorder. */
+/**
+ * Ordenar entradas, productos (dentro de su categoría) o bloques arrastrando (mantener apretado y
+ * mover). Con lector de pantalla, acciones Subir / Bajar. Guarda con /reorder.
+ */
 export default function ReorderScreen() {
   const { kind } = useLocalSearchParams<{ kind: ReorderKind }>();
   const groups = useGroups(kind);
@@ -91,7 +98,7 @@ function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: G
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [groups, setGroups] = useState(initial);
-  const [saving, setSaving] = useState(false);
+  const morph = useMorphStatus();
 
   const ids = groups.flatMap((g) => g.items.map((i) => i.id));
   const dirty = ids.join() !== initial.flatMap((g) => g.items.map((i) => i.id)).join();
@@ -110,17 +117,25 @@ function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: G
     );
   };
 
-  const save = async () => {
+  // Soltar una fila arrastrada: el grupo queda en el orden nuevo.
+  const reorder = (gi: number, order: string[]) => {
+    setGroups((prev) =>
+      prev.map((g, k) => {
+        if (k !== gi) return g;
+        const byId = new Map(g.items.map((it) => [it.id, it]));
+        const items = order.map((id) => byId.get(id)).filter((it): it is Item => !!it);
+        return items.length === g.items.length ? { ...g, items } : g;
+      }),
+    );
+  };
+
+  const save = () => {
     if (!eventId || !dirty) return;
-    setSaving(true);
-    const res = await saveOrder(eventId, kind, ids);
-    setSaving(false);
-    if (!res.ok) {
-      toast.error('No se pudo guardar el orden', res.error);
-      return;
-    }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    morph.run(async () => {
+      const res = await saveOrder(eventId, kind, ids);
+      if (!res.ok) toast.error('No se pudo guardar el orden', res.error);
+      return res.ok;
+    });
   };
 
   return (
@@ -135,63 +150,40 @@ function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: G
         {groups.map((g, gi) => (
           <View key={g.title ?? gi} style={styles.group}>
             {g.title ? <GroupHeader title={g.title} count={g.items.length} /> : null}
-            {g.items.map((it, ii) => (
-              <Animated.View key={it.id} layout={LinearTransition.duration(200)} style={styles.card}>
-                <Text style={styles.pos}>{ii + 1}</Text>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={styles.title} numberOfLines={1}>
-                    {it.title}
-                  </Text>
-                  {it.subtitle ? <Text style={styles.subtitle}>{it.subtitle}</Text> : null}
+            <SortableList
+              items={g.items}
+              rowHeight={ROW_H}
+              label={(it) => `${it.title}${it.subtitle ? `, ${it.subtitle}` : ''}`}
+              onMove={(ii, d) => move(gi, ii, d)}
+              onReorder={(order) => reorder(gi, order)}
+              renderItem={(it, ii) => (
+                <View style={styles.card}>
+                  <Text style={styles.pos}>{ii + 1}</Text>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={styles.title} numberOfLines={1}>
+                      {it.title}
+                    </Text>
+                    {it.subtitle ? <Text style={styles.subtitle}>{it.subtitle}</Text> : null}
+                  </View>
+                  <View style={styles.grip}>
+                    <Icon name="grip" size={16} color={colors.textMuted} />
+                  </View>
                 </View>
-                <Arrow icon="arrowUp" label={`Subir ${it.title}`} disabled={ii === 0} onPress={() => move(gi, ii, -1)} />
-                <Arrow
-                  icon="arrowDown"
-                  label={`Bajar ${it.title}`}
-                  disabled={ii === g.items.length - 1}
-                  onPress={() => move(gi, ii, 1)}
-                />
-              </Animated.View>
-            ))}
+              )}
+            />
           </View>
         ))}
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <Pressable
+        <MorphButton
+          label="Guardar orden"
+          status={morph.status}
           onPress={save}
-          disabled={!dirty || saving}
-          accessibilityRole="button"
-          style={({ pressed }) => [styles.save, (!dirty || saving) && { opacity: 0.4 }, pressed && { opacity: 0.85 }]}>
-          {saving ? <ActivityIndicator color={colors.onInk} /> : <Text style={styles.saveText}>Guardar orden</Text>}
-        </Pressable>
+          onDone={() => router.back()}
+          disabled={!dirty}
+        />
       </View>
     </View>
-  );
-}
-
-function Arrow({
-  icon,
-  label,
-  disabled,
-  onPress,
-}: {
-  icon: 'arrowUp' | 'arrowDown';
-  label: string;
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  const styles = useStyles();
-  const { colors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      hitSlop={4}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.arrow, disabled && { opacity: 0.25 }, pressed && { opacity: 0.6 }]}>
-      <Icon name={icon} size={14} color={colors.ink} />
-    </Pressable>
   );
 }
 
@@ -212,10 +204,11 @@ const useStyles = makeStyles((c) =>
     hint: { color: c.textMuted, fontSize: 13, lineHeight: 18, paddingHorizontal: 4 },
     group: { gap: 8 },
     card: {
+      height: ROW_H,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
-      padding: 12,
+      paddingHorizontal: 12,
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
       borderWidth: 1,
@@ -225,14 +218,7 @@ const useStyles = makeStyles((c) =>
     pos: { width: 22, color: c.textMuted, fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
     title: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
     subtitle: { color: c.textMuted, fontSize: 12 },
-    arrow: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.raised,
-    },
+    grip: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
     footer: {
       position: 'absolute',
       left: 0,
@@ -244,14 +230,5 @@ const useStyles = makeStyles((c) =>
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: c.border,
     },
-    save: {
-      height: 52,
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.ink,
-    },
-    saveText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
   }),
 );

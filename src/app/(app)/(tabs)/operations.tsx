@@ -1,11 +1,14 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
+import { CountBadge } from '@/components/motion/count-badge';
 import { enter, enterItem } from '@/components/dashboard/detail-kit';
+import { CardListSkeleton } from '@/components/dashboard/skeleton';
 import { Lottie } from '@/components/fx/lottie';
+import { TicketMascot } from '@/components/illustrations/ticket-mascot';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
@@ -24,6 +27,7 @@ import {
   useOperationFilters,
 } from '@/features/operations/operations';
 import { useNow } from '@/hooks/use-now';
+import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { listOrders, type Order } from '@/lib/api/organizer';
 import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
@@ -106,6 +110,27 @@ function OperationsContent() {
     }));
   };
 
+  // Pedidos que aparecen después de la primera carga (en vivo o al refrescar) brillan un momento.
+  // Al cambiar la búsqueda o los filtros se empieza de cero: no es que "llegaron".
+  const seen = useRef<{ key: string | null; ids: Set<string> } | null>(null);
+  const [fresh, setFresh] = useState<Set<string>>(() => new Set());
+  const loadedOrders = orders.data?.orders;
+  useEffect(() => {
+    if (!loadedOrders) return;
+    const ids = loadedOrders.map((o) => o.id);
+    if (!seen.current || seen.current.key !== key) {
+      seen.current = { key, ids: new Set(ids) };
+      setFresh(new Set());
+      return;
+    }
+    const known = seen.current.ids;
+    const added = ids.filter((id) => !known.has(id));
+    added.forEach((id) => known.add(id));
+    if (added.length) setFresh(new Set(added));
+  }, [loadedOrders, key]);
+
+  const pull = usePullRefresh(orders.refresh);
+
   const event = events?.find((e) => e.id === eventId);
   const active = activeOperationFilters(filters);
   const list = orders.data?.orders ?? [];
@@ -123,15 +148,19 @@ function OperationsContent() {
       style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}>
       <Icon name="filter" size={17} color={colors.text} />
       {active > 0 ? (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{active}</Text>
-        </View>
+        <CountBadge count={active} style={styles.badge} textStyle={styles.badgeText} />
       ) : null}
     </Pressable>
   );
 
   return (
-    <TabPage title="Operaciones" subtitle={event?.name} right={filterButton}>
+    <TabPage
+      title="Operaciones"
+      subtitle={event?.name ?? 'Elegí un evento'}
+      onSubtitlePress={() => router.push('/switch-event')}
+      right={filterButton}
+      refreshing={pull.refreshing}
+      onRefresh={pull.onRefresh}>
       <Animated.View entering={enter(1)} style={{ gap: 12 }}>
         <View style={styles.search}>
           <Icon name="search" size={16} color={colors.textMuted} />
@@ -175,8 +204,16 @@ function OperationsContent() {
         ) : null}
       </Animated.View>
 
-      {!orders.data ? (
-        <Text style={styles.empty}>{orders.error ?? 'Cargando operaciones…'}</Text>
+      {!orders.data && !orders.error ? (
+        <CardListSkeleton variant="operation" label="Cargando operaciones" />
+      ) : !orders.data ? (
+        <Text style={styles.empty}>{orders.error}</Text>
+      ) : list.length === 0 && !debounced.trim() && !active ? (
+        <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
+          <TicketMascot size={128} onLight={colors.scheme === 'light'} />
+          <Text style={styles.emptyTitle}>Todavía no hay pedidos</Text>
+          <Text style={styles.emptyText}>Cuando alguien compre una entrada o un producto, aparece acá al instante.</Text>
+        </Animated.View>
       ) : list.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
           <Lottie
@@ -192,13 +229,11 @@ function OperationsContent() {
           <Text style={styles.emptyText}>
             {debounced.trim()
               ? `No encontramos pedidos para “${debounced.trim()}”.`
-              : active
-                ? 'No hay pedidos con esos filtros.'
-                : 'Todavía no hay pedidos en este evento.'}
+              : 'No hay pedidos con esos filtros.'}
           </Text>
         </Animated.View>
       ) : (
-        <View style={[styles.groups, orders.refreshing && { opacity: 0.6 }]}>
+        <View style={styles.groups}>
           {groups.map((g) => (
             <Animated.View key={g.key} layout={LinearTransition.duration(260)} style={styles.group}>
               <View style={styles.groupHead}>
@@ -213,6 +248,8 @@ function OperationsContent() {
                   layout={LinearTransition.duration(260)}>
                   <OperationCard
                     order={o}
+                    fresh={fresh.has(o.id)}
+                    href={{ pathname: '/operation/[key]', params: { key: o.id } }}
                     onPress={() => router.push({ pathname: '/operation/[key]', params: { key: o.id } })}
                     onDeliver={
                       deliverable(o)

@@ -7,10 +7,8 @@ import {
   ActionSheetIOS,
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -20,6 +18,7 @@ import {
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
+import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon } from '@/components/dashboard/icon';
 import { Card, CardList, GroupHeader, HeaderAction, ProductThumb, SaveText } from '@/components/manage/catalog-kit';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -200,11 +199,8 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
               }),
         }}
       />
-      <KeyboardAvoidingView
-        style={styles.screen}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
-        <ScrollView
+      <View style={styles.screen}>
+        <KeyboardScroll
           style={styles.screen}
           contentContainerStyle={styles.content}
           contentInsetAdjustmentBehavior="automatic"
@@ -343,8 +339,8 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
               <Text style={styles.deleteText}>Eliminar bloque</Text>
             </Pressable>
           ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </KeyboardScroll>
+      </View>
     </>
   );
 }

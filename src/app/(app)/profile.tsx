@@ -19,6 +19,7 @@ import {
   getBiometricEmail,
   getBiometricKind,
 } from '@/lib/biometrics';
+import { hasScanSounds, setScanSoundEnabled, useScanSoundEnabled, useSaleSoundEnabled, setSaleSoundEnabled } from '@/lib/sounds';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -71,6 +72,8 @@ function ProfileContent() {
 
       <View style={styles.menu}>
         <BiometricCard email={user?.email} />
+        {hasScanSounds ? <ScanSoundCard /> : null}
+        {hasScanSounds ? <SaleSoundCard /> : null}
         <NavCard
           icon="bank"
           title="Cobros"
@@ -93,6 +96,58 @@ function ProfileContent() {
 
       <LogoutButton onPress={(signOut) => dismiss(signOut)} />
     </ScrollView>
+  );
+}
+
+/** Sonido al validar un QR (éxito, aviso, error). Al prenderlo suena una vez de muestra. */
+function ScanSoundCard() {
+  const { colors } = useTheme();
+  const on = useScanSoundEnabled();
+  const toggle = () => {
+    Haptics.selectionAsync();
+    setScanSoundEnabled(!on);
+  };
+  return (
+    <NavCard
+      icon="sound"
+      title="Sonido del escáner"
+      subtitle={on ? 'Suena al validar (respeta el modo silencio)' : 'Desactivado'}
+      onPress={toggle}
+      right={
+        <Switch
+          value={on}
+          onValueChange={toggle}
+          trackColor={{ true: colors.primary, false: colors.border }}
+          accessibilityLabel={`Sonido del escáner: ${on ? 'activado' : 'desactivado'}`}
+        />
+      }
+    />
+  );
+}
+
+/** "Ka-ching" cuando entra una venta con el inicio abierto. Al prenderlo suena una vez de muestra. */
+function SaleSoundCard() {
+  const { colors } = useTheme();
+  const on = useSaleSoundEnabled();
+  const toggle = () => {
+    Haptics.selectionAsync();
+    setSaleSoundEnabled(!on);
+  };
+  return (
+    <NavCard
+      icon="cash"
+      title="Sonido de venta"
+      subtitle={on ? 'Suena al entrar una venta en vivo' : 'Desactivado'}
+      onPress={toggle}
+      right={
+        <Switch
+          value={on}
+          onValueChange={toggle}
+          trackColor={{ true: colors.primary, false: colors.border }}
+          accessibilityLabel={`Sonido de venta: ${on ? 'activado' : 'desactivado'}`}
+        />
+      }
+    />
   );
 }
 

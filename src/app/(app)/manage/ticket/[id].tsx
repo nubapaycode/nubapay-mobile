@@ -4,10 +4,8 @@ import { type ReactNode, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -21,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { enter } from "@/components/dashboard/detail-kit";
+import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon } from "@/components/dashboard/icon";
 import {
   Card,
@@ -227,12 +226,8 @@ function TicketForm({
               }),
         }}
       />
-      <KeyboardAvoidingView
-        style={styles.screen}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-      >
-        <ScrollView
+      <View style={styles.screen}>
+        <KeyboardScroll
           style={styles.screen}
           contentContainerStyle={styles.content}
           contentInsetAdjustmentBehavior="automatic"
@@ -434,8 +429,8 @@ function TicketForm({
               </Pressable>
             </Animated.View>
           ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </KeyboardScroll>
+      </View>
     </>
   );
 }

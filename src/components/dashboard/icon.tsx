@@ -7,6 +7,7 @@ import { useTheme } from '@/theme';
 const ICONS = {
   chevronDown: { ios: 'chevron.down', android: 'keyboard_arrow_down' },
   chevronRight: { ios: 'chevron.right', android: 'chevron_right' },
+  chevronLeft: { ios: 'chevron.left', android: 'chevron_left' },
   chevronUpDown: { ios: 'chevron.up.chevron.down', android: 'unfold_more' },
   ticket: { ios: 'ticket', android: 'confirmation_number' },
   scan: { ios: 'qrcode.viewfinder', android: 'qr_code_scanner' },
@@ -73,6 +74,12 @@ const ICONS = {
   faceid: { ios: 'faceid', android: 'face' },
   fingerprint: { ios: 'touchid', android: 'fingerprint' },
   shield: { ios: 'lock.shield', android: 'shield' },
+  sound: { ios: 'speaker.wave.2', android: 'volume_up' },
+  chevronsRight: { ios: 'chevron.right.2', android: 'keyboard_double_arrow_right' },
+  wifiOff: { ios: 'wifi.slash', android: 'wifi_off' },
+  wifi: { ios: 'wifi', android: 'wifi' },
+  send: { ios: 'paperplane.fill', android: 'send' },
+  grip: { ios: 'line.3.horizontal', android: 'drag_handle' },
 } as const;
 
 export type IconName = keyof typeof ICONS;

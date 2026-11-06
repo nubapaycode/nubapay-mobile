@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -91,23 +91,26 @@ export default function MemberScreen() {
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic">
         {/* Quién es: cabecera centrada como en el detalle de pedido. */}
-        <Animated.View entering={enter(0)} style={styles.hero}>
-          <MemberAvatar member={member} size={72} />
-          <Text style={styles.name} numberOfLines={2}>
-            {member.name}
-          </Text>
-          <Text style={styles.email} numberOfLines={1}>
-            {member.email}
-          </Text>
-          <View style={styles.chips}>
-            <RoleChip member={member} />
-            {member.isOwner ? (
-              <View style={styles.you}>
-                <Text style={styles.youText}>Sos vos · organizador</Text>
-              </View>
-            ) : null}
-          </View>
-        </Animated.View>
+        {/* Destino del zoom desde la card: la card se transforma en esta cabecera (iOS 18+). */}
+        <Link.AppleZoomTarget>
+          <Animated.View entering={enter(0)} style={styles.hero}>
+            <MemberAvatar member={member} size={72} />
+            <Text style={styles.name} numberOfLines={2}>
+              {member.name}
+            </Text>
+            <Text style={styles.email} numberOfLines={1}>
+              {member.email}
+            </Text>
+            <View style={styles.chips}>
+              <RoleChip member={member} />
+              {member.isOwner ? (
+                <View style={styles.you}>
+                  <Text style={styles.youText}>Sos vos · organizador</Text>
+                </View>
+              ) : null}
+            </View>
+          </Animated.View>
+        </Link.AppleZoomTarget>
 
         {/* Acciones rápidas (estilo Revolut): círculos con ícono y etiqueta. */}
         <Animated.View entering={enter(1)} style={styles.quick}>

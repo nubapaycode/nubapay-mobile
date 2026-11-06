@@ -120,7 +120,7 @@ const refresh = (eventId: string) => invalidate(`staff:${eventId}`);
 export async function inviteMember(
   eventId: string,
   input: { name: string; email: string; roleName: string; permissions: PermissionId[] },
-): Promise<Result & { emailSent?: boolean }> {
+): Promise<Result & { emailSent?: boolean; emailError?: string }> {
   const res = await inviteStaff(eventId, {
     name: input.name.trim(),
     email: input.email.trim().toLowerCase(),
@@ -129,7 +129,7 @@ export async function inviteMember(
   });
   if (!res.ok) return res;
   await refresh(eventId);
-  return { ok: true, emailSent: res.data.email_sent !== false };
+  return { ok: true, emailSent: res.data.email_sent !== false, emailError: res.data.email_error };
 }
 
 /** Cambia el rol; si es una plantilla, le asigna sus herramientas. */
@@ -153,8 +153,17 @@ export async function removeMember(eventId: string, m: Member): Promise<Result> 
 
 export async function resendAccess(eventId: string, m: Member): Promise<Result> {
   const res = await resendStaffInvite(eventId, m.id);
-  return res.ok ? { ok: true } : res;
+  if (!res.ok) return res;
+  // El backend responde 200 aunque el proveedor de email lo rechace: eso también es un error.
+  if (res.data.email_sent === false) {
+    return { ok: false, error: mailError('No pudimos mandar el email.', res.data.email_error) };
+  }
+  return { ok: true };
 }
+
+/** En desarrollo suma el motivo que dio el proveedor de email (en producción, solo el texto amable). */
+export const mailError = (text: string, detail?: string) =>
+  __DEV__ && detail ? `${text}\n\n${detail}` : text;
 
 /* ── Filtros (por rol y/o por permiso). Vacío = sin filtrar. ── */
 

@@ -17,6 +17,7 @@ import { makeStyles, useTheme } from '@/theme';
 
 import { AreaChart, type ChartPoint } from './area-chart';
 import { Icon } from './icon';
+import { SaleBurst } from './live-moments';
 import { RollingNumber } from './rolling-number';
 
 const RANGES: { preset: RangePreset; label: string }[] = [
@@ -55,6 +56,9 @@ export function PulseHero({
   const styles = useStyles();
   const { colors } = useTheme();
   const [scrub, setScrub] = useState<number | null>(null);
+  // La línea del período anterior se puede ocultar desde la leyenda.
+  const [showPrev, setShowPrev] = useState(true);
+  const hasPrev = summary.series.points.some((p) => p.prev_revenue != null);
 
   const points: ChartPoint[] = summary.series.points.map((p) => ({
     label: p.label,
@@ -78,14 +82,26 @@ export function PulseHero({
             ? `${isHourly ? 'Franja de las ' : ''}${active.label}`
             : `Recaudado · ${scopeLabel ? `${scopeLabel} · ` : ''}${periodLabel}`}
         </Text>
-        <RollingNumber
-          value={active ? active.revenue : summary.total_revenue}
-          format={formatMoney}
-          style={styles.hero}
-        />
+        <View>
+          <RollingNumber
+            value={active ? active.revenue : summary.total_revenue}
+            format={formatMoney}
+            style={styles.hero}
+          />
+          <SaleBurst
+            value={summary.total_revenue}
+            live={live && active == null}
+            resetKey={`${periodLabel}|${scopeLabel ?? ''}`}
+          />
+        </View>
         <View style={styles.metaRow}>
           <DeltaChip ratio={delta} />
-          <Text style={styles.meta}>{formatInt(orders)} pedidos</Text>
+          <Text style={styles.meta}>
+            {formatInt(orders)} pedidos
+            {active && showPrev && active.prev_revenue != null ? (
+              <Text style={styles.metaPrev}> · antes {formatMoney(active.prev_revenue)}</Text>
+            ) : null}
+          </Text>
         </View>
       </View>
 
@@ -96,11 +112,53 @@ export function PulseHero({
           height={150}
           color={colors.hero.line}
           onScrub={setScrub}
+          showPrev={showPrev}
           emptyLabel={isHourly ? 'Sin ventas en las últimas 8 horas' : 'Sin ventas en este período'}
         />
       </View>
 
+      {hasPrev ? (
+        <ChartLegend
+          showPrev={showPrev}
+          onToggle={() => {
+            Haptics.selectionAsync();
+            setShowPrev((v) => !v);
+          }}
+        />
+      ) : null}
+
       <RangeTabs selected={selected} onSelect={onSelectPreset} />
+    </View>
+  );
+}
+
+/**
+ * Qué es cada línea: la de este período y la punteada del anterior (mismo tramo, corrido). Tocar
+ * "Anterior" la muestra u oculta.
+ */
+function ChartLegend({ showPrev, onToggle }: { showPrev: boolean; onToggle: () => void }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <View style={styles.legend}>
+      <View style={styles.legendItem}>
+        <View style={[styles.legendLine, { backgroundColor: colors.hero.line }]} />
+        <Text style={styles.legendText}>Este período</Text>
+      </View>
+      <Pressable
+        onPress={onToggle}
+        hitSlop={8}
+        accessibilityRole="switch"
+        accessibilityState={{ checked: showPrev }}
+        accessibilityLabel="Comparar con el período anterior"
+        style={({ pressed }) => [styles.legendItem, styles.legendToggle, pressed && { opacity: 0.6 }]}>
+        <View style={styles.legendDash}>
+          {[0, 1, 2].map((i) => (
+            <View key={i} style={[styles.legendDot, { backgroundColor: colors.chart.previous }]} />
+          ))}
+        </View>
+        <Text style={[styles.legendText, !showPrev && styles.legendOff]}>Anterior</Text>
+      </Pressable>
     </View>
   );
 }
@@ -203,6 +261,15 @@ const useStyles = makeStyles((c) =>
       letterSpacing: -1.4,
     },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
+    metaPrev: { color: c.textMuted },
+    legend: { flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: -2 },
+    legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    legendToggle: { paddingHorizontal: 8, height: 24, borderRadius: Radius.pill },
+    legendLine: { width: 14, height: 2, borderRadius: 1 },
+    legendDash: { flexDirection: 'row', gap: 2 },
+    legendDot: { width: 4, height: 2, borderRadius: 1 },
+    legendText: { color: c.textSecondary, fontSize: 12, fontWeight: '500' },
+    legendOff: { color: c.textMuted, textDecorationLine: 'line-through' },
     meta: { color: c.textSecondary, fontSize: 13, fontVariant: ['tabular-nums'] },
     delta: {
       flexDirection: 'row',

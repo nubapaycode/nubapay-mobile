@@ -23,6 +23,7 @@ const GAP = 8;
 const ACTION_W = BTN_W * 2 + GAP * 2;
 const SNAP = { duration: 260, easing: Easing.out(Easing.cubic) };
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
+const LIFT = { duration: 180, easing: Easing.out(Easing.cubic) };
 
 type Props = {
   event: EventSummary;
@@ -134,9 +135,20 @@ export function EventCard({ event, selected, onSelect, swipe }: Props) {
             accessibilityRole="button"
             accessibilityState={{ selected }}
             accessibilityLabel={`${event.name}, ${status.label}, ${formatEventDate(event.starts_at)}`}
-            accessibilityHint={canSwipe ? 'Deslizá a la izquierda para editar o eliminar' : undefined}
+            accessibilityHint={canSwipe ? 'Deslizá a la izquierda o mantené apretado para editar o eliminar' : undefined}
             onPressIn={() => scale.set(withTiming(0.98, PRESS))}
             onPressOut={() => scale.set(withTiming(1, PRESS))}
+            // Mantener apretado: la card se "levanta" y descubre Editar y Eliminar (mismo lugar que el deslizar).
+            onLongPress={
+              canSwipe
+                ? () => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                    scale.set(withTiming(1.03, LIFT));
+                    swipe?.onOpenChange(true);
+                  }
+                : undefined
+            }
+            delayLongPress={380}
             onPress={() => (open ? swipe?.onOpenChange(false) : onSelect())}
             style={[styles.card, selected && styles.cardSelected]}>
             <View style={styles.body}>

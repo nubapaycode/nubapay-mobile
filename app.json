@@ -61,7 +61,39 @@
         {
           "faceIDPermission": "Nubapay usa Face ID para que ingreses sin escribir tu contraseña."
         }
-      ]
+      ],
+      "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "color": "#0069ff",
+          "enableBackgroundRemoteNotifications": true
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "frequentUpdates": true,
+          "widgets": [
+            {
+              "name": "EventPulse",
+              "displayName": "Pulso del evento",
+              "description": "Lo recaudado y las entradas vendidas de tu evento.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium"
+                ],
+                "initialLayout": "src/widgets/EventPulseWidget.tsx"
+              },
+              "android": null
+            }
+          ],
+          "enablePushNotifications": true
+        }
+      ],
+      "expo-quick-actions",
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,

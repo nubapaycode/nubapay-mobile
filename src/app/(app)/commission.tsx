@@ -6,6 +6,7 @@ import Animated from 'react-native-reanimated';
 import { Breakdown, DetailHero, enter } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { ProgressBar } from '@/components/dashboard/progress-bar';
+import { MoneyTimeline } from '@/components/payouts/money-timeline';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import {
   eventPhase,
@@ -129,23 +130,27 @@ export default function CommissionScreen() {
             ) : null}
           </DetailHero>
 
-          {/* Liquidación: facturado − comisión = neto; lo destacado es la comisión a pagar */}
-          <Animated.View entering={enter(2)} style={styles.settle}>
-            <Row label="Facturado" value={formatMoney(billed)} />
-            {feeMode ? (
-              <Row label="Costo de servicio cobrado" value={formatMoney(due)} divider />
-            ) : (
-              <Row label="Comisión Nubapay (1 %)" value={`− ${formatMoney(due)}`} divider />
-            )}
-            <Row label="Neto para vos" value={formatMoney(net)} divider />
-            <View style={styles.due}>
+          {/* Liquidación como recorrido: facturado → comisión → neto; abajo, lo que se paga */}
+          <View style={{ gap: 12 }}>
+            <MoneyTimeline
+              key={`${selectedId}|${billed}`}
+              delay={420}
+              steps={[
+                { label: 'Facturado', hint: `${formatInt(list.length)} pagos aprobados`, value: formatMoney(billed) },
+                feeMode
+                  ? { label: 'Costo de servicio', hint: 'Lo pagó el comprador aparte', value: formatMoney(due) }
+                  : { label: 'Comisión Nubapay', hint: dueHint, value: `− ${formatMoney(due)}` },
+                { label: 'Neto para vos', value: formatMoney(net), strong: true },
+              ]}
+            />
+            <Animated.View entering={enter(3)} style={styles.due}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.dueLabel}>{dueLabel}</Text>
                 <Text style={styles.dueHint}>{dueHint}</Text>
               </View>
               <Text style={styles.dueValue}>{formatMoney(due)}</Text>
-            </View>
-          </Animated.View>
+            </Animated.View>
+          </View>
 
           <Text style={styles.note}>
             {feeMode
@@ -155,16 +160,6 @@ export default function CommissionScreen() {
         </View>
       )}
     </ScrollView>
-  );
-}
-
-function Row({ label, value, divider }: { label: string; value: string; divider?: boolean }) {
-  const styles = useStyles();
-  return (
-    <View style={[styles.row, divider && styles.divider]}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -199,34 +194,16 @@ const useStyles = makeStyles((c) =>
 
     loading: { paddingVertical: Spacing.six, alignItems: 'center' },
 
-    settle: {
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
-      borderWidth: 1,
-      borderColor: c.border,
-      paddingHorizontal: 16,
-      overflow: 'hidden',
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 12,
-      paddingVertical: 13,
-    },
-    divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderSubtle },
-    rowLabel: { color: c.textSecondary, fontSize: 14 },
-    rowValue: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
     due: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      marginHorizontal: -16,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
+      padding: 16,
+      borderRadius: Radius.xl,
+      borderCurve: 'continuous',
+      borderWidth: 1,
+      borderColor: c.border,
       backgroundColor: c.canvas,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: c.border,
     },
     dueLabel: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     dueHint: { color: c.textMuted, fontSize: 12 },

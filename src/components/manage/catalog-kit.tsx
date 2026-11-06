@@ -23,6 +23,7 @@ import { DisplayFont, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
 import { Lottie } from "@/components/fx/lottie";
+import { TicketMascot } from "@/components/illustrations/ticket-mascot";
 
 /**
  * Piezas compartidas del catálogo (lista, formulario y sus hojas): miniatura, buscador, lista
@@ -233,15 +234,20 @@ export function EmptyState({
   const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <Lottie
-        name={icon === "search" ? "search" : "empty"}
-        size={132}
-        fallback={
-          <View style={styles.emptyIcon}>
-            <Icon name={icon} size={24} color={colors.ink} />
-          </View>
-        }
-      />
+      {/* Sin búsqueda es que todavía no hay nada: ahí saluda la mascota. */}
+      {icon === "search" ? (
+        <Lottie
+          name="search"
+          size={132}
+          fallback={
+            <View style={styles.emptyIcon}>
+              <Icon name={icon} size={24} color={colors.ink} />
+            </View>
+          }
+        />
+      ) : (
+        <TicketMascot size={120} onLight={colors.scheme === "light"} />
+      )}
       <View style={{ gap: 4, alignItems: "center" }}>
         <Text style={styles.emptyTitle}>{title}</Text>
         {text ? <Text style={styles.emptyText}>{text}</Text> : null}

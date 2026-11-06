@@ -6,6 +6,7 @@ import Animated from 'react-native-reanimated';
 
 import { enter, enterRow } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
+import { CardListSkeleton } from '@/components/dashboard/skeleton';
 import { AddEventButton } from '@/components/events/add-event-button';
 import { EventCard } from '@/components/events/event-card';
 import { DisplayFont, Spacing } from '@/constants/theme';
@@ -79,9 +80,11 @@ export default function EventsScreen() {
         <Animated.View entering={enter(0)} style={styles.summary}>
           <Text style={styles.count}>{all.length}</Text>
           <Text style={styles.countLabel}>
-            {all.length === 1 ? 'evento' : 'eventos'} · deslizá a la izquierda para eliminar
+            {all.length === 1 ? 'evento' : 'eventos'} · deslizá o mantené apretado para editar
           </Text>
         </Animated.View>
+
+        {!events ? <CardListSkeleton variant="event" count={4} label="Cargando eventos" /> : null}
 
         {groups.map((g) => (
           <View key={g.phase} style={styles.group}>

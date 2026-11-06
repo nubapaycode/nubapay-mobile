@@ -6,10 +6,8 @@ import { Children, type ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   ActionSheetIOS,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -25,6 +23,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
+import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon } from '@/components/dashboard/icon';
 import { Segmented } from '@/components/dashboard/segmented';
 import { DateTimeField } from '@/components/events/date-time-field';
@@ -217,11 +216,8 @@ export function EventForm({ event }: { event?: EventDetail }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
-      <ScrollView
+    <View style={styles.screen}>
+      <KeyboardScroll
         style={styles.screen}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
@@ -419,9 +415,9 @@ export function EventForm({ event }: { event?: EventDetail }) {
             onValueChange={setShortcuts}
           />
         </Section>
-      </ScrollView>
+      </KeyboardScroll>
 
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

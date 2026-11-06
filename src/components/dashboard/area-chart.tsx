@@ -33,6 +33,8 @@ type Props = {
   emptyLabel?: string;
   /** Evento en vivo: punto que late en la punta de la curva y "ping" cuando entra una venta. */
   live?: boolean;
+  /** Dibuja la línea punteada del período anterior (si los puntos la traen). */
+  showPrev?: boolean;
 };
 
 const CURSOR = { duration: 110, easing: Easing.out(Easing.quad) };
@@ -123,6 +125,7 @@ export function AreaChart({
   onScrub,
   emptyLabel = 'Sin ventas en este período',
   live = false,
+  showPrev = true,
 }: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -135,7 +138,7 @@ export function AreaChart({
   const base = PAD_TOP + plotH;
   const values = points.map((p) => p.value);
   const prevs = points.map((p) => p.prev ?? 0);
-  const hasPrev = points.some((p) => p.prev != null);
+  const hasPrev = showPrev && points.some((p) => p.prev != null);
   const max = Math.max(1, ...values, ...(hasPrev ? prevs : [])) * 1.12;
   const isEmpty = values.every((v) => v === 0);
 
@@ -345,8 +348,8 @@ export function AreaChart({
                     <AnimatedPath
                       animatedProps={prevProps}
                       stroke={colors.chart.previous}
-                      strokeWidth={1}
-                      strokeDasharray="3 3"
+                      strokeWidth={1.5}
+                      strokeDasharray="4 4"
                       fill="none"
                     />
                   </Svg>

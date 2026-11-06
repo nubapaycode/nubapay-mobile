@@ -32,6 +32,7 @@ import { AnimatedNumber } from './animated-number';
 import { FADE_EASING, FADE_MS, RISE_EASING, RISE_MS } from './detail-kit';
 import { Icon, type IconName } from './icon';
 import { LivePill } from './live-pill';
+import { MilestoneHalo } from './live-moments';
 import { PaymentMethodIcon } from './payment-method-icon';
 import { ProgressBar } from './progress-bar';
 import { Rings } from './ring';
@@ -85,6 +86,7 @@ function TicketsTile({ data, index, wide }: { data: DashboardData; index: number
 
   const ring = (
     <View style={styles.ringWrap}>
+      {live ? <MilestoneHalo ratio={ratio} size={76} /> : null}
       <Rings
         size={76}
         stroke={4.5}

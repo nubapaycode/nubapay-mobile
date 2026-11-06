@@ -1,9 +1,11 @@
 import * as Haptics from 'expo-haptics';
+import { Link } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
 import { useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
+  type SharedValue,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -38,6 +40,7 @@ export function AppTabBar({
   onScan,
 }: BottomTabBarProps & { onScan: () => void }) {
   const styles = useStyles();
+  const width = useSharedValue(0);
   const routes = state.routes.filter((r) => TABS[r.name]);
   const half = Math.ceil(routes.length / 2);
 
@@ -63,19 +66,70 @@ export function AppTabBar({
     );
   };
 
+  // Lugar de la pestaña activa entre los cinco (el del medio es el escáner).
+  const focusedAt = routes.findIndex((r) => state.routes[state.index]?.key === r.key);
+  const slot = focusedAt < 0 ? -1 : focusedAt < half ? focusedAt : focusedAt + 1;
+
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+    <View
+      style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}
+      onLayout={(e) => width.set(e.nativeEvent.layout.width)}>
       {routes.slice(0, half).map(renderTab)}
       <ScanButton onPress={onScan} />
       {routes.slice(half).map(renderTab)}
+      <TabIndicator slot={slot} slots={routes.length + 1} width={width} />
     </View>
   );
 }
 
+const INDICATOR_W = 16;
+const SLIDE = { duration: 300, easing: Easing.inOut(Easing.cubic) };
+
 /**
- * Pestaña: al activarse el ícono hace un "pop" corto (se achica y vuelve) y el indicador crece
- * de punto a guion; al desactivarse vuelve a punto y se desvanece.
+ * Indicador único que se desliza de una pestaña a otra; en el trayecto se estira (como una gota)
+ * y al llegar vuelve a su largo. Sin pestaña activa se desvanece.
  */
+function TabIndicator({ slot, slots, width }: { slot: number; slots: number; width: SharedValue<number> }) {
+  const styles = useStyles();
+  const reduceMotion = useReducedMotion();
+  const pos = useSharedValue(Math.max(0, slot));
+  const stretch = useSharedValue(0);
+  const visible = useSharedValue(slot >= 0 ? 1 : 0);
+  const first = useRef(true);
+
+  useEffect(() => {
+    visible.set(withTiming(slot >= 0 ? 1 : 0, { duration: 180 }));
+    if (slot < 0) return;
+    if (first.current || reduceMotion) {
+      first.current = false;
+      pos.set(slot);
+      return;
+    }
+    const jump = Math.abs(slot - pos.get());
+    pos.set(withTiming(slot, SLIDE));
+    stretch.set(
+      withSequence(
+        withTiming(Math.min(1, 0.5 + jump * 0.25), { duration: 150, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 150, easing: Easing.in(Easing.quad) }),
+      ),
+    );
+  }, [slot, reduceMotion, pos, stretch, visible]);
+
+  const style = useAnimatedStyle(() => {
+    const slotW = width.value / slots;
+    return {
+      opacity: width.value > 0 ? visible.value : 0,
+      transform: [
+        { translateX: pos.value * slotW + slotW / 2 - INDICATOR_W / 2 },
+        { scaleX: 1 + stretch.value * 1.4 },
+      ],
+    };
+  });
+
+  return <Animated.View pointerEvents="none" style={[styles.indicator, style]} />;
+}
+
+/** Pestaña: al activarse el ícono hace un "pop" corto (se achica y vuelve). */
 function TabItem({
   focused,
   icon,
@@ -92,12 +146,10 @@ function TabItem({
   const styles = useStyles();
   const { colors } = useTheme();
   const reduceMotion = useReducedMotion();
-  const on = useSharedValue(focused ? 1 : 0);
   const pop = useSharedValue(1);
   const mounted = useRef(false);
 
   useEffect(() => {
-    on.set(reduceMotion ? (focused ? 1 : 0) : withTiming(focused ? 1 : 0, SWITCH));
     if (focused && mounted.current && !reduceMotion) {
       pop.set(
         withSequence(
@@ -108,13 +160,9 @@ function TabItem({
       );
     }
     mounted.current = true;
-  }, [focused, on, pop, reduceMotion]);
+  }, [focused, pop, reduceMotion]);
 
   const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
-  const indicatorStyle = useAnimatedStyle(() => ({
-    opacity: on.value,
-    width: 4 + on.value * 12,
-  }));
 
   return (
     <Pressable
@@ -130,12 +178,16 @@ function TabItem({
           color={focused ? colors.ink : colors.textMuted}
         />
       </Animated.View>
-      <Animated.View style={[styles.indicator, indicatorStyle]} />
     </Pressable>
   );
 }
 
-const SWITCH = { duration: 240, easing: Easing.out(Easing.cubic) };
+
+/**
+ * En iOS 18+ el escáner se abre con el zoom nativo: el círculo crece hasta ser la pantalla (y al
+ * cerrar vuelve a él). En otras versiones el Link navega igual, sin la animación.
+ */
+const ZOOM = Platform.OS === 'ios';
 
 /** Botón central elevado: círculo azul de marca con el ícono de QR. */
 function ScanButton({ onPress }: { onPress: () => void }) {
@@ -143,21 +195,31 @@ function ScanButton({ onPress }: { onPress: () => void }) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
   const press = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const button = (
+    <Pressable
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        // Con zoom navega el Link; acá solo el toque.
+        if (!ZOOM) onPress();
+      }}
+      onPressIn={() => scale.set(withTiming(0.92, PRESS))}
+      onPressOut={() => scale.set(withTiming(1, PRESS))}
+      accessibilityRole="button"
+      accessibilityLabel="Escanear QR"
+      style={styles.scan}>
+      <Icon name="qr" size={26} color={colors.onPrimary} />
+    </Pressable>
+  );
   return (
     <View style={styles.scanSlot}>
       <Animated.View style={[styles.scanRing, press]}>
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            onPress();
-          }}
-          onPressIn={() => scale.set(withTiming(0.92, PRESS))}
-          onPressOut={() => scale.set(withTiming(1, PRESS))}
-          accessibilityRole="button"
-          accessibilityLabel="Escanear QR"
-          style={styles.scan}>
-          <Icon name="qr" size={26} color={colors.onPrimary} />
-        </Pressable>
+        {ZOOM ? (
+          <Link href="/scan" asChild>
+            <Link.AppleZoom>{button}</Link.AppleZoom>
+          </Link>
+        ) : (
+          button
+        )}
       </Animated.View>
     </View>
   );
@@ -174,7 +236,16 @@ const useStyles = makeStyles((c) =>
       borderTopColor: c.border,
     },
     tab: { flex: 1, alignItems: 'center', gap: 6, paddingTop: 6, height: 44 },
-    indicator: { height: 4, borderRadius: 2, backgroundColor: c.ink },
+    // Debajo del ícono: padding de la barra (10) + de la pestaña (6) + ícono (23) + separación (6).
+    indicator: {
+      position: 'absolute',
+      left: 0,
+      top: 45,
+      width: INDICATOR_W,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.ink,
+    },
 
     scanSlot: { flex: 1, alignItems: 'center' },
     scanRing: {

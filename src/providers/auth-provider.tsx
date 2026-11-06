@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { unregisterPush } from '@/lib/push';
 import { apiFetch, authPaths, setApiToken, setUnauthorizedHandler } from '@/lib/api';
 import { clearQueries } from '@/lib/query';
 import {
@@ -41,6 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   const signOut = useCallback(async () => {
+    // Antes de borrar la sesión (hace falta el token para avisarle al backend).
+    await unregisterPush().catch(() => {});
     clearQueries();
     await clearSession();
     setToken(null);

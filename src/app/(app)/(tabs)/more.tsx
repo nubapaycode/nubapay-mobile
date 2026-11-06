@@ -13,6 +13,7 @@ import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { useRegrets } from '@/features/manage/manage';
 import { apiFetch } from '@/lib/api';
 import { apiUrl, publicCatalogUrl, publicTicketsUrl } from '@/lib/api/url';
+import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -40,11 +41,12 @@ function usePublicStoreLinks() {
       if (slug) refresh();
     }, [slug, refresh]),
   );
-  if (!slug || !data) return { catalogUrl: null, ticketsUrl: null };
+  if (!slug || !data) return { catalogUrl: null, ticketsUrl: null, refresh };
   const hasProducts = (data.products?.length ?? 0) + (data.combos?.length ?? 0) > 0;
   return {
     catalogUrl: hasProducts ? publicCatalogUrl(slug) : null,
     ticketsUrl: data.tickets?.length ? publicTicketsUrl(slug) : null,
+    refresh,
   };
 }
 
@@ -60,7 +62,8 @@ export default function MoreScreen() {
   const showSales = canProducts || canOrders;
   const canMethods = !isStaff || can('storefront');
   const showPayouts = canMethods || can('payments');
-  const { catalogUrl, ticketsUrl } = usePublicStoreLinks();
+  const { catalogUrl, ticketsUrl, refresh: refreshLinks } = usePublicStoreLinks();
+  const pull = usePullRefresh(() => Promise.all([refreshLinks(), regrets.refresh()]));
   const openPublic = (url: string) =>
     WebBrowser.openBrowserAsync(url, {
       presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
@@ -68,7 +71,7 @@ export default function MoreScreen() {
     });
 
   return (
-    <TabPage title="Más">
+    <TabPage title="Más" refreshing={pull.refreshing} onRefresh={pull.onRefresh}>
       <Animated.View entering={enter(1)} style={styles.group}>
         <Text style={styles.groupTitle}>Eventos</Text>
         <NavCard

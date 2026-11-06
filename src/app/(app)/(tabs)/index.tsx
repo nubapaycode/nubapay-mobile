@@ -17,6 +17,7 @@ import { FADE_EASING, FADE_MS } from '@/components/dashboard/detail-kit';
 import { HeroBackdrop } from '@/components/dashboard/hero-backdrop';
 import { Lottie } from '@/components/fx/lottie';
 import { LastHourCard } from '@/components/dashboard/last-hour-card';
+import { SoldOutParty } from '@/components/dashboard/live-moments';
 import { PulseHeader } from '@/components/dashboard/pulse-header';
 import { PulseHero } from '@/components/dashboard/pulse-hero';
 import { hiddenNativeSpinner, PulseRefresh } from '@/components/dashboard/pulse-refresh';
@@ -39,6 +40,7 @@ import { eventPhase } from '@/features/dashboard/format';
 import { eventOffer, singleOffer } from '@/features/dashboard/offer';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
+import { useLivePulse } from '@/features/live/live-pulse';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
@@ -106,6 +108,12 @@ export default function HomeScreen() {
   const only = data ? singleOffer(eventOffer(data.insights)) : null;
   const scopeLabel =
     filters.scope !== 'all' ? SCOPE_LABEL[filters.scope] : only ? SCOPE_LABEL[only] : null;
+
+  // Widget de inicio y Live Activity (iOS): se sincronizan cada vez que llegan datos nuevos.
+  useLivePulse(
+    event?.id ?? null,
+    data ? `${data.summary.total_revenue}|${data.summary.order_count}|${data.insights.event.phase}` : null,
+  );
 
   const selectPreset = (preset: RangePreset) =>
     setDashboardFilters({ ...filters, period: { preset } });
@@ -182,6 +190,9 @@ export default function HomeScreen() {
         )}
       </Animated.ScrollView>
       {Platform.OS === 'ios' ? <PulseRefresh scrollY={scrollY} refreshing={refreshing} /> : null}
+      {data?.insights.event.phase === 'live' && data.insights.tickets.capacity ? (
+        <SoldOutParty key={event?.id} ratio={data.insights.tickets.sold / data.insights.tickets.capacity} />
+      ) : null}
       {/* Franja fija bajo la barra de estado; cuando el hero se va, muestra evento y recaudación. */}
       <CompactBar
         scrollY={scrollY}
@@ -189,7 +200,12 @@ export default function HomeScreen() {
         revenue={data?.summary.total_revenue ?? null}
         periodLabel={data ? periodLabel(filters.period) : null}
         orderCount={data?.summary.order_count ?? null}
-        live={(data?.insights.event.phase ?? phase) === 'live'}
+        userName={user?.name ?? null}
+        filterCount={activeFilterCount(filters, base)}
+        showFilters={canView}
+        onOpenEvents={() => router.push('/switch-event')}
+        onOpenProfile={() => router.push('/profile')}
+        onOpenFilters={() => router.push('/dashboard-filters')}
       />
     </View>
   );

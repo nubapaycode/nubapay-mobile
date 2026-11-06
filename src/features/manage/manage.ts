@@ -198,7 +198,7 @@ export function useBlocks() {
 export function useRegrets(enabled = true) {
   const eventId = useSelectedEventId();
   const q = useQuery<Regret[]>(enabled ? key('regrets', eventId) : null, () => listRegrets(eventId!));
-  return { regrets: q.data, error: q.data ? null : q.error, eventId };
+  return { regrets: q.data, error: q.data ? null : q.error, eventId, refresh: q.refresh };
 }
 
 /* ───────────── Escritura ───────────── */

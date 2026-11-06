@@ -4,10 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -27,6 +24,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
+import { KeyboardScroll } from "@/components/fx/keyboard";
+import { MorphButton, useMorphStatus } from '@/components/motion/morph-button';
 import { Icon } from '@/components/dashboard/icon';
 import { Confetti } from '@/components/fx/confetti';
 import { Tilt } from '@/components/motion/tilt';
@@ -116,11 +115,8 @@ function PaymentMethodsContent({ event, ready }: { event: EventDetail; ready: Pa
   const ordered = [...METHODS].sort((a, b) => Number(isReady(b, event)) - Number(isReady(a, event)));
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
-      <ScrollView
+    <View style={styles.screen}>
+      <KeyboardScroll
         style={styles.screen}
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
@@ -177,9 +173,9 @@ function PaymentMethodsContent({ event, ready }: { event: EventDetail; ready: Pa
         </Group>
 
         <Text style={[styles.note, styles.footnote]}>Estos métodos son de {event.name}.</Text>
-      </ScrollView>
+      </KeyboardScroll>
       {party ? <Confetti key={party} seed={party} /> : null}
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -512,7 +508,7 @@ function CredentialsForm({
   const [expanded, setExpanded] = useState(!collapsed);
   const [values, setValues] = useState<Record<string, string>>({});
   const [shown, setShown] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
+  const morph = useMorphStatus();
   const complete = fields.every((f) => (values[f.key as string] ?? '').trim().length > 0);
 
   if (!expanded) {
@@ -563,33 +559,25 @@ function CredentialsForm({
           );
         })}
       </View>
-      <Pressable
-        accessibilityRole="button"
-        disabled={!complete || saving}
-        onPress={async () => {
-          setSaving(true);
-          const ok = await onSave(
-            Object.fromEntries(fields.map((f) => [f.key, (values[f.key as string] ?? '').trim()])) as EventPatch,
-          );
-          setSaving(false);
-          if (ok) {
-            setValues({});
-            if (collapsed) setExpanded(false);
-          }
+      <MorphButton
+        label="Guardar credenciales"
+        status={morph.status}
+        disabled={!complete}
+        colors={{ bg: colors.ink, fg: colors.onInk }}
+        height={50}
+        onPress={() =>
+          morph.run(() =>
+            onSave(
+              Object.fromEntries(fields.map((f) => [f.key, (values[f.key as string] ?? '').trim()])) as EventPatch,
+            ),
+          )
+        }
+        onDone={() => {
+          morph.reset();
+          setValues({});
+          if (collapsed) setExpanded(false);
         }}
-        style={({ pressed }) => [
-          styles.primary,
-          (!complete || saving) && styles.primaryDisabled,
-          pressed && { opacity: 0.85 },
-        ]}>
-        {saving ? (
-          <ActivityIndicator color={colors.textMuted} />
-        ) : (
-          <Text style={[styles.primaryText, !complete && styles.primaryTextDisabled]}>
-            Guardar credenciales
-          </Text>
-        )}
-      </Pressable>
+      />
       {helpUrl ? (
         <Pressable
           accessibilityRole="link"

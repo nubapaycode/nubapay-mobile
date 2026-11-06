@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
+import { ScalePressable } from '@/components/motion/scale-pressable';
 import { enter, enterRow } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -67,7 +68,7 @@ export function AddButton({ label, onPress }: { label: string; onPress: () => vo
   const styles = useStyles();
   const { colors } = useTheme();
   return (
-    <Pressable
+    <ScalePressable
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress();
@@ -76,7 +77,7 @@ export function AddButton({ label, onPress }: { label: string; onPress: () => vo
       style={({ pressed }) => [styles.add, pressed && { backgroundColor: colors.border }]}>
       <Icon name="plus" size={15} color={colors.ink} />
       <Text style={styles.addText}>{label}</Text>
-    </Pressable>
+    </ScalePressable>
   );
 }
 

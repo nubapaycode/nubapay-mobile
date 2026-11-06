@@ -6,10 +6,8 @@ import { type ReactNode, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -19,6 +17,7 @@ import {
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 
 import { enter } from "@/components/dashboard/detail-kit";
+import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon, type IconName } from "@/components/dashboard/icon";
 import {
   Card,
@@ -327,12 +326,8 @@ function ProductForm({
               }),
         }}
       />
-      <KeyboardAvoidingView
-        style={styles.screen}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-      >
-        <ScrollView
+      <View style={styles.screen}>
+        <KeyboardScroll
           style={styles.screen}
           contentContainerStyle={styles.content}
           contentInsetAdjustmentBehavior="automatic"
@@ -545,8 +540,8 @@ function ProductForm({
               </Pressable>
             </Animated.View>
           ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </KeyboardScroll>
+      </View>
     </>
   );
 }

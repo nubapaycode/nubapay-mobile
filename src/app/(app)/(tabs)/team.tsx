@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
+import { CountBadge } from '@/components/motion/count-badge';
 import { enter, enterItem } from '@/components/dashboard/detail-kit';
+import { CardListSkeleton } from '@/components/dashboard/skeleton';
 import { Lottie } from '@/components/fx/lottie';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
@@ -23,6 +25,7 @@ import {
   useTeamFilters,
 } from '@/features/team/team';
 import { useTeam } from '@/features/team/use-team';
+import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { makeStyles, useTheme } from '@/theme';
 
 /**
@@ -44,7 +47,8 @@ export default function TeamScreen() {
 function TeamContent() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { members: team, error } = useTeam();
+  const { members: team, error, refresh } = useTeam();
+  const pull = usePullRefresh(refresh);
   const filters = useTeamFilters();
   const [query, setQuery] = useState('');
 
@@ -58,6 +62,8 @@ function TeamContent() {
     <TabPage
       title="Equipo"
       subtitle={team ? `${team.length} ${team.length === 1 ? 'persona' : 'personas'}` : undefined}
+      refreshing={pull.refreshing}
+      onRefresh={pull.onRefresh}
       right={
         <View style={styles.headActions}>
           <Pressable
@@ -71,9 +77,7 @@ function TeamContent() {
             style={({ pressed }) => [styles.round, pressed && styles.pressed]}>
             <Icon name="filter" size={17} color={colors.text} />
             {active > 0 ? (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{active}</Text>
-              </View>
+              <CountBadge count={active} style={styles.badge} textStyle={styles.badgeText} />
             ) : null}
           </Pressable>
           <Pressable
@@ -133,8 +137,10 @@ function TeamContent() {
         ) : null}
       </Animated.View>
 
-      {!team ? (
-        <Text style={styles.empty}>{error ?? 'Cargando equipo…'}</Text>
+      {!team && !error ? (
+        <CardListSkeleton variant="member" count={4} label="Cargando equipo" />
+      ) : !team ? (
+        <Text style={styles.empty}>{error}</Text>
       ) : members.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
           <Lottie
@@ -167,7 +173,13 @@ function TeamContent() {
                   layout={LinearTransition.duration(260)}>
                   <MemberCard
                     member={m}
+                    href={{ pathname: '/member/[id]', params: { id: m.id } }}
                     onPress={() => router.push({ pathname: '/member/[id]', params: { id: m.id } })}
+                    onChangeRole={
+                      m.isOwner
+                        ? undefined
+                        : () => router.push({ pathname: '/change-role/[id]', params: { id: m.id } })
+                    }
                   />
                 </Animated.View>
               ))}

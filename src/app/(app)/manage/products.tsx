@@ -25,6 +25,8 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ScalePressable } from "@/components/motion/scale-pressable";
+import { CountBadge } from "@/components/motion/count-badge";
 import { EventContext } from "@/components/events/event-context";
 import { enter, enterItem } from "@/components/dashboard/detail-kit";
 import { Icon, type IconName } from "@/components/dashboard/icon";
@@ -240,9 +242,7 @@ export default function ProductsScreen() {
               color={activeFilters > 0 ? colors.onInk : colors.ink}
             />
             {activeFilters > 0 ? (
-              <View style={styles.badgeCount}>
-                <Text style={styles.badgeCountText}>{activeFilters}</Text>
-              </View>
+              <CountBadge count={activeFilters} style={styles.badgeCount} textStyle={styles.badgeCountText} />
             ) : null}
           </Pressable>
         </Animated.View>
@@ -465,7 +465,7 @@ function ProductRow({
       : null;
 
   return (
-    <Pressable
+    <ScalePressable
       onPress={() => {
         Haptics.selectionAsync();
         router.push({ pathname: "/manage/product/[id]", params: { id: p.id } });
@@ -552,7 +552,7 @@ function ProductRow({
         trackColor={{ true: colors.primary, false: colors.border }}
         accessibilityLabel={`${p.name}: ${p.isActive ? "a la venta" : "pausado"}`}
       />
-    </Pressable>
+    </ScalePressable>
   );
 }
 

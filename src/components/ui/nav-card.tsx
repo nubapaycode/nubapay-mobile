@@ -1,8 +1,9 @@
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
+import { ScalePressable } from '@/components/motion/scale-pressable';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 
@@ -29,7 +30,7 @@ export function NavCard({
   const styles = useStyles();
   const { colors } = useTheme();
   return (
-    <Pressable
+    <ScalePressable
       accessibilityRole={external ? 'link' : 'button'}
       accessibilityLabel={`${title}. ${subtitle}${external ? '. Abre el navegador' : ''}`}
       onPress={() => {
@@ -50,7 +51,7 @@ export function NavCard({
         ) : (
           <Icon name="chevronRight" size={12} color={colors.textMuted} />
         ))}
-    </Pressable>
+    </ScalePressable>
   );
 }
 
