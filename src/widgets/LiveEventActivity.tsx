@@ -1,38 +1,52 @@
-import { Gauge, HStack, Image, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { Chart, Gauge, HStack, Image, Spacer, Text, VStack, ZStack } from '@expo/ui/swift-ui';
 import {
   activityBackgroundTint,
   font,
   foregroundStyle,
+  frame,
+  gaugeStyle,
+  layoutPriority,
   lineLimit,
   minimumScaleFactor,
   monospacedDigit,
   padding,
+  scaleEffect,
+  tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity } from 'expo-widgets';
 
 import type { EventPulseProps } from './types';
 
 /**
- * Live Activity del evento en vivo, adaptada a lo que vende:
- * - pantalla bloqueada: recaudación grande, el dato principal (entradas o productos) a la
- *   derecha, la barra de aforo si hay entradas con tope, y abajo última hora + segundo dato;
- * - Dynamic Island compacta: la nube de Nubapay + recaudación corta;
+ * Live Activity del evento en vivo:
+ * - pantalla bloqueada: el nombre como título, la recaudación con lo vendido en la última hora
+ *   (lima si viene subiendo, ámbar si se frenó), el gráfico de esa hora en tramos de 5 min y la
+ *   mascota. Solo datos que tiene cualquier evento, sin los de entradas o barra;
+ * - Dynamic Island compacta: aro de aforo (o la nube si no hay entradas con tope) + recaudación corta;
  * - expandida: recaudación, dato principal y, abajo, barra + última hora + segundo dato.
+ *
+ * `paceSeries` y `paceTrend` pueden faltar en pushes de un backend anterior: se tratan como vacíos.
  */
 const LiveEventActivity = (props: EventPulseProps) => {
   'widget';
   return {
     banner: (
       <VStack alignment="leading" spacing={8} modifiers={[padding({ all: 16 }), activityBackgroundTint('#080b11')]}>
-        <HStack spacing={6}>
-          <Image assetName="NubapayCloud" />
-          <Text modifiers={[font({ size: 12, weight: 'bold' }), foregroundStyle('#c6ff00')]}>EN VIVO</Text>
-          <Text modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>
+        <HStack spacing={8}>
+          <Text
+            modifiers={[
+              font({ size: 15, weight: 'semibold' }),
+              foregroundStyle('#f5f7fa'),
+              lineLimit(1),
+              layoutPriority(1),
+            ]}>
             {props.eventName}
           </Text>
+          <Spacer />
+          <Text modifiers={[font({ size: 11, weight: 'bold' }), foregroundStyle('#c6ff00')]}>EN VIVO</Text>
         </HStack>
-        <HStack alignment="bottom">
-          <VStack alignment="leading" spacing={2}>
+        <HStack spacing={12}>
+          <VStack alignment="leading" spacing={3}>
             <Text
               modifiers={[
                 font({ size: 30, weight: 'bold', design: 'rounded' }),
@@ -43,47 +57,72 @@ const LiveEventActivity = (props: EventPulseProps) => {
               ]}>
               {props.revenue}
             </Text>
-            <Text modifiers={[font({ size: 12 }), foregroundStyle('#9aa3b2')]}>Recaudado · {props.orders}</Text>
-          </VStack>
-          <Spacer />
-          <VStack alignment="trailing" spacing={2}>
-            <Text
-              modifiers={[
-                font({ size: 17, weight: 'semibold' }),
-                foregroundStyle('#f5f7fa'),
-                monospacedDigit(),
-                lineLimit(1),
-              ]}>
-              {props.mainValue}
-            </Text>
             <HStack spacing={4}>
-              <Image systemName={props.icon} size={10} color="#636c7c" />
-              <Text modifiers={[font({ size: 11 }), foregroundStyle('#636c7c')]}>{props.mainLabel}</Text>
+              {props.paceTrend === 'flat' ? null : (
+                <Image
+                  systemName={props.paceTrend === 'down' ? 'arrow.down.right' : 'arrow.up.right'}
+                  size={10}
+                  color={props.paceTrend === 'down' ? '#ffb340' : '#c6ff00'}
+                />
+              )}
+              <Text
+                modifiers={[
+                  font({ size: 12, weight: 'semibold' }),
+                  foregroundStyle(props.paceTrend === 'down' ? '#ffb340' : '#c6ff00'),
+                  monospacedDigit(),
+                  lineLimit(1),
+                ]}>
+                {props.paceValue}
+              </Text>
+              <Text modifiers={[font({ size: 12 }), foregroundStyle('#9aa3b2'), lineLimit(1)]}>última hora</Text>
             </HStack>
           </VStack>
-        </HStack>
-        {props.ratio >= 0 ? <Gauge value={props.ratio} modifiers={[foregroundStyle('#c6ff00')]} /> : null}
-        <HStack>
-          <Text modifiers={[font({ size: 12 }), foregroundStyle('#9aa3b2')]}>{props.paceLabel} </Text>
-          <Text modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#c6ff00'), monospacedDigit()]}>
-            {props.paceValue}
-          </Text>
           <Spacer />
-          <Text modifiers={[font({ size: 12 }), foregroundStyle('#9aa3b2')]}>{props.extraLabel} </Text>
-          <Text modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle('#f5f7fa'), monospacedDigit()]}>
-            {props.extraValue}
-          </Text>
+          {(props.paceSeries ?? []).length > 1 ? (
+            <ZStack modifiers={[frame({ width: 84, height: 40 })]}>
+              <Chart
+                type="area"
+                showGrid={false}
+                data={(props.paceSeries ?? []).map((y, x) => ({ x, y }))}
+                areaStyle={{ color: props.paceTrend === 'down' ? '#ffb34026' : '#c6ff0026' }}
+              />
+              <Chart
+                type="line"
+                showGrid={false}
+                data={(props.paceSeries ?? []).map((y, x) => ({ x, y }))}
+                lineStyle={{ color: props.paceTrend === 'down' ? '#ffb340' : '#c6ff00', width: 2 }}
+              />
+            </ZStack>
+          ) : null}
+          <Image assetName="NubapayMascot" modifiers={[frame({ width: 54, height: 56 })]} />
         </HStack>
       </VStack>
     ),
-    // La nube de Nubapay (catálogo de assets del widget, ver plugins/with-widget-assets.js).
-    compactLeading: <Image assetName="NubapayCloud" />,
+    // Aro de aforo; sin entradas con tope, la nube de Nubapay (ver plugins/with-widget-assets.js).
+    // El Gauge circular mide ~44 pt: se escala para que entre en la isla compacta.
+    compactLeading:
+      props.ratio >= 0 ? (
+        <Gauge
+          value={props.ratio}
+          modifiers={[gaugeStyle('circularCapacity'), tint('#c6ff00'), scaleEffect(0.5), frame({ width: 22, height: 22 })]}
+        />
+      ) : (
+        <Image assetName="NubapayCloud" />
+      ),
     compactTrailing: (
       <Text modifiers={[font({ size: 14, weight: 'semibold' }), foregroundStyle('#ffffff'), monospacedDigit()]}>
         {props.revenueShort}
       </Text>
     ),
-    minimal: <Image assetName="NubapayCloud" />,
+    minimal:
+      props.ratio >= 0 ? (
+        <Gauge
+          value={props.ratio}
+          modifiers={[gaugeStyle('circularCapacity'), tint('#c6ff00'), scaleEffect(0.5), frame({ width: 22, height: 22 })]}
+        />
+      ) : (
+        <Image assetName="NubapayCloud" />
+      ),
     expandedLeading: (
       <VStack alignment="leading" spacing={2}>
         <Text modifiers={[font({ size: 11 }), foregroundStyle('#9aa3b2')]}>Recaudado</Text>

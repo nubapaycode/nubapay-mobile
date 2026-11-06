@@ -26,6 +26,10 @@ export type EventPulseProps = {
   /** Ritmo: lo vendido en la última hora ("Última hora" / "+$120K"). */
   paceLabel: string;
   paceValue: string;
+  /** Lo vendido en cada tramo de 5 min de la última hora (12 montos; el último es el actual). */
+  paceSeries: number[];
+  /** Últimos 15 min contra los 15 anteriores; "flat" si no se vendió nada en media hora. */
+  paceTrend: 'up' | 'down' | 'flat';
   /** Segundo dato según el catálogo ("Ingresaron" / "Por entregar"). */
   extraLabel: string;
   extraValue: string;
@@ -47,6 +51,8 @@ export const EMPTY_PULSE: EventPulseProps = {
   mainValue: '',
   paceLabel: '',
   paceValue: '',
+  paceSeries: [],
+  paceTrend: 'flat',
   extraLabel: '',
   extraValue: '',
   ratio: -1,
