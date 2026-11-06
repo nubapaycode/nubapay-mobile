@@ -1,5 +1,4 @@
 import { requireOptionalNativeModule } from 'expo';
-import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
@@ -10,7 +9,8 @@ import { apiFetch, authPaths } from '@/lib/api';
 
 /**
  * Notificaciones push del organizador (pedido en efectivo para aprobar, hitos de aforo). Las manda
- * el backend (services/push_notifications.py) por el servicio de Expo.
+ * el backend directo a Apple (APNs, services/push_notifications.py) con el token del dispositivo:
+ * no hace falta cuenta ni proyecto de Expo. Por ahora solo iOS (Android necesitaría Firebase).
  *
  * `expo-notifications` es nativo: sin el módulo en el build todo esto no hace nada.
  */
@@ -32,34 +32,24 @@ Notifications?.setNotificationHandler({
 
 let registered: string | null = null;
 
-const projectId = (): string | undefined =>
-  Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+/** Token de APNs del teléfono (hexadecimal). Solo iOS. */
+async function deviceToken(): Promise<string | null> {
+  if (!Notifications || Platform.OS !== 'ios') return null;
+  const t = await Notifications.getDevicePushTokenAsync();
+  return typeof t.data === 'string' ? t.data : null;
+}
 
-/**
- * Pide permiso (la primera vez), obtiene el token de Expo y lo guarda en el backend. Sin proyecto
- * de EAS (`eas init`) no hay token: avisa en desarrollo y sigue sin push.
- */
+/** Pide permiso (la primera vez), obtiene el token de APNs del teléfono y lo guarda en el backend. */
 export async function registerPush(): Promise<void> {
-  if (!Notifications || registered) return;
+  if (!Notifications || registered || Platform.OS !== 'ios') return;
   try {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'Avisos del evento',
-        importance: Notifications.AndroidImportance.HIGH,
-        lightColor: '#0069ff',
-      });
-    }
     const current = await Notifications.getPermissionsAsync();
     let granted = current.granted;
     if (!granted && current.canAskAgain) granted = (await Notifications.requestPermissionsAsync()).granted;
     if (!granted) return;
 
-    const id = projectId();
-    if (!id) {
-      if (__DEV__) console.warn('[push] Falta el projectId de EAS: corré `bunx eas-cli init` para tener push.');
-      return;
-    }
-    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: id });
+    const token = await deviceToken();
+    if (!token) return;
     const res = await apiFetch<{ ok: true }>(authPaths.pushToken(), {
       method: 'POST',
       body: JSON.stringify({ token, platform: Platform.OS }),
@@ -72,7 +62,7 @@ export async function registerPush(): Promise<void> {
 
 /**
  * Al cerrar sesión: el backend deja de mandarle avisos a este teléfono. No depende de lo que quedó
- * en memoria (la app pudo reiniciarse desde que se registró): vuelve a pedir el token de Expo del
+ * en memoria (la app pudo reiniciarse desde que se registró): vuelve a pedir el token de APNs del
  * dispositivo y lee los de Live Activity guardados. Va antes de borrar la sesión, porque el backend
  * pide el token de sesión para dar de baja.
  */
@@ -81,10 +71,7 @@ export async function unregisterPush(): Promise<void> {
   registered = null;
   if (!token && Notifications) {
     try {
-      const id = projectId();
-      if (id && (await Notifications.getPermissionsAsync()).granted) {
-        token = (await Notifications.getExpoPushTokenAsync({ projectId: id })).data;
-      }
+      if ((await Notifications.getPermissionsAsync()).granted) token = await deviceToken();
     } catch {
       // Sin token no hay nada que dar de baja en este teléfono.
     }
