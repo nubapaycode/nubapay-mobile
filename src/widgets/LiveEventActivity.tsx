@@ -25,7 +25,8 @@ import type { EventPulseProps } from './types';
  * - Dynamic Island compacta: aro de aforo (o la nube si no hay entradas con tope) + recaudación corta;
  * - expandida: recaudación, dato principal y, abajo, barra + última hora + segundo dato.
  *
- * `paceSeries` y `paceTrend` pueden faltar en pushes de un backend anterior: se tratan como vacíos.
+ * `paceSeries` y `paceTrend` pueden faltar en pushes de un backend anterior: sin ellos no hay gráfico
+ * ni flecha. La flecha tampoco se muestra sin ventas en media hora (`flat`).
  */
 const LiveEventActivity = (props: EventPulseProps) => {
   'widget';
@@ -58,13 +59,13 @@ const LiveEventActivity = (props: EventPulseProps) => {
               {props.revenue}
             </Text>
             <HStack spacing={4}>
-              {props.paceTrend === 'flat' ? null : (
+              {props.paceTrend === 'up' || props.paceTrend === 'down' ? (
                 <Image
                   systemName={props.paceTrend === 'down' ? 'arrow.down.right' : 'arrow.up.right'}
                   size={10}
                   color={props.paceTrend === 'down' ? '#ffb340' : '#c6ff00'}
                 />
-              )}
+              ) : null}
               <Text
                 modifiers={[
                   font({ size: 12, weight: 'semibold' }),
