@@ -43,9 +43,36 @@ type Pulse = { props: EventPulseProps; live: boolean; ends_at: string | null };
 const EVENT_KEY = 'nubapay.pulseEvent';
 const canStore = Platform.OS !== 'web';
 
-/** Tokens de APNs ya enviados al backend (para no repetir y para borrarlos al cerrar sesión). */
+/**
+ * Tokens de APNs ya enviados al backend: en memoria para no repetir, y guardados para poder darlos
+ * de baja al cerrar sesión aunque la app se haya reiniciado desde que se registraron.
+ */
 const sentTokens = new Set<string>();
-export const liveActivityTokens = () => [...sentTokens];
+const TOKENS_KEY = 'nubapay.liveTokens';
+
+async function storedTokens(): Promise<string[]> {
+  if (!canStore) return [];
+  try {
+    const raw = await SecureStore.getItemAsync(TOKENS_KEY);
+    const list: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list.filter((t): t is string => typeof t === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+async function rememberToken(token: string) {
+  if (!canStore) return;
+  const list = await storedTokens();
+  if (list.includes(token)) return;
+  // Los tokens rotan: con los últimos 20 alcanza.
+  await SecureStore.setItemAsync(TOKENS_KEY, JSON.stringify([...list, token].slice(-20))).catch(() => {});
+}
+
+/** Todos los tokens de Live Activity de este teléfono (memoria + guardados). */
+export async function liveActivityTokens(): Promise<string[]> {
+  return [...new Set([...sentTokens, ...(await storedTokens())])];
+}
 
 async function sendToken(token: string, kind: 'update' | 'start', eventId?: string, auth?: string | null) {
   if (sentTokens.has(token)) return;
@@ -54,7 +81,10 @@ async function sendToken(token: string, kind: 'update' | 'start', eventId?: stri
     body: JSON.stringify({ token, kind, event_id: eventId }),
     ...(auth !== undefined ? { token: auth } : {}),
   });
-  if (res.ok) sentTokens.add(token);
+  if (res.ok) {
+    sentTokens.add(token);
+    await rememberToken(token);
+  }
 }
 
 // Token "push-to-start" del teléfono (iOS 17.2+): con él el backend puede abrir la Live Activity
@@ -136,8 +166,14 @@ export function useLivePulse(eventId: string | null, version: string | null) {
   }, [eventId, version]);
 }
 
-/** Al cerrar sesión: se cierra la Live Activity y el widget vuelve al estado vacío. */
-export function clearPulse() {
+/** Al cerrar sesión: se cierra la Live Activity, el widget vuelve al estado vacío y se olvidan los tokens. */
+export async function clearPulse() {
+  sentTokens.clear();
+  pendingStart = null;
+  if (canStore) {
+    await SecureStore.deleteItemAsync(TOKENS_KEY).catch(() => {});
+    await SecureStore.deleteItemAsync(EVENT_KEY).catch(() => {});
+  }
   if (!native) return;
   try {
     native.activity.getInstances().forEach((a) => a.end('immediate').catch(() => {}));
@@ -154,6 +190,4 @@ export function clearPulse() {
   } catch {
     // Nada que limpiar.
   }
-  sentTokens.clear();
-  if (canStore) SecureStore.deleteItemAsync(EVENT_KEY).catch(() => {});
 }

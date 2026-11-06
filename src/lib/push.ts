@@ -70,17 +70,34 @@ export async function registerPush(): Promise<void> {
   }
 }
 
-/** Al cerrar sesión: el backend deja de mandarle avisos a este teléfono. */
+/**
+ * Al cerrar sesión: el backend deja de mandarle avisos a este teléfono. No depende de lo que quedó
+ * en memoria (la app pudo reiniciarse desde que se registró): vuelve a pedir el token de Expo del
+ * dispositivo y lee los de Live Activity guardados. Va antes de borrar la sesión, porque el backend
+ * pide el token de sesión para dar de baja.
+ */
 export async function unregisterPush(): Promise<void> {
-  const token = registered;
+  let token = registered;
   registered = null;
-  const live = liveActivityTokens();
-  clearPulse();
-  if (!token && !live.length) return;
-  await apiFetch(authPaths.pushToken(), {
-    method: 'DELETE',
-    body: JSON.stringify({ token, live_tokens: live }),
-  });
+  if (!token && Notifications) {
+    try {
+      const id = projectId();
+      if (id && (await Notifications.getPermissionsAsync()).granted) {
+        token = (await Notifications.getExpoPushTokenAsync({ projectId: id })).data;
+      }
+    } catch {
+      // Sin token no hay nada que dar de baja en este teléfono.
+    }
+  }
+  const live = await liveActivityTokens();
+  if (token || live.length) {
+    const res = await apiFetch(authPaths.pushToken(), {
+      method: 'DELETE',
+      body: JSON.stringify({ token, live_tokens: live }),
+    });
+    if (!res.ok && __DEV__) console.warn('[push] No se pudo dar de baja el dispositivo', res.error);
+  }
+  await clearPulse();
 }
 
 type PushData = { type?: string; eventId?: string; orderId?: string };
