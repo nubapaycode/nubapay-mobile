@@ -162,7 +162,12 @@ function statusLabel(event: EventSummary, phase: EventPhase): string {
   const date = formatEventDate(event.starts_at);
   if (phase === 'ended') return `Finalizado · ${date}`;
   const d = daysUntil(event.starts_at);
-  const when = d <= 0 ? 'Empieza hoy' : d === 1 ? 'Mañana' : `En ${d} días`;
+  if (d <= 0) {
+    // Hoy el día sobra: solo la hora (si el evento la tiene).
+    const hhmm = event.starts_at?.split('T')[1]?.slice(0, 5);
+    return hhmm && hhmm !== '00:00' ? `Empieza hoy · ${hhmm}` : 'Empieza hoy';
+  }
+  const when = d === 1 ? 'Mañana' : `En ${d} días`;
   return `${when} · ${date}`;
 }
 
