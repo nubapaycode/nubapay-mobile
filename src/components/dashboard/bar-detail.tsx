@@ -11,7 +11,7 @@ import {
 import type { DashboardData } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 
-import { DetailNote, enter, enterRow } from './detail-kit';
+import { DetailNote, enter, enterRow, HeroFacts } from './detail-kit';
 import { Donut } from './donut';
 import { Icon } from './icon';
 import { ProgressBar } from './progress-bar';
@@ -71,7 +71,9 @@ export function BarDetail({ data, rangeNote }: { data: DashboardData; rangeNote:
         </Donut>
         {products.units_sold === 0 ? (
           <Text style={styles.empty}>Todavía no se vendió nada en la barra</Text>
-        ) : null}
+        ) : (
+          <HeroFacts facts={stats} />
+        )}
       </Animated.View>
 
       <Animated.View entering={enter(1)} style={styles.row}>
@@ -96,18 +98,6 @@ export function BarDetail({ data, rangeNote }: { data: DashboardData; rangeNote:
         ))}
       </Animated.View>
 
-      <Animated.View entering={enter(2)} style={styles.row}>
-        {stats.map((s) => (
-          <View key={s.label} style={[styles.card, styles.part]}>
-            <Text style={styles.label} numberOfLines={1}>
-              {s.label}
-            </Text>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {s.value}
-            </Text>
-          </View>
-        ))}
-      </Animated.View>
 
       {star ? (
         <Animated.View entering={enter(3)} style={styles.section}>
@@ -203,7 +193,6 @@ const useStyles = makeStyles((c) =>
     dot: { width: 8, height: 8, borderRadius: 2.5 },
     label: { color: c.textSecondary, fontSize: 11, flexShrink: 1 },
     partValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
-    statValue: { color: c.text, fontSize: 18, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
 
     section: { gap: 10 },
     sectionHead: {

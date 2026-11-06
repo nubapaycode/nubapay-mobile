@@ -11,7 +11,7 @@ import {
 import type { DashboardInsights } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 
-import { enter, enterRow } from './detail-kit';
+import { enter, enterRow, HeroFacts } from './detail-kit';
 import { Icon } from './icon';
 import { ProgressBar } from './progress-bar';
 import { Rings } from './ring';
@@ -98,6 +98,7 @@ export function TicketsDetail({ insights }: { insights: DashboardInsights }) {
             Faltan ingresar <Text style={styles.heroNoteStrong}>{formatInt(pendingIn)}</Text>
           </Text>
         ) : null}
+        <HeroFacts facts={stats} />
       </Animated.View>
 
       <Animated.View entering={enter(1)} style={styles.row}>
@@ -116,18 +117,6 @@ export function TicketsDetail({ insights }: { insights: DashboardInsights }) {
         ))}
       </Animated.View>
 
-      <Animated.View entering={enter(2)} style={styles.row}>
-        {stats.map((s) => (
-          <View key={s.label} style={[styles.card, styles.part]}>
-            <Text style={styles.label} numberOfLines={1}>
-              {s.label}
-            </Text>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {s.value}
-            </Text>
-          </View>
-        ))}
-      </Animated.View>
 
       {tickets.types.length > 0 ? (
         <Animated.View entering={enter(3)} style={styles.section}>
@@ -274,7 +263,6 @@ const useStyles = makeStyles((c) =>
     dot: { width: 8, height: 8, borderRadius: 2.5 },
     label: { color: c.textSecondary, fontSize: 11, flexShrink: 1 },
     partValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
-    statValue: { color: c.text, fontSize: 18, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
 
     section: { gap: 10 },
     sectionHead: {

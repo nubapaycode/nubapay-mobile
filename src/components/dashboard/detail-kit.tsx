@@ -95,6 +95,25 @@ export function Breakdown({ items }: { items: BreakdownItem[] }) {
 }
 
 /** 3 métricas en fila entre líneas finas. */
+/**
+ * Datos secundarios del detalle, integrados al bloque de arriba: una línea de texto centrada
+ * ("Recaudado $1,2M · Precio promedio $5.400 · Asistencia 74 %") en vez de cards sueltas.
+ */
+export function HeroFacts({ facts }: { facts: { label: string; value: string }[] }) {
+  const styles = useStyles();
+  if (!facts.length) return null;
+  return (
+    <Text style={styles.facts}>
+      {facts.map((f, i) => (
+        <Text key={f.label}>
+          {i > 0 ? <Text style={styles.factSep}>{'  ·  '}</Text> : null}
+          {f.label} <Text style={styles.factValue}>{f.value}</Text>
+        </Text>
+      ))}
+    </Text>
+  );
+}
+
 export function StatsRow({
   stats,
   index = 1,
@@ -252,6 +271,15 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
     },
     stat: { flex: 1, gap: 4 },
+    facts: {
+      color: c.textSecondary,
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: 'center',
+      paddingHorizontal: Spacing.three,
+    },
+    factValue: { color: c.text, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    factSep: { color: c.textMuted },
     statDivider: {
       borderLeftWidth: StyleSheet.hairlineWidth,
       borderLeftColor: c.border,

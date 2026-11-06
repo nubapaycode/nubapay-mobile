@@ -14,7 +14,7 @@ import type { ActivityItem, DashboardData } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
 
-import { enter, enterRow, FADE_EASING, FADE_MS } from './detail-kit';
+import { enter, enterRow, FADE_EASING, FADE_MS, HeroFacts } from './detail-kit';
 import { Icon, type IconName } from './icon';
 import { LivePill } from './live-pill';
 import { ProgressBar } from './progress-bar';
@@ -91,17 +91,8 @@ export function ActivityDetail({ data }: { data: DashboardData }) {
     <View style={styles.wrap}>
       {live ? <LiveHero data={data} /> : peak ? <PeakHero peak={peak} range={peakRange!} /> : null}
 
-      <Animated.View entering={enter(1)} style={styles.stats}>
-        {stats.map((s) => (
-          <View key={s.label} style={[styles.card, styles.stat]}>
-            <Text style={styles.statLabel} numberOfLines={1}>
-              {s.label}
-            </Text>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {s.value}
-            </Text>
-          </View>
-        ))}
+      <Animated.View entering={enter(1)}>
+        <HeroFacts facts={stats} />
       </Animated.View>
 
       {recent_activity.length > 0 ? (
@@ -386,10 +377,6 @@ const useStyles = makeStyles((c) =>
     axis: { flexDirection: 'row', justifyContent: 'space-between' },
     axisText: { color: c.textMuted, fontSize: 11 },
 
-    stats: { flexDirection: 'row', gap: 8 },
-    stat: { flex: 1, gap: 4, padding: 12 },
-    statLabel: { color: c.textSecondary, fontSize: 11 },
-    statValue: { color: c.text, fontSize: 18, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
 
     section: { gap: 10 },
     sectionHead: {
