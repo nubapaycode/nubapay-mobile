@@ -41,7 +41,7 @@ import {
 import { eventPhase } from '@/features/dashboard/format';
 import { mascotLines } from '@/features/dashboard/mascot-lines';
 import { eventOffer, singleOffer } from '@/features/dashboard/offer';
-import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
+import { loadLastEventId, setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
 import { openAddEvent } from '@/features/events/add-event';
 import { hasLivePulse, useLivePulse } from '@/features/live/live-pulse';
@@ -86,11 +86,20 @@ export default function HomeScreen() {
   const { events, error: eventsError } = useEvents();
   const selectedId = useSelectedEventId();
 
-  // Primer ingreso: el evento en curso o, si no hay, el más reciente.
+  // Al ingresar: el último evento usado; si ya no existe, el en curso o, si no hay, el más reciente.
+  // También cubre una selección que no es de esta cuenta (quedó de otra sesión): se vuelve a elegir.
   useEffect(() => {
-    if (selectedId || !events?.length) return;
-    const live = events.find((e) => eventPhase(e) === 'live');
-    setSelectedEventId((live ?? events[0]).id);
+    if (!events?.length || (selectedId && events.some((e) => e.id === selectedId))) return;
+    let cancelled = false;
+    loadLastEventId().then((last) => {
+      if (cancelled) return;
+      const remembered = last ? events.find((e) => e.id === last) : null;
+      const live = events.find((e) => eventPhase(e) === 'live');
+      setSelectedEventId((remembered ?? live ?? events[0]).id);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [events, selectedId]);
 
   const event = events?.find((e) => e.id === selectedId) ?? null;

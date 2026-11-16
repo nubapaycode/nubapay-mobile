@@ -1,6 +1,6 @@
 import { type Href, Link } from 'expo-router';
-import type { ComponentProps, ReactElement } from 'react';
-import { Platform } from 'react-native';
+import { cloneElement, type ComponentProps, type ReactElement } from 'react';
+import { Platform, StyleSheet } from 'react-native';
 
 export type PreviewAction = {
   title: string;
@@ -39,9 +39,15 @@ export function PreviewLink({
   children: ReactElement;
 }) {
   if (!hasLinkPreview || disabled) return children;
+  // El Slot del Link no acepta `style` en array: lo aplanamos acá para que ningún hijo lo rompa.
+  const { style } = children.props as { style?: unknown };
+  const child = Array.isArray(style)
+    ? cloneElement(children as ReactElement<{ style?: unknown }>, { style: StyleSheet.flatten(style) })
+    : children;
   return (
+    // `asChild` es obligatorio para el zoom nativo.
     <Link href={href} asChild>
-      <Link.Trigger withAppleZoom={zoom}>{children}</Link.Trigger>
+      <Link.Trigger withAppleZoom={zoom}>{child}</Link.Trigger>
       {zoom ? null : <Link.Preview />}
       {actions.length ? (
         <Link.Menu>

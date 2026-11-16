@@ -7,7 +7,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { CountBadge } from '@/components/motion/count-badge';
 import { enter, enterItem } from '@/components/dashboard/detail-kit';
 import { CardListSkeleton } from '@/components/dashboard/skeleton';
-import { TicketMascot } from '@/components/illustrations/ticket-mascot';
+import { Ticky } from '@/components/illustrations/ticky';
 import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
@@ -214,7 +214,7 @@ function OperationsContent() {
         <Text style={styles.empty}>{orders.error}</Text>
       ) : list.length === 0 && !debounced.trim() && !active ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
-          <TicketMascot size={128} onLight={colors.scheme === 'light'} />
+          <Ticky size={128} onLight={colors.scheme === 'light'} />
           <Text style={styles.emptyTitle}>Todavía no hay pedidos</Text>
           <Text style={styles.emptyText}>Cuando alguien compre una entrada o un producto, aparece acá al instante.</Text>
         </Animated.View>
@@ -369,8 +369,8 @@ const useStyles = makeStyles((c) =>
     },
     tagText: { color: c.textSecondary, fontSize: 12, fontWeight: '600' },
 
-    groups: { gap: 22 },
-    group: { gap: 8 },
+    groups: { gap: 28 },
+    group: { gap: 14 },
     groupHead: {
       flexDirection: 'row',
       alignItems: 'baseline',

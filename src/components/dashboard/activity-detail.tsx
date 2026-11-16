@@ -14,7 +14,7 @@ import type { ActivityItem, DashboardData } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
 
-import { enter, enterRow, FADE_EASING, FADE_MS, HeroFacts } from './detail-kit';
+import { enter, enterRow, FADE_EASING, FADE_MS } from './detail-kit';
 import { Icon, type IconName } from './icon';
 import { LivePill } from './live-pill';
 import { ProgressBar } from './progress-bar';
@@ -67,6 +67,7 @@ function clock(at: string | null): string {
  */
 export function ActivityDetail({ data }: { data: DashboardData }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   const { insights } = data;
   const { peak_hour: peak, customers, staff_scans, recent_activity } = insights;
   const live = insights.event.phase === 'live';
@@ -76,23 +77,42 @@ export function ActivityDetail({ data }: { data: DashboardData }) {
   const showFilters = new Set(recent_activity.map((a) => a.type)).size > 1;
   const peakRange = peak ? `${peak.label}–${nextHour(peak.label)} h` : null;
 
-  const stats = [
+  const first: { label: string; value: string; icon: IconName } =
     live && peakRange
-      ? { label: 'Hora pico', value: peakRange }
-      : { label: 'Ítems/pedido', value: formatDecimal(customers.avg_items_per_order) },
-    { label: 'Compradores', value: formatInt(customers.unique) },
-    {
-      label: 'Recurrentes',
-      value: customers.unique ? formatPercent(customers.repeat / customers.unique) : '—',
-    },
-  ];
+      ? { label: 'Hora pico', value: peakRange, icon: 'clock' }
+      : { label: 'Ítems por pedido', value: formatDecimal(customers.avg_items_per_order), icon: 'receipt' };
+  const repeatShare = customers.unique ? customers.repeat / customers.unique : 0;
 
   return (
     <View style={styles.wrap}>
       {live ? <LiveHero data={data} /> : peak ? <PeakHero peak={peak} range={peakRange!} /> : null}
 
       <Animated.View entering={enter(1)}>
-        <HeroFacts facts={stats} />
+        <View style={{ gap: 10 }}>
+          <View style={styles.statRow}>
+            <StatCard icon={first.icon} label={first.label} value={first.value} />
+            <StatCard icon="people" label="Compradores" value={formatInt(customers.unique)} />
+          </View>
+          <View style={[styles.card, styles.repeatCard]}>
+            <View style={styles.repeatHead}>
+              <View style={styles.statIcon}>
+                <Icon name="undo" size={14} color={colors.textSecondary} />
+              </View>
+              <Text style={styles.statLabel}>Compradores recurrentes</Text>
+              <View style={{ flex: 1 }} />
+              <Text style={styles.statValue}>{customers.unique ? formatPercent(repeatShare) : '—'}</Text>
+            </View>
+            <ProgressBar
+              height={8}
+              total={Math.max(1, customers.unique)}
+              delay={160}
+              segments={[{ value: customers.repeat, color: colors.chart.ramp[0] }]}
+            />
+            <Text style={styles.statMeta}>
+              {formatInt(customers.repeat)} de {formatInt(customers.unique)} volvieron a comprar
+            </Text>
+          </View>
+        </View>
       </Animated.View>
 
       {recent_activity.length > 0 ? (
@@ -112,6 +132,26 @@ export function ActivityDetail({ data }: { data: DashboardData }) {
 
       {staff_scans.length > 0 ? <Team scans={staff_scans} /> : null}
 
+    </View>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: IconName; label: string; value: string }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.card, styles.statCard]}>
+      <View style={styles.statIcon}>
+        <Icon name={icon} size={14} color={colors.textSecondary} />
+      </View>
+      <View style={{ gap: 2 }}>
+        <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+          {value}
+        </Text>
+        <Text style={styles.statLabel} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -331,6 +371,21 @@ const AVATAR = 40;
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrap: { gap: 28 },
+    statRow: { flexDirection: 'row', gap: 10 },
+    statCard: { flex: 1, padding: 16, gap: 14 },
+    statIcon: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.raised,
+    },
+    repeatCard: { padding: 16, gap: 12 },
+    repeatHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    statMeta: { color: c.textMuted, fontSize: 12 },
+    statLabel: { color: c.textMuted, fontSize: 12 },
+    statValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
     grow: { flex: 1, gap: 2 },
     card: {
       backgroundColor: c.surface,

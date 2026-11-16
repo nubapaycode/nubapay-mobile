@@ -127,6 +127,11 @@ export default function MemberScreen() {
                 onPress={() => router.push({ pathname: '/change-role/[id]', params: { id: member.id } })}
               />
               <QuickAction
+                icon="lock"
+                label="Permisos"
+                onPress={() => router.push({ pathname: '/edit-permissions/[id]', params: { id: member.id } })}
+              />
+              <QuickAction
                 icon="undo"
                 label="Reenviar acceso"
                 loading={busy === 'resend'}

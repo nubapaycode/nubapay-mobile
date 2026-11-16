@@ -4,9 +4,12 @@ import { KeyboardAvoidingView, Platform, ScrollView, TurboModuleRegistry, View }
 /**
  * `react-native-keyboard-controller` tiene código nativo: si el build instalado es anterior a
  * agregarlo, se usa lo de React Native (KeyboardAvoidingView + ScrollView) para no romper nada.
+ * En web no hay `TurboModuleRegistry` (el export de iOS arma un bundle web para el manifiesto de
+ * rutas y fallaba acá): se chequea la plataforma antes.
  */
 type KC = typeof import('react-native-keyboard-controller');
-const kc: KC | null = TurboModuleRegistry.get('KeyboardController')
+const kc: KC | null =
+  Platform.OS !== 'web' && TurboModuleRegistry.get('KeyboardController')
   ? // eslint-disable-next-line @typescript-eslint/no-require-imports
     (require('react-native-keyboard-controller') as KC)
   : null;

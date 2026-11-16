@@ -360,6 +360,16 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen
+        name="edit-permissions/[id]"
+        options={{
+          // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.
+          headerShown: false,
+          presentation: 'transparentModal',
+          animation: 'none',
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
+      <Stack.Screen
         name="invite-member"
         options={{
           // Hoja propia (<Sheet>): todo el ancho y pegada abajo; anima ella misma.

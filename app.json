@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "app.nubapay.business"
+      "bundleIdentifier": "com.nubapay-business.ios"
     },
     "android": {
       "adaptiveIcon": {
@@ -74,6 +74,8 @@
       [
         "expo-widgets",
         {
+          "bundleIdentifier": "com.nubapay-business.ios.ExpoWidgetsTarget",
+          "groupIdentifier": "group.com.nubapay-business.ios",
           "frequentUpdates": true,
           "widgets": [
             {

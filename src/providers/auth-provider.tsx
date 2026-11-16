@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 
 import { unregisterPush } from '@/lib/push';
 import { apiFetch, authPaths, setApiToken, setUnauthorizedHandler } from '@/lib/api';
+import { resetSelectedEvent } from '@/features/dashboard/selected-event';
 import { clearQueries } from '@/lib/query';
 import {
   type AuthUser,
@@ -43,8 +44,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     // Antes de borrar la sesión (hace falta el token para avisarle al backend).
-    await unregisterPush().catch(() => {});
+    // Con tope de tiempo: si el token de APNs o la red no responden, no debe bloquear el cierre.
+    await Promise.race([
+      unregisterPush().catch(() => {}),
+      new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+    ]);
     clearQueries();
+    resetSelectedEvent();
     await clearSession();
     setToken(null);
     setUser(null);
@@ -82,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!res.ok) return { ok: false, error: res.error, status: res.status };
     if (!res.data.token) return { ok: false, error: 'Respuesta inválida del servidor' };
     const nextUser = toAuthUser(res.data);
+    resetSelectedEvent(); // la selección de la cuenta anterior no vale para esta
     await saveSession(res.data.token, nextUser);
     setToken(res.data.token);
     setUser(nextUser);

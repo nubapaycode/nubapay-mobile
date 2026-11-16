@@ -23,7 +23,7 @@ import { DisplayFont, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
 import { MoodMascot } from "@/components/illustrations/mood-mascot";
-import { TicketMascot } from "@/components/illustrations/ticket-mascot";
+import { Ticky } from "@/components/illustrations/ticky";
 
 /**
  * Piezas compartidas del catálogo (lista, formulario y sus hojas): miniatura, buscador, lista
@@ -238,7 +238,7 @@ export function EmptyState({
       {icon === "search" ? (
         <MoodMascot mood="search" size={120} onLight={colors.scheme === "light"} />
       ) : (
-        <TicketMascot size={120} onLight={colors.scheme === "light"} />
+        <Ticky size={120} onLight={colors.scheme === "light"} />
       )}
       <View style={{ gap: 4, alignItems: "center" }}>
         <Text style={styles.emptyTitle}>{title}</Text>

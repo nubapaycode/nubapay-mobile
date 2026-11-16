@@ -143,7 +143,7 @@ export function OperationCard({
         }. Ver detalle`}
         accessibilityActions={canDeliver ? [{ name: 'deliver', label: tickets ? 'Registrar ingreso' : 'Entregar' }] : undefined}
         onAccessibilityAction={(e) => e.nativeEvent.actionName === 'deliver' && onDeliver?.()}
-        style={[styles.card, cancelled && styles.cardCancelled]}>
+        style={StyleSheet.flatten([styles.card, cancelled && styles.cardCancelled])}>
         <View style={styles.top}>
           <View>
             <View style={styles.avatar}>
@@ -212,8 +212,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.brandMuted,
     },
     card: {
-      gap: 12,
-      padding: 14,
+      gap: 16,
+      padding: 18,
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
       borderWidth: StyleSheet.hairlineWidth,
@@ -222,8 +222,8 @@ const useStyles = makeStyles((c) =>
       boxShadow: c.cardShadowSubtle,
     },
     cardCancelled: { opacity: 0.7 },
-    top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    grow: { flex: 1, gap: 3 },
+    top: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    grow: { flex: 1, gap: 5 },
     avatar: {
       width: AVATAR,
       height: AVATAR,
@@ -249,10 +249,10 @@ const useStyles = makeStyles((c) =>
     name: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     number: { color: c.textSecondary, fontWeight: '600' },
-    right: { alignItems: 'flex-end', gap: 3 },
+    right: { alignItems: 'flex-end', gap: 5 },
     amount: { color: c.text, fontSize: 16, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
     amountCancelled: { color: c.textMuted, textDecorationLine: 'line-through' },
-    bottom: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    bottom: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',

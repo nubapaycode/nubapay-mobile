@@ -167,6 +167,11 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       paddingHorizontal: 10,
       paddingVertical: 6,
+      shadowColor: '#000',
+      shadowOpacity: 0.12,
+      shadowRadius: 6,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
     },
     bubbleText: { color: c.text, fontSize: 13, fontWeight: '500' },
     bubbleTail: {

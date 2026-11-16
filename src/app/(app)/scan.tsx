@@ -25,7 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/dashboard/icon';
 import { RollingNumber } from '@/components/dashboard/rolling-number';
 import { Confetti } from '@/components/fx/confetti';
-import { TicketMascot } from '@/components/illustrations/ticket-mascot';
+import { Ticky } from '@/components/illustrations/ticky';
 import { DeliverPanel } from '@/components/operations/deliver-panel';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
@@ -630,7 +630,7 @@ function Outcome({
 
   return (
     <Animated.View entering={FadeIn.duration(200)} style={[{ gap: 12, alignItems: 'center' }, cardStyle]}>
-      {tone === 'success' ? <TicketMascot size={96} onLight confetti={false} /> : null}
+      {tone === 'success' ? <Ticky size={96} pose="celebrate" onLight confetti={false} /> : null}
       <View style={[styles.outcomeIconSlot, tone === 'success' && styles.outcomeBadge]}>
         <Animated.View style={[styles.outcomeRing, { borderColor: color }, ringStyle]} />
         <Animated.View style={[styles.outcomeIcon, { backgroundColor: color }, iconStyle]}>
