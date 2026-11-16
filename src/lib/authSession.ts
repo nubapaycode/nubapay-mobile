@@ -8,6 +8,7 @@ export type OrganizerStaffTools = {
   scanner: boolean;
   orders: boolean;
   pickup_points: boolean;
+  regrets: boolean;
   payments: boolean;
 };
 

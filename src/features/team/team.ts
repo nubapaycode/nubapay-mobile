@@ -16,7 +16,7 @@ import { invalidate } from '@/lib/query';
  */
 
 /** Permisos = herramientas del staff. Mismas claves y textos que el panel web (StaffView). */
-export type PermissionId = 'dashboard' | 'products' | 'scanner' | 'orders' | 'pickup_points' | 'payments';
+export type PermissionId = 'dashboard' | 'products' | 'scanner' | 'orders' | 'pickup_points' | 'regrets' | 'payments';
 
 export const PERMISSION_LABEL: Record<PermissionId, string> = {
   dashboard: 'Dashboard / métricas',
@@ -24,6 +24,7 @@ export const PERMISSION_LABEL: Record<PermissionId, string> = {
   scanner: 'Escáner QR',
   orders: 'Pedidos',
   pickup_points: 'Puntos de retiro',
+  regrets: 'Arrepentimientos',
   payments: 'Pagos',
 };
 
@@ -34,6 +35,7 @@ export const PERMISSION_SHORT: Record<PermissionId, string> = {
   scanner: 'Escáner',
   orders: 'Pedidos',
   pickup_points: 'Retiro',
+  regrets: 'Arrepent.',
   payments: 'Pagos',
 };
 
@@ -83,6 +85,7 @@ export const toTools = (perms: PermissionId[], storefront = false): StaffTools =
   scanner: perms.includes('scanner'),
   orders: perms.includes('orders'),
   pickup_points: perms.includes('pickup_points'),
+  regrets: perms.includes('regrets'),
   payments: perms.includes('payments'),
 });
 
@@ -139,6 +142,14 @@ export async function setMemberRole(eventId: string, m: Member, roleName: string
     role: roleName,
     ...(template ? { tools: toTools(template.permissions, m.storefront) } : {}),
   });
+  if (!res.ok) return res;
+  await refresh(eventId);
+  return { ok: true };
+}
+
+/** Guarda las herramientas de la persona (conserva la de tienda, que la app no edita). */
+export async function setMemberPermissions(eventId: string, m: Member, permissions: PermissionId[]): Promise<Result> {
+  const res = await patchStaff(eventId, m.id, { tools: toTools(permissions, m.storefront) });
   if (!res.ok) return res;
   await refresh(eventId);
   return { ok: true };

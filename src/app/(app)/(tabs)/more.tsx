@@ -43,10 +43,11 @@ export default function MoreScreen() {
   const { colors } = useTheme();
   const { can, isStaff, eventId } = useEventAccess();
   const canOrders = can('orders');
-  const regrets = useRegrets(canOrders);
+  const canRegrets = can('regrets');
+  const regrets = useRegrets(canRegrets);
   const pendingRegrets = regrets.regrets?.filter((r) => r.status === 'pending').length ?? 0;
   const canProducts = can('products');
-  const showSales = canProducts || canOrders;
+  const showSales = canProducts || canOrders || canRegrets;
   const canMethods = !isStaff || can('storefront');
   const showPayouts = canMethods || can('payments');
   const store = usePublicStore();
@@ -136,7 +137,7 @@ export default function MoreScreen() {
             onPress={() => router.push('/manage/pickup-points')}
           />
           */}
-          {canOrders ? (
+          {canRegrets ? (
           <NavCard
             icon="receipt"
             title="Arrepentimientos"

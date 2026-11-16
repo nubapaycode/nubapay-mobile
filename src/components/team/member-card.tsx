@@ -28,6 +28,7 @@ export const PERMISSION_ICON: Record<PermissionId, IconName> = {
   scanner: 'qr',
   orders: 'receipt',
   pickup_points: 'store',
+  regrets: 'undo',
   payments: 'card',
 };
 

@@ -36,7 +36,9 @@ export function QuickActions() {
     ...(!isStaff || can('payments') || can('storefront')
       ? [{ key: 'payouts', label: 'Cobros', icon: 'bank', href: '/payouts' }] satisfies Action[]
       : []),
-    { key: 'events', label: 'Eventos', icon: 'calendar', href: '/events' },
+    ...(can('regrets')
+      ? [{ key: 'regrets', label: 'Devoluciones', icon: 'undo', href: '/manage/regrets' }] satisfies Action[]
+      : []),
   ];
 
   return (
