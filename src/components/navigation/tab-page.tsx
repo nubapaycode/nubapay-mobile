@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { Platform, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -17,6 +17,7 @@ import { BlurView } from '@/components/fx/blur';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Scroll en el que el título grande ya se fue y aparece la barra compacta (y en cuántos px). */
 const COMPACT_AT = 34;
@@ -150,7 +151,7 @@ export function TabPage({
             { backgroundColor: BlurView ? colors.surfaceGlass : colors.backgroundTranslucent },
           ]}
         />
-        <Animated.Text style={[styles.barTitle, barTitleStyle]} numberOfLines={1}>
+        <Animated.Text maxFontSizeMultiplier={1.3} style={[styles.barTitle, barTitleStyle]} numberOfLines={1}>
           {title}
         </Animated.Text>
       </Animated.View>

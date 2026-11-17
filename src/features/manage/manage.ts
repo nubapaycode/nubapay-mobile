@@ -164,7 +164,7 @@ export function useTickets() {
       })) ?? null,
     [q.data],
   );
-  return { tickets, error: tickets ? null : q.error, eventId };
+  return { tickets, error: tickets ? null : q.error, eventId, refresh: q.refresh };
 }
 
 export function usePickupPoints() {
@@ -185,13 +185,13 @@ export function usePickupPoints() {
       isActive: p.is_active,
     }));
   }, [q.data, stats]);
-  return { pickups, error: pickups ? null : q.error, eventId };
+  return { pickups, error: pickups ? null : q.error, eventId, refresh: q.refresh };
 }
 
 export function useBlocks() {
   const eventId = useSelectedEventId();
   const q = useQuery<CatalogBlock[]>(key('blocks', eventId), () => listBlocks(eventId!));
-  return { blocks: q.data, error: q.data ? null : q.error, eventId };
+  return { blocks: q.data, error: q.data ? null : q.error, eventId, refresh: q.refresh };
 }
 
 /** `enabled: false` no pide nada (p. ej. si el rol no puede ver pedidos). */

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { ScalePressable } from '@/components/motion/scale-pressable';
@@ -9,6 +9,9 @@ import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 /** Página de gestión (blanca, con header nativo): resumen, botón de agregar y la lista. */
 export function ManageScreen({
@@ -17,6 +20,7 @@ export function ManageScreen({
   onAdd,
   loading,
   empty,
+  error,
   children,
 }: {
   summary?: ReactNode;
@@ -25,6 +29,8 @@ export function ManageScreen({
   loading?: boolean;
   /** Texto si la lista está vacía. */
   empty?: string | null;
+  /** Si la lista no pudo cargarse: estado de error con reintento. */
+  error?: { title: string; message: string; onRetry?: () => void | Promise<unknown> } | null;
   children?: ReactNode;
 }) {
   const styles = useStyles();
@@ -40,7 +46,9 @@ export function ManageScreen({
           <AddButton label={addLabel} onPress={onAdd} />
         </Animated.View>
       ) : null}
-      {loading ? (
+      {error ? (
+        <ErrorState title={error.title} message={error.message} onRetry={error.onRetry} />
+      ) : loading ? (
         <Text style={styles.muted}>Cargando…</Text>
       ) : empty ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.empty}>

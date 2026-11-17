@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInRight,
@@ -14,6 +14,7 @@ import Animated, {
 
 import { DisplayFont, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 export type MoneyStep = {
   label: string;

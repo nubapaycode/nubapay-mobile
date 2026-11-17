@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import type { NativeStackHeaderProps } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const BAR_H = 48;
 

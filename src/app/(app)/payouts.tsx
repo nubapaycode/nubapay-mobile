@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
@@ -8,6 +8,7 @@ import { Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { isReady, METHOD_LABEL, METHODS, useSelectedEventDetail } from '@/features/payouts/payment-methods';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Cobros: acceso a los métodos de pago del catálogo y a la comisión del evento. */
 export default function PayoutsScreen() {
@@ -27,7 +28,7 @@ export default function PayoutsScreen() {
       style={styles.screen}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic">
-      <Animated.Text entering={enter(0)} style={styles.intro}>
+      <Animated.Text maxFontSizeMultiplier={1.3} entering={enter(0)} style={styles.intro}>
         Elegí cómo te pagan tus clientes y revisá la comisión de cada evento.
       </Animated.Text>
 

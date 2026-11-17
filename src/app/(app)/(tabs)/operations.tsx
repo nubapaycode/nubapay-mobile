@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { CountBadge } from '@/components/motion/count-badge';
@@ -34,6 +34,9 @@ import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { awaitingCash, hasPending } from '@/features/operations/scan';
 import { useFirstTip } from '@/features/tips/tips';
+import { ErrorState } from '@/components/ui/error-state';
+import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
 
 /**
  * Operaciones (referencias: Mercury y Revolut Business): buscador, el total de resultados y los pedidos agrupados por día con lo cobrado en cada uno, cada
@@ -104,7 +107,10 @@ function OperationsContent() {
     setLoadingMore(true);
     const res = await listOrders(eventId!, { ...params, page: loaded + 1, page_size: PAGE_SIZE });
     setLoadingMore(false);
-    if (!res.ok) return;
+    if (!res.ok) {
+      toast.error('No se pudieron cargar más pedidos', res.error);
+      return;
+    }
     setPages({ key, n: loaded + 1 });
     setQueryData<OrdersPage>(key, (prev) => ({
       orders: dedupe([...(prev?.orders ?? []), ...res.data.orders]),
@@ -169,6 +175,7 @@ function OperationsContent() {
         <View style={styles.search}>
           <Icon name="search" size={16} color={colors.textMuted} />
           <TextInput
+            maxFontSizeMultiplier={1.3}
             value={query}
             onChangeText={setQuery}
             placeholder="Buscar por nombre, email o pedido"
@@ -211,7 +218,7 @@ function OperationsContent() {
       {!orders.data && !orders.error ? (
         <CardListSkeleton variant="operation" label="Cargando operaciones" />
       ) : !orders.data ? (
-        <Text style={styles.empty}>{orders.error}</Text>
+        <ErrorState title="No pudimos cargar las operaciones" message={orders.error} onRetry={orders.refresh} />
       ) : list.length === 0 && !debounced.trim() && !active ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
           <Ticky size={128} onLight={colors.scheme === 'light'} />

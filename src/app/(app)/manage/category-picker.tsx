@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -26,6 +25,7 @@ import {
 } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
 import { toast } from "@/components/ui/toast";
+import { Text } from "@/components/ui/text";
 
 /**
  * Elegir la categoría de un producto, en una hoja (patrón "Search or add" de Shopify): buscador,

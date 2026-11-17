@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { type ReactNode, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   Extrapolation,
@@ -20,6 +20,7 @@ import { CountBadge } from '@/components/motion/count-badge';
 import { DisplayFont } from '@/constants/theme';
 import { formatMoney, initials } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 import { RollingNumber } from './rolling-number';

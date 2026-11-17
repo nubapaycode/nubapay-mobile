@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { type LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -19,6 +19,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { formatMoneyCompact } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -388,6 +389,7 @@ export function AreaChart({
             </Text>
             {isEmpty && (
               <Animated.Text
+                maxFontSizeMultiplier={1.3}
                 entering={FadeIn.delay(reduceMotion ? 0 : MORPH.duration - 100).duration(260)}
                 style={[styles.empty, { top: PAD_TOP + plotH / 2 - 9 }]}>
                 {emptyLabel}

@@ -9,8 +9,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -48,7 +46,11 @@ import {
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { loadImagePicker } from "@/lib/native-modules";
 import { makeStyles, useTheme } from "@/theme";
+import type { Product as ApiProduct } from '@/lib/api/organizer';
+import { undoableDelete } from '@/lib/undoable';
 import { toast } from "@/components/ui/toast";
+import { Text } from "@/components/ui/text";
+import { Switch } from "@/components/ui/switch";
 
 const LAYOUT = LinearTransition.duration(240);
 const PICK: ImagePickerOptions = {
@@ -242,28 +244,18 @@ function ProductForm({
     router.back();
   };
 
-  const remove = () =>
-    Alert.alert(
-      `Eliminar ${noun}`,
-      `“${product?.name}” deja de estar en el catálogo.`,
-      [
-        { text: "Volver", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            if (!product || !eventId) return;
-            const res = await deleteProduct(eventId, product.id);
-            if (!res.ok) {
-              toast.error("No se pudo eliminar", res.error);
-              return;
-            }
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            router.back();
-          },
-        },
-      ],
-    );
+  const remove = () => {
+    if (!product || !eventId) return;
+    undoableDelete<ApiProduct>({
+      queryKey: `products:${eventId}`,
+      match: (p) => p.id === product.id,
+      title: `${noun === "combo" ? "Combo" : "Producto"} eliminado`,
+      message: product.name,
+      errorTitle: "No se pudo eliminar",
+      commit: () => deleteProduct(eventId, product.id),
+      leave: () => router.back(),
+    });
+  };
 
   const pick = async (source: "library" | "camera") => {
     Haptics.selectionAsync();
@@ -376,6 +368,7 @@ function ProductForm({
               <Card danger={touched && !!errors.name}>
                 <Field label="Nombre" error={touched ? errors.name : null}>
                   <TextInput
+                    maxFontSizeMultiplier={1.3}
                     value={name}
                     onChangeText={setName}
                     placeholder={
@@ -398,6 +391,7 @@ function ProductForm({
                   }
                 >
                   <TextInput
+                    maxFontSizeMultiplier={1.3}
                     value={description}
                     onChangeText={setDescription}
                     placeholder={
@@ -447,6 +441,7 @@ function ProductForm({
                     $
                   </Text>
                   <TextInput
+                    maxFontSizeMultiplier={1.3}
                     value={price}
                     onChangeText={setPrice}
                     placeholder="0"

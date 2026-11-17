@@ -1,5 +1,5 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { ActivityDetail } from '@/components/dashboard/activity-detail';
 import { BarDetail } from '@/components/dashboard/bar-detail';
@@ -13,6 +13,7 @@ import { eventOffer } from '@/features/dashboard/offer';
 import type { DashboardData } from '@/features/dashboard/types';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const TITLES = {
   tickets: 'Entradas',

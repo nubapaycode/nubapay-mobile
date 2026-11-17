@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { Breakdown, DetailHero, enter } from '@/components/dashboard/detail-kit';
@@ -25,6 +25,8 @@ import { listApprovedPayments, type Payment } from '@/lib/api/organizer';
 import { useQuery } from '@/lib/query';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
 
 /**
  * Comisión: total facturado del evento actual (pagos aprobados, sin el costo de servicio) con su
@@ -98,7 +100,7 @@ export default function CommissionScreen() {
       {!ready ? (
         <View style={styles.loading}>
           {payments.error ? (
-            <Text style={styles.note}>{payments.error}</Text>
+            <ErrorState title="No pudimos cargar los cobros" message={payments.error} onRetry={payments.refresh} />
           ) : (
             <ActivityIndicator color={colors.textMuted} />
           )}

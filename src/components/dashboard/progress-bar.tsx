@@ -21,16 +21,25 @@ export function ProgressBar({
   height = 8,
   track,
   delay = 0,
+  accessibilityLabel,
 }: {
   segments: Segment[];
   total: number;
   height?: number;
   track?: string;
   delay?: number;
+  /** Qué mide la barra ("Vendidas", "Cupo"…); el porcentaje lo agrega solo. */
+  accessibilityLabel?: string;
 }) {
   const { colors } = useTheme();
+  const done = segments.reduce((a, s) => a + s.value, 0);
+  const pct = total > 0 ? Math.round(Math.max(0, Math.min(1, done / total)) * 100) : 0;
   return (
     <View
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityValue={{ min: 0, max: 100, now: pct, text: `${pct}%` }}
       style={[
         styles.track,
         { height, borderRadius: height / 2, backgroundColor: track ?? colors.raised },

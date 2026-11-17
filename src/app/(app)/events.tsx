@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enter, enterRow } from '@/components/dashboard/detail-kit';
@@ -19,6 +19,7 @@ import { openAddEvent } from '@/features/events/add-event';
 import { confirmDeleteEvent } from '@/features/events/event-actions';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const GROUPS: { phase: EventPhase; title: string }[] = [
   { phase: 'live', title: 'En vivo' },

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -14,6 +14,7 @@ import { Radius } from '@/constants/theme';
 import { daysUntil, formatEventDate, initials } from '@/features/dashboard/format';
 import type { EventPhase, EventSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 

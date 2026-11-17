@@ -5,8 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
-  Text,
   View,
 } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
@@ -35,6 +33,9 @@ import {
 } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { makeStyles, useTheme } from "@/theme";
+import { ErrorState } from "@/components/ui/error-state";
+import { Text } from "@/components/ui/text";
+import { Switch } from "@/components/ui/switch";
 
 /** Verde lima del botón "+" del header (igual que el catálogo). */
 const LIME = "#C6FF00";
@@ -70,7 +71,7 @@ function ticketStatus(t: TicketType): Status {
 export default function TicketsAdminScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { tickets: list, error, eventId } = useTickets();
+  const { tickets: list, error, eventId, refresh } = useTickets();
   useFocusStatusBar();
 
   const tickets = list ?? [];
@@ -133,11 +134,7 @@ export default function TicketsAdminScreen() {
         </Animated.View>
         {!list ? (
           error ? (
-            <EmptyState
-              icon="help"
-              title="No pudimos cargar las entradas"
-              text={error}
-            />
+            <ErrorState title="No pudimos cargar las entradas" message={error} onRetry={refresh} />
           ) : (
             <CatalogSkeleton />
           )

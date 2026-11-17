@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { formatInt, formatMoney, formatPercent, PAYMENT_LABEL } from '@/features/dashboard/format';
 import type { DashboardInsights, DashboardSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Card } from './card';
 import { ProgressBar } from './progress-bar';

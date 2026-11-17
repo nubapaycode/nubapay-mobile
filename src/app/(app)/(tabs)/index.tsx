@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef } from 'react';
-import { Platform, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Platform, RefreshControl, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
   FadeIn,
@@ -25,6 +25,7 @@ import { QuickActions } from '@/components/dashboard/quick-actions';
 import { RecapCard } from '@/components/dashboard/recap-card';
 import { DashboardSkeleton } from '@/components/dashboard/skeleton';
 import { Button } from '@/components/ui';
+import { ErrorState } from '@/components/ui/error-state';
 import { CoachTip } from '@/components/ui/coach-tip';
 import { NoAccess } from '@/components/ui/no-access';
 import { useEventAccess } from '@/features/access/access';
@@ -51,6 +52,7 @@ import { AUTO_RECAP_WINDOW_MS, eventEndedAt, hasSeenRecap } from '@/features/rec
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Alto del degradé del hero por debajo del área segura. */
 const HERO_HEIGHT = 560;
@@ -83,7 +85,7 @@ export default function HomeScreen() {
     };
   });
   const { user } = useAuth();
-  const { events, error: eventsError } = useEvents();
+  const { events, error: eventsError, refresh: refreshEvents } = useEvents();
   const selectedId = useSelectedEventId();
 
   // Al ingresar: el último evento usado; si ya no existe, el en curso o, si no hay, el más reciente.
@@ -206,13 +208,13 @@ export default function HomeScreen() {
         </Animated.View>
 
         {eventsError ? (
-          <ErrorState message={eventsError} />
+          <ErrorState title="No pudimos cargar tus eventos" message={eventsError} onRetry={refreshEvents} />
         ) : events && events.length === 0 ? (
           <NoEventsState canCreate={canCreateEvents} />
         ) : !canView ? (
           <NoAccess text="Tu rol en este evento no incluye ver las métricas. Usá el escáner o las otras herramientas que tengas habilitadas." />
         ) : state.status === 'error' ? (
-          <ErrorState message={state.error} onRetry={refresh} />
+          <ErrorState title="No pudimos cargar las métricas" message={state.error} onRetry={refresh} />
         ) : !data || !event ? (
           <DashboardSkeleton />
         ) : (
@@ -298,19 +300,6 @@ function NoEventsState({ canCreate }: { canCreate: boolean }) {
           : 'Cuando el organizador te sume a un evento, lo vas a ver acá.'}
       </Text>
       {canCreate ? <Button title="Crear mi primer evento" onPress={openAddEvent} /> : null}
-    </View>
-  );
-}
-
-function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
-  const styles = useStyles();
-  const { colors } = useTheme();
-  return (
-    <View style={styles.error}>
-      <MoodMascot mood="offline" size={104} onLight={colors.scheme === 'light'} />
-      <Text style={styles.errorTitle}>No pudimos cargar las métricas</Text>
-      <Text style={styles.errorText}>{message}</Text>
-      {onRetry ? <Button title="Reintentar" variant="ghost" onPress={onRetry} /> : null}
     </View>
   );
 }

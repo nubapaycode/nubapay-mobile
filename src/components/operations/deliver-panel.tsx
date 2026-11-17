@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
@@ -10,6 +10,7 @@ import { formatMoney } from '@/features/dashboard/format';
 import { awaitingCash, remainingOf, SCAN_COPY, scanKind } from '@/features/operations/scan';
 import { confirmCash, type Order, type OrderItem, redeemItems } from '@/lib/api/organizer';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Entrega de un pedido validado: cobrar el efectivo si falta y elegir cuánto de cada ítem se

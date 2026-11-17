@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -25,6 +25,8 @@ import { type Regret, useRegrets } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { useNow } from "@/hooks/use-now";
 import { makeStyles, useTheme } from "@/theme";
+import { ErrorState } from "@/components/ui/error-state";
+import { Text } from "@/components/ui/text";
 
 type Filter = "pending" | "resolved";
 const LAYOUT = LinearTransition.duration(260);
@@ -39,7 +41,7 @@ const time = (r: Regret) => new Date(r.createdAt).getTime();
 export default function RegretsScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { regrets: list, error } = useRegrets();
+  const { regrets: list, error, refresh } = useRegrets();
   const now = useNow(30_000);
   const [filter, setFilter] = useState<Filter>("pending");
   useFocusStatusBar();
@@ -70,11 +72,7 @@ export default function RegretsScreen() {
       </Animated.View>
       {!list ? (
         error ? (
-          <EmptyState
-            icon="help"
-            title="No pudimos cargar las solicitudes"
-            text={error}
-          />
+          <ErrorState title="No pudimos cargar las solicitudes" message={error} onRetry={refresh} />
         ) : (
           <CatalogSkeleton />
         )

@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
 import { formatMoney, relativeTime } from '@/features/dashboard/format';
 import type { ActivityItem } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Card } from './card';
 import { Icon, type IconName } from './icon';

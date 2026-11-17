@@ -8,8 +8,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
-  Text,
   View,
 } from "react-native";
 import Animated, {
@@ -58,6 +56,9 @@ import {
 } from "@/features/manage/promo";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { makeStyles, useTheme } from "@/theme";
+import { ErrorState } from "@/components/ui/error-state";
+import { Text } from "@/components/ui/text";
+import { Switch } from "@/components/ui/switch";
 
 const NO_CATEGORY = "Sin categoría";
 /** Verde lima del botón "+" del header. */
@@ -116,7 +117,7 @@ const matchesQuery = (p: Product, q: string) =>
 export default function ProductsScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { products: list, error, eventId } = useProducts();
+  const { products: list, error, eventId, refresh } = useProducts();
   const [query, setQuery] = useState("");
   const filters = useCatalogFilters();
   const activeFilters = activeCatalogFilters(filters);
@@ -249,11 +250,7 @@ export default function ProductsScreen() {
 
         {!list ? (
           error ? (
-            <EmptyState
-              icon="help"
-              title="No pudimos cargar el catálogo"
-              text={error}
-            />
+            <ErrorState title="No pudimos cargar el catálogo" message={error} onRetry={refresh} />
           ) : (
             <CatalogSkeleton />
           )

@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -26,6 +26,7 @@ import {
   setPendingBiometricOffer,
 } from '@/lib/biometrics';
 import { dark, makeStyles, PaletteScope, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Oferta de ingreso con biometría, justo después de entrar con contraseña. Va en oscuro como el

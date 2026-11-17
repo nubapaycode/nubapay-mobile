@@ -1,7 +1,7 @@
 // Puntos de retiro deshabilitado por ahora: la pantalla queda sin acceso (se sacó de "Más" y del layout). No se comenta entera porque Expo Router exige el `export default` de cada ruta.
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { LinearTransition } from 'react-native-reanimated';
 
 import { enter, enterRow, StatsRow } from '@/components/dashboard/detail-kit';
@@ -13,6 +13,8 @@ import { formatInt, formatMoneyCompact, formatPercent } from '@/features/dashboa
 import { type PickupPoint, setPickupActive, usePickupPoints } from '@/features/manage/manage';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 /**
  * Puntos de retiro: métricas, y cada punto en su tarjeta con su parte de los pedidos, lo

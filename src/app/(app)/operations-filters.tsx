@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -20,6 +20,7 @@ import { purgeTestOrders } from '@/lib/api/organizer';
 import { invalidate } from '@/lib/query';
 import { makeStyles } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
 
 const keys = <T extends string>(o: Record<T, string>) => Object.keys(o) as T[];
 

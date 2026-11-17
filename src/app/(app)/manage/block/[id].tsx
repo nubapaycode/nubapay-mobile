@@ -10,8 +10,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -27,7 +25,11 @@ import { type CatalogBlock, removeBlock, saveBlock, useBlocks, useProducts } fro
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { loadImagePicker } from '@/lib/native-modules';
 import { makeStyles, useTheme } from '@/theme';
+import type { CatalogBlock as ApiBlock } from '@/lib/api/organizer';
+import { undoableDelete } from '@/lib/undoable';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 const LAYOUT = LinearTransition.duration(240);
 const PICK: ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [3, 1], quality: 0.8 };
@@ -105,24 +107,18 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
     router.back();
   };
 
-  const remove = () =>
-    Alert.alert('Eliminar bloque', `“${block?.title}” deja de mostrarse en la tienda. Los productos no se borran.`, [
-      { text: 'Volver', style: 'cancel' },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: async () => {
-          if (!block || !eventId) return;
-          const res = await removeBlock(eventId, block.id);
-          if (!res.ok) {
-            toast.error('No se pudo eliminar', res.error);
-            return;
-          }
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          router.back();
-        },
-      },
-    ]);
+  const remove = () => {
+    if (!block || !eventId) return;
+    undoableDelete<ApiBlock>({
+      queryKey: `blocks:${eventId}`,
+      match: (b) => b.id === block.id,
+      title: 'Bloque eliminado',
+      message: block.title,
+      errorTitle: 'No se pudo eliminar',
+      commit: () => removeBlock(eventId, block.id),
+      leave: () => router.back(),
+    });
+  };
 
   const pick = async (source: 'library' | 'camera') => {
     const ImagePicker = await loadImagePicker();
@@ -212,6 +208,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
               <View style={styles.field}>
                 <Text style={styles.label}>Título</Text>
                 <TextInput
+                  maxFontSizeMultiplier={1.3}
                   value={title}
                   onChangeText={setTitle}
                   placeholder="Ej: Lo más pedido"

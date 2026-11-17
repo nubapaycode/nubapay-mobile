@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -25,6 +24,7 @@ import {
   useProducts,
 } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
+import { Text } from "@/components/ui/text";
 
 const STATUS: { value: CatalogFilters["status"]; label: string }[] = [
   { value: "all", label: "Todos" },

@@ -1,11 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, StyleSheet, View } from 'react-native';
 
 import { AuthField, AuthScreen, AuthTitle, isEmail, PillButton } from '@/components/auth';
 import { Icon } from '@/components/dashboard/icon';
 import { apiFetch, authPaths } from '@/lib/api';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const RESEND_SECONDS = 30;
 

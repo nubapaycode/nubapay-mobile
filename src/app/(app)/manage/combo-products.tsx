@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -29,6 +28,7 @@ import {
 } from "@/features/manage/combo-picker";
 import { type Product, useProducts } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
+import { Text } from "@/components/ui/text";
 
 const NO_CATEGORY = "Sin categoría";
 

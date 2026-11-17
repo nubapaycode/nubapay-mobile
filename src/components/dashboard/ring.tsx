@@ -25,19 +25,28 @@ export function Rings({
   stroke = 12,
   gap = 5,
   ticks,
+  accessibilityLabel,
 }: {
   rings: RingSpec[];
   size?: number;
   stroke?: number;
   gap?: number;
   ticks?: number[];
+  /** Resumen del progreso en palabras (p. ej. "Vendidas 62%"). */
+  accessibilityLabel?: string;
 }) {
   const { colors } = useTheme();
   const center = size / 2;
   const outer = size / 2 - stroke / 2;
   const reached = rings[0]?.ratio ?? 0;
   return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      accessible={!!accessibilityLabel}
+      accessibilityRole={accessibilityLabel ? 'image' : undefined}
+      accessibilityLabel={accessibilityLabel}>
       {rings.map((r, i) => {
         const radius = size / 2 - stroke / 2 - i * (stroke + gap);
         return (

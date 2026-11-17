@@ -1,10 +1,11 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
 import { openAddEvent } from '@/features/events/add-event';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Botón gris para crear un evento. Texto e ícono en la tinta del tema. Las cuentas de staff no lo ven. */
 export function AddEventButton({ onPress = openAddEvent }: { onPress?: () => void }) {

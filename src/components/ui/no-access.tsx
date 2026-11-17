@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Tarjeta para cuando el rol de la persona en el evento no incluye esta herramienta. */
 export function NoAccess({ title = 'Sin permiso', text }: { title?: string; text: string }) {

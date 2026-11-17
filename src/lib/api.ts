@@ -29,6 +29,10 @@ async function parse<T>(res: Response, authed: boolean): Promise<ApiResult<T>> {
   return { ok: true, data: body as T };
 }
 
+/** Texto de error cuando el pedido ni siquiera llegó al servidor (sin internet, servidor caído). */
+export const CONNECTION_ERROR = 'No se pudo conectar con el servidor';
+export const isConnectionError = (message: string | null | undefined) => message === CONNECTION_ERROR;
+
 /** fetch JSON con manejo uniforme de errores. Devuelve `{ ok, data }` o `{ ok: false, error }`. */
 export async function apiFetch<T>(
   url: string,
@@ -47,7 +51,7 @@ export async function apiFetch<T>(
     });
     return await parse<T>(res, !!auth && auth === sessionToken);
   } catch {
-    return { ok: false, error: 'No se pudo conectar con el servidor' };
+    return { ok: false, error: CONNECTION_ERROR };
   }
 }
 

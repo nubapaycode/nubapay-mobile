@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -9,6 +9,7 @@ import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { type SetupStep, useEventSetup } from '@/features/setup/event-setup';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 

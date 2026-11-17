@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,6 +11,7 @@ import Animated, {
 
 import { Radius } from '@/constants/theme';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Indicador "EN VIVO": punto de marca con halo que late. */
 export function LivePill({ label = 'EN VIVO', compact }: { label?: string; compact?: boolean }) {

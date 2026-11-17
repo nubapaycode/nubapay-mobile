@@ -9,8 +9,6 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -42,6 +40,8 @@ import { loadImagePicker } from '@/lib/native-modules';
 import { invalidate, setQueryData } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 /** `starts_at` / `ends_at` del backend son hora local sin zona: `new Date` los lee como locales. */
 const parse = (iso: string | null) => (iso ? new Date(iso) : null);
@@ -298,6 +298,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
               <Text style={styles.inputLabel}>Nombre</Text>
             </View>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               value={name}
               onChangeText={setName}
               placeholder="Nombre del evento"
@@ -314,6 +315,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
               <Text style={styles.inputLabel}>Link de la tienda</Text>
             </View>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               value={shownSlug}
               onChangeText={(v) => {
                 setSlugTouched(true);
@@ -336,6 +338,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
               </Text>
             </View>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               value={description}
               onChangeText={setDescription}
               placeholder="Contá de qué se trata el evento"
@@ -454,7 +457,7 @@ function SaveButton({
       accessibilityLabel={dirty ? 'Guardar cambios' : 'Sin cambios para guardar'}
       accessibilityState={{ disabled: !enabled }}
       style={({ pressed }) => [styles.save, pressed && { opacity: 0.6 }]}>
-      <Animated.Text style={[styles.saveText, fg]}>Guardar</Animated.Text>
+      <Animated.Text maxFontSizeMultiplier={1.3} style={[styles.saveText, fg]}>Guardar</Animated.Text>
     </Pressable>
   );
 }

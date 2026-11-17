@@ -1,7 +1,6 @@
-import { requireOptionalNativeModule } from 'expo';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   interpolateColor,
@@ -14,14 +13,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius } from '@/constants/theme';
+import { Network } from '@/lib/network';
 import { useTheme } from '@/theme';
-
-/** `expo-network` es nativo: sin él en el build no hay banner (y nada se rompe). */
-type NetworkModule = typeof import('expo-network');
-const Network: NetworkModule | null = requireOptionalNativeModule('ExpoNetwork')
-  ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-    (require('expo-network') as NetworkModule)
-  : null;
+import { Text } from '@/components/ui/text';
 
 const IN = { duration: 320, easing: Easing.out(Easing.cubic) };
 const OUT = { duration: 260, easing: Easing.in(Easing.cubic) };

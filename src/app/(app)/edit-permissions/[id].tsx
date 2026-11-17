@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -17,6 +17,7 @@ import {
 } from '@/features/team/team';
 import { useTeam } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Hoja para editar los permisos (herramientas) de una persona: PATCH …/staff/<id> con `tools`. */
 export default function EditPermissionsSheet() {

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { type Href, router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -15,6 +15,7 @@ import {
 import type { DashboardData } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon, type IconName } from './icon';
 import { ProgressBar } from './progress-bar';

@@ -8,7 +8,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
@@ -32,6 +31,8 @@ import { loadClipboard } from '@/lib/native-modules';
 import { invalidate, setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
 
 const dateFmt = new Intl.DateTimeFormat('es-AR', {
   day: 'numeric',
@@ -75,7 +76,11 @@ export default function OperationScreen() {
   if (!o) {
     return (
       <View style={styles.missing}>
-        {q.error ? <Text style={styles.missingText}>{q.error}</Text> : <ActivityIndicator color={colors.textMuted} />}
+        {q.error ? (
+          <ErrorState title="No pudimos cargar el pedido" message={q.error} onRetry={q.refresh} />
+        ) : (
+          <ActivityIndicator color={colors.textMuted} />
+        )}
       </View>
     );
   }

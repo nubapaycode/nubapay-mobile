@@ -9,7 +9,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
@@ -30,6 +29,7 @@ import { useNow } from "@/hooks/use-now";
 import { loadClipboard } from "@/lib/native-modules";
 import { makeStyles, useTheme } from "@/theme";
 import { toast } from "@/components/ui/toast";
+import { Text } from "@/components/ui/text";
 
 /** Solo acepta URLs https; cualquier otro esquema (intent:, tel:, javascript:…) se descarta. */
 function safeHttpsUrl(raw: string | null | undefined): string | null {

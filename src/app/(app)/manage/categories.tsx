@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { enterRow } from '@/components/dashboard/detail-kit';
@@ -12,14 +12,16 @@ import { formatInt } from '@/features/dashboard/format';
 import { removeCategory, renameCategory, useCategories, useProducts } from '@/features/manage/manage';
 import type { Category } from '@/lib/api/organizer';
 import { makeStyles, useTheme } from '@/theme';
+import { undoableDelete } from '@/lib/undoable';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
 
 /**
  * Categorías del catálogo: cada una en su card con cuántos productos tiene. Se renombran en el
  * lugar y se eliminan si están vacías (el backend no deja borrar una con productos).
  */
 export default function CategoriesScreen() {
-  const { data, error, eventId } = useCategories();
+  const { data, error, eventId, refresh } = useCategories();
   const { products } = useProducts();
   const count = (id: string) => (products ?? []).filter((p) => p.categoryId === id).length;
   const list = data ?? [];
@@ -30,7 +32,8 @@ export default function CategoriesScreen() {
       addLabel="Nueva categoría"
       onAdd={() => router.push('/manage/new-category')}
       loading={!data && !error}
-      empty={error ?? (data && list.length === 0 ? 'Todavía no hay categorías. Creá una para ordenar tu catálogo.' : null)}>
+      error={!data && error ? { title: 'No pudimos cargar las categorías', message: error, onRetry: refresh } : null}
+      empty={data && list.length === 0 ? 'Todavía no hay categorías. Creá una para ordenar tu catálogo.' : null}>
       {list.map((c, i) => (
         <CategoryCard key={c.id} category={c} index={i} products={count(c.id)} eventId={eventId} />
       ))}
@@ -81,22 +84,15 @@ function CategoryCard({
       );
       return;
     }
-    Alert.alert('Eliminar categoría', `“${category.name}” se borra del catálogo.`, [
-      { text: 'Volver', style: 'cancel' },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: async () => {
-          if (!eventId) return;
-          const res = await removeCategory(eventId, category.id);
-          if (!res.ok) {
-            toast.error('No se pudo eliminar', res.error);
-            return;
-          }
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        },
-      },
-    ]);
+    if (!eventId) return;
+    undoableDelete<Category>({
+      queryKey: `categories:${eventId}`,
+      match: (c) => c.id === category.id,
+      title: 'Categoría eliminada',
+      message: category.name,
+      errorTitle: 'No se pudo eliminar',
+      commit: () => removeCategory(eventId, category.id),
+    });
   };
 
   return (
@@ -108,6 +104,7 @@ function CategoryCard({
       {editing ? (
         <Animated.View entering={FadeIn.duration(180)} style={styles.editRow}>
           <TextInput
+            maxFontSizeMultiplier={1.3}
             value={name}
             onChangeText={setName}
             autoFocus

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
@@ -13,6 +13,7 @@ import { useRegrets } from '@/features/manage/manage';
 import { storeBlocker, useEventSetup, usePublicStore } from '@/features/setup/event-setup';
 import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const HELP_URL = 'https://www.nubapay.app/ayuda';
 

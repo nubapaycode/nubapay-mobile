@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   type TextInputInstance,
   View,
@@ -35,6 +34,7 @@ import {
 import { useRoles, useTeam } from "@/features/team/use-team";
 import { makeStyles, useTheme } from "@/theme";
 import { toast } from "@/components/ui/toast";
+import { Text } from "@/components/ui/text";
 
 const LAYOUT = LinearTransition.duration(240);
 
@@ -161,6 +161,7 @@ function InviteContent() {
         <View style={[styles.card, touched && errors.name && styles.cardError]}>
           <Field label="Nombre" error={touched ? errors.name : null} ok={!errors.name}>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               value={name}
               onChangeText={setName}
               placeholder="Nombre y apellido"
@@ -179,6 +180,7 @@ function InviteContent() {
         >
           <Field label="Email" error={touched ? errors.email : null} ok={!errors.email}>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               ref={emailRef}
               value={email}
               onChangeText={setEmail}
@@ -208,6 +210,7 @@ function InviteContent() {
           ]}
         >
           <TextInput
+            maxFontSizeMultiplier={1.3}
             ref={roleRef}
             value={roleName}
             onChangeText={(t) => {
@@ -254,6 +257,7 @@ function InviteContent() {
         ) : null}
         {isNewRole ? (
           <Animated.Text
+            maxFontSizeMultiplier={1.3}
             entering={FadeIn.duration(220)}
             exiting={FadeOut.duration(140)}
             style={styles.hint}
@@ -262,6 +266,7 @@ function InviteContent() {
           </Animated.Text>
         ) : customized ? (
           <Animated.Text
+            maxFontSizeMultiplier={1.3}
             entering={FadeIn.duration(220)}
             exiting={FadeOut.duration(140)}
             style={styles.hint}

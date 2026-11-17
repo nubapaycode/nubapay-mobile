@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
@@ -11,6 +11,7 @@ import { PERMISSION_SHORT, PERMISSIONS, roleById, setMemberRole } from '@/featur
 import { useRoles, useTeam } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
 
 /**
  * Hoja para cambiar el rol de una persona (PATCH /api/events/<id>/staff/<staff_id>). Con una
@@ -99,6 +100,7 @@ function ChangeRoleContent() {
 
       {changed ? (
         <Animated.Text
+          maxFontSizeMultiplier={1.3}
           entering={FadeIn.duration(260)}
           layout={LinearTransition.duration(260)}
           style={styles.note}>

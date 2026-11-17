@@ -1,11 +1,12 @@
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 
 import { Icon } from "@/components/dashboard/icon";
 import { DisplayFont, Radius } from "@/constants/theme";
 import { formatTime } from "@/features/manage/promo";
 import { makeStyles, useTheme } from "@/theme";
+import { Text } from "@/components/ui/text";
 
 /**
  * Solo hora, con su etiqueta arriba ("Desde" / "Hasta"). En iOS, el picker compacto nativo; en

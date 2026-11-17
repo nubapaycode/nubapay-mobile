@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -24,6 +24,7 @@ import type { DashboardData } from '@/features/dashboard/types';
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
 import { markRecapSeen } from '@/features/recap/recap-seen';
 import { shareRecapImage } from '@/features/recap/share-recap';
+import { Text } from '@/components/ui/text';
 
 /** Cuánto dura cada pantalla del resumen antes de pasar sola a la siguiente. */
 const SLIDE_MS = 5_500;
@@ -191,6 +192,7 @@ export default function EventRecapScreen() {
           )}
           {slide.lines.map((l, i) => (
             <Animated.Text
+              maxFontSizeMultiplier={1.3}
               key={l}
               entering={reduceMotion ? undefined : FadeInDown.delay(500 + i * 220).duration(380)}
               style={[styles.lines, { color: fg }]}>

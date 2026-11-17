@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -17,11 +17,12 @@ import { FullWindowOverlay } from 'react-native-screens';
 import Svg, { Path } from 'react-native-svg';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { Icon } from '@/components/dashboard/icon';
+import { Icon, type IconName } from '@/components/dashboard/icon';
 import { Confetti } from '@/components/fx/confetti';
 import { Lottie } from '@/components/fx/lottie';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Kind = 'success' | 'error' | 'info';
 type ToastData = {
@@ -31,6 +32,12 @@ type ToastData = {
   message?: string;
   /** Éxito importante (algo creado): ícono Lottie y confetti. */
   celebrate?: boolean;
+  /** Botón a la derecha (p. ej. "Deshacer"). Al tocarlo se corre y el aviso se va. */
+  action?: { label: string; onPress: () => void };
+  /** Cuánto queda a la vista (ms); por defecto depende del tipo. */
+  duration?: number;
+  /** Ícono propio (por ejemplo la papelera al borrar). */
+  icon?: IconName;
 };
 
 /* ───────── Store mínimo: cualquier parte de la app puede avisar sin hooks ni contexto. ───────── */
@@ -47,7 +54,11 @@ export const toast = {
   success: (title: string, message?: string, opts?: { celebrate?: boolean }) =>
     show({ kind: 'success', title, message, celebrate: opts?.celebrate }),
   error: (title: string, message?: string) => show({ kind: 'error', title, message }),
-  info: (title: string, message?: string) => show({ kind: 'info', title, message }),
+  info: (
+    title: string,
+    message?: string,
+    opts?: { action?: ToastData['action']; duration?: number; icon?: IconName },
+  ) => show({ kind: 'info', title, message, ...opts }),
 };
 
 const DURATION: Record<Kind, number> = { success: 2600, error: 4200, info: 3200 };
@@ -103,6 +114,8 @@ function ToastView({ data, onGone }: { data: ToastData; onGone: () => void }) {
           ? Haptics.NotificationFeedbackType.Success
           : Haptics.NotificationFeedbackType.Warning,
     );
+    // iOS no tiene live regions: el lector de pantalla necesita el aviso explícito.
+    AccessibilityInfo.announceForAccessibility(`${data.title}${data.message ? `. ${data.message}` : ''}`);
     y.set(reduceMotion ? 0 : withTiming(0, IN));
     if (!reduceMotion) {
       if (data.kind === 'success') check.set(withDelay(200, withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) })));
@@ -111,7 +124,7 @@ function ToastView({ data, onGone }: { data: ToastData; onGone: () => void }) {
         shake.set(withDelay(260, withSequence(step(-7), step(6), step(-4), step(2), step(0))));
       }
     }
-    const t = setTimeout(leave, DURATION[data.kind] + (data.celebrate ? 800 : 0));
+    const t = setTimeout(leave, (data.duration ?? DURATION[data.kind]) + (data.celebrate ? 800 : 0));
     return () => clearTimeout(t);
     // Una vez por aviso (cada aviso es un componente nuevo por `key`).
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,7 +153,7 @@ function ToastView({ data, onGone }: { data: ToastData; onGone: () => void }) {
   const checkProps = useAnimatedProps(() => ({ strokeDashoffset: CHECK_LEN * (1 - check.value) }));
 
   return (
-    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { paddingTop: insets.top + 6 }]}>
+    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { paddingTop: insets.top + 6, paddingHorizontal: 12, alignItems: 'center' }]}>
       {data.celebrate ? <Confetti origin={{ x: 40, y: insets.top + 40 }} seed={data.id} /> : null}
       <GestureDetector gesture={pan}>
         <Animated.View
@@ -162,7 +175,11 @@ function ToastView({ data, onGone }: { data: ToastData; onGone: () => void }) {
             <SuccessCheck tone={tone} props={checkProps} />
           ) : (
             <View style={[styles.icon, { backgroundColor: tone }]}>
-              <Icon name={data.kind === 'error' ? 'close' : 'help'} size={13} color="#ffffff" />
+              <Icon
+                name={data.icon ?? (data.kind === 'error' ? 'close' : 'help')}
+                size={13}
+                color="#ffffff"
+              />
             </View>
           )}
           <View style={styles.texts}>
@@ -175,6 +192,20 @@ function ToastView({ data, onGone }: { data: ToastData; onGone: () => void }) {
               </Text>
             ) : null}
           </View>
+          {data.action ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={data.action.label}
+              hitSlop={10}
+              onPress={() => {
+                Haptics.selectionAsync();
+                data.action?.onPress();
+                leave();
+              }}
+              style={({ pressed }) => [styles.action, pressed && { opacity: 0.6 }]}>
+              <Text style={styles.actionText}>{data.action.label}</Text>
+            </Pressable>
+          ) : null}
         </Animated.View>
       </GestureDetector>
     </View>
@@ -204,7 +235,8 @@ function SuccessCheck({ tone, props }: { tone: string; props: object }) {
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     toast: {
-      marginHorizontal: 12,
+      width: '100%',
+      maxWidth: 480,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
@@ -222,5 +254,14 @@ const useStyles = makeStyles((c) =>
     texts: { flex: 1, gap: 2 },
     title: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
     message: { color: c.textSecondary, fontSize: 13, lineHeight: 18 },
+    action: {
+      minHeight: 36,
+      paddingHorizontal: 12,
+      borderRadius: Radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.raised,
+    },
+    actionText: { color: c.text, fontSize: 14, fontFamily: DisplayFont.semibold },
   }),
 );

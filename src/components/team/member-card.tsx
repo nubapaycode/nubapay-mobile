@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import type { Href } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
@@ -16,6 +16,7 @@ import {
   PERMISSIONS,
 } from '@/features/team/team';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 const LIFT = { duration: 180, easing: Easing.out(Easing.cubic) };

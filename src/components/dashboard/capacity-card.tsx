@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoney, formatPercent } from '@/features/dashboard/format';
 import type { DashboardInsights } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { Card } from './card';
@@ -31,6 +32,7 @@ export function CapacityOverview({
       <View style={styles.top}>
         <View style={styles.ringWrap}>
           <Rings
+            accessibilityLabel={`Entradas vendidas ${Math.round(soldRatio * 100)}% del cupo${showCheckin ? `, ingresaron ${Math.round(inRatio * 100)}%` : ''}`}
             rings={
               showCheckin
                 ? [

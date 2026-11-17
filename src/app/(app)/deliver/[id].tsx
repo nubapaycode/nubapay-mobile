@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { DeliverPanel } from '@/components/operations/deliver-panel';
 import { NoAccess } from '@/components/ui/no-access';
@@ -9,6 +9,7 @@ import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { type Order, previewScan } from '@/lib/api/organizer';
 import { invalidate, setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
 
 /**
  * Entregar sin escanear (desde el detalle del pedido): valida el pedido igual que el escáner y
@@ -50,7 +51,7 @@ export default function DeliverScreen() {
           onCancel={() => router.back()}
         />
       ) : q.error ? (
-        <Text style={styles.error}>{q.error}</Text>
+        <ErrorState title="No pudimos cargar el pedido" message={q.error} onRetry={q.refresh} />
       ) : (
         <ActivityIndicator color={colors.textMuted} style={{ marginTop: 40 }} />
       )}

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { type GestureResponderEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { type GestureResponderEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   interpolateColor,
@@ -12,6 +12,7 @@ import Animated, {
 import { Icon } from '@/components/dashboard/icon';
 import { Radius } from '@/constants/theme';
 import { type AppearancePreference, dark, light, makeStyles, type Palette, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const OPTIONS: { value: AppearancePreference; label: string }[] = [
   { value: 'system', label: 'Automático' },

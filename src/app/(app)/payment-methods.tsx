@@ -6,8 +6,6 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -43,6 +41,9 @@ import { type EventDetail, type EventPatch, patchEvent } from '@/lib/api/organiz
 import { invalidate, setQueryData } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 const LAYOUT = LinearTransition.duration(260);
 const MP_CREDENTIALS = 'https://www.mercadopago.com.ar/developers/panel/app';
@@ -87,13 +88,17 @@ function MethodMark({ id, size = 'md' }: { id: PaymentMethodId; size?: 'sm' | 'm
 export default function PaymentMethodsScreen() {
   const styles = useStyles();
   const { colors } = useTheme();
-  const { data: event, error } = useSelectedEventDetail();
+  const { data: event, error, refresh } = useSelectedEventDetail();
   useFocusStatusBar();
 
   if (!event) {
     return (
       <View style={styles.center}>
-        {error ? <Text style={styles.note}>{error}</Text> : <ActivityIndicator color={colors.textMuted} />}
+        {error ? (
+          <ErrorState title="No pudimos cargar los medios de pago" message={error} onRetry={refresh} />
+        ) : (
+          <ActivityIndicator color={colors.textMuted} />
+        )}
       </View>
     );
   }
@@ -535,6 +540,7 @@ function CredentialsForm({
               <Text style={styles.fieldLabel}>{f.label}</Text>
               <View style={styles.inputRow}>
                 <TextInput
+                  maxFontSizeMultiplier={1.3}
                   value={values[k] ?? ''}
                   onChangeText={(t) => setValues((v) => ({ ...v, [k]: t }))}
                   placeholder={`Pegá tu ${f.label}`}

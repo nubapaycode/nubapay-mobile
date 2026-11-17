@@ -1,7 +1,10 @@
-import { ActivityIndicator, Pressable, type PressableProps, StyleSheet, Text } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { ActivityIndicator, type PressableProps, StyleSheet } from 'react-native';
 
+import { ScalePressable } from '@/components/motion/scale-pressable';
 import { Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Props = PressableProps & {
   title: string;
@@ -9,14 +12,20 @@ type Props = PressableProps & {
   variant?: 'primary' | 'ghost';
 };
 
-export function Button({ title, loading, variant = 'primary', disabled, style, ...rest }: Props) {
+export function Button({ title, loading, variant = 'primary', disabled, style, onPress, ...rest }: Props) {
   const styles = useStyles();
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
   return (
-    <Pressable
+    <ScalePressable
+      scaleTo={0.97}
       accessibilityRole="button"
+      accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
       disabled={isDisabled}
+      onPress={(e) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onPress?.(e);
+      }}
       style={(state) => [
         styles.base,
         variant === 'primary' ? styles.primary : styles.ghost,
@@ -31,7 +40,7 @@ export function Button({ title, loading, variant = 'primary', disabled, style, .
       ) : (
         <Text style={[styles.label, variant === 'ghost' && { color: colors.accent }]}>{title}</Text>
       )}
-    </Pressable>
+    </ScalePressable>
   );
 }
 

@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { DisplayFont, Radius } from "@/constants/theme";
 import { initials } from "@/features/dashboard/format";
 import type { Regret } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
+import { Text } from "@/components/ui/text";
 
 /** Lima de marca (fondos). */
 export const LIME = "#C6FF00";

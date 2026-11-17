@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { CountBadge } from '@/components/motion/count-badge';
@@ -27,6 +27,8 @@ import {
 import { useTeam } from '@/features/team/use-team';
 import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
 
 /**
  * Equipo del evento (mismo lenguaje que Operaciones): filtros e invitar arriba a la derecha,
@@ -97,6 +99,7 @@ function TeamContent() {
         <View style={styles.search}>
           <Icon name="search" size={16} color={colors.textMuted} />
           <TextInput
+            maxFontSizeMultiplier={1.3}
             value={query}
             onChangeText={setQuery}
             placeholder="Buscar por nombre, email o rol"
@@ -140,7 +143,7 @@ function TeamContent() {
       {!team && !error ? (
         <CardListSkeleton variant="member" count={4} label="Cargando equipo" />
       ) : !team ? (
-        <Text style={styles.empty}>{error}</Text>
+        <ErrorState title="No pudimos cargar el equipo" message={error} onRetry={refresh} />
       ) : members.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
           <MoodMascot mood="search" size={112} onLight={colors.scheme === 'light'} />

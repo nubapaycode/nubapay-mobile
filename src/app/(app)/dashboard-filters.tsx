@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Segmented } from '@/components/dashboard/segmented';
@@ -22,6 +22,7 @@ import { eventPhase } from '@/features/dashboard/format';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type PeriodChoice = RangePreset | 'custom';
 

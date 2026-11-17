@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -13,6 +13,7 @@ import {
 import type { ActivityItem, DashboardData } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { enter, enterRow, FADE_EASING, FADE_MS } from './detail-kit';
 import { Icon, type IconName } from './icon';
@@ -180,6 +181,7 @@ function LiveHero({ data }: { data: DashboardData }) {
           values={live.per_minute}
           height={56}
           live
+          accessibilityLabel={`Pedidos por minuto de la última media hora. En la última hora: ${formatInt(live.orders_last_hour)} ${live.orders_last_hour === 1 ? 'pedido' : 'pedidos'}.`}
           color={colors.chart.ramp[2]}
           highlight={colors.chart.ramp[0]}
         />

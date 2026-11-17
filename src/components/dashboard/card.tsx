@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Props = {
   title?: string;
@@ -24,7 +25,9 @@ export function Card({ title, subtitle, right, children, index = 0, style }: Pro
       {title ? (
         <View style={styles.header}>
           <View style={{ flexShrink: 1 }}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title} accessibilityRole="header">
+              {title}
+            </Text>
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
           </View>
           {right}

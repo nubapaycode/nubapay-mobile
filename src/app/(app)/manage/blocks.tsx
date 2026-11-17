@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { enter, enterRow } from '@/components/dashboard/detail-kit';
@@ -16,6 +16,9 @@ import { setBlockActive, useBlocks, useProducts } from '@/features/manage/manage
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import type { CatalogBlock } from '@/lib/api/organizer';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 const openBlock = (id: string) => router.push({ pathname: '/manage/block/[id]', params: { id } });
 const MAX_THUMBS = 4;
@@ -29,7 +32,7 @@ const MAX_THUMBS = 4;
 export default function BlocksScreen() {
   const styles = useStyles();
   const { can } = useEventAccess();
-  const { blocks, error, eventId } = useBlocks();
+  const { blocks, error, eventId, refresh } = useBlocks();
   const { products } = useProducts();
   useFocusStatusBar();
 
@@ -52,7 +55,7 @@ export default function BlocksScreen() {
         <NoAccess text="Tu rol en este evento no incluye editar la tienda." />
       ) : !blocks ? (
         error ? (
-          <EmptyState icon="help" title="No pudimos cargar los bloques" text={error} />
+          <ErrorState title="No pudimos cargar los bloques" message={error} onRetry={refresh} />
         ) : (
           <Text style={styles.muted}>Cargando…</Text>
         )

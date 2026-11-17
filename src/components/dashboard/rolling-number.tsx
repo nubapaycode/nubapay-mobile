@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, type TextStyle, View } from 'react-native';
+import { StyleSheet, type TextStyle, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -8,6 +8,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import { Text } from '@/components/ui/text';
 
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 /** Mismo ritmo que los fundidos: 1200 ms, arranca y frena gradualmente. */

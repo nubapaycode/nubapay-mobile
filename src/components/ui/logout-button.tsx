@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Botón de cerrar sesión (fondo rojo tenue). Por defecto cierra la sesión

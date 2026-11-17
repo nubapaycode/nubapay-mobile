@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,6 +9,7 @@ import { hasKeyboardController, KeyboardScroll, KeyboardSticky } from '@/compone
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Props = {
   /** Botón redondo arriba a la izquierda (volver). */

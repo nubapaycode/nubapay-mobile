@@ -1,11 +1,12 @@
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AuthField, AuthScreen, AuthTitle, PillButton } from '@/components/auth';
 import { setPendingBiometricOffer } from '@/lib/biometrics';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Ingreso, paso 2: la contraseña del email elegido. Al entrar, el layout raíz lleva solo a la app

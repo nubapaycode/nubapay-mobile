@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Radius } from '@/constants/theme';
 import { formatPercent } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 

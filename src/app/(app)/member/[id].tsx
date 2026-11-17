@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Link, router, Stack, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enter } from '@/components/dashboard/detail-kit';
@@ -15,7 +15,9 @@ import { PERMISSION_LABEL, PERMISSIONS, removeMember, resendAccess } from '@/fea
 import { useTeam } from '@/features/team/use-team';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
-import { toast } from '@/components/ui/toast';
+import type { StaffRow } from '@/lib/api/organizer';
+import { undoableDelete } from '@/lib/undoable';
+import { Text } from '@/components/ui/text';
 
 /**
  * Detalle de una persona del equipo (routes/event_staff.py), mismo lenguaje que el detalle de
@@ -48,26 +50,18 @@ export default function MemberScreen() {
   const rank =
     scans > 0 ? [...team].sort((x, y) => y.stats.scans - x.stats.scans).findIndex((m) => m.id === member.id) + 1 : 0;
 
-  const confirmRemove = () =>
-    Alert.alert('Quitar del equipo', `${member.name} deja de tener acceso al evento.`, [
-      { text: 'Volver', style: 'cancel' },
-      {
-        text: 'Quitar',
-        style: 'destructive',
-        onPress: async () => {
-          if (!eventId) return;
-          setBusy('remove');
-          const res = await removeMember(eventId, member);
-          setBusy(null);
-          if (!res.ok) {
-            toast.error('No se pudo quitar', res.error);
-            return;
-          }
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          router.back();
-        },
-      },
-    ]);
+  const confirmRemove = () => {
+    if (!eventId) return;
+    undoableDelete<StaffRow>({
+      queryKey: `staff:${eventId}`,
+      match: (r) => r.id === member.id,
+      title: `${member.name} salió del equipo`,
+      message: 'Ya no tiene acceso al evento.',
+      errorTitle: 'No se pudo quitar',
+      commit: () => removeMember(eventId, member),
+      leave: () => router.back(),
+    });
+  };
 
   const resend = async () => {
     if (!eventId) return;

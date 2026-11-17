@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { LivePill } from '@/components/dashboard/live-pill';
@@ -10,6 +10,7 @@ import { eventPhase, formatEventDate, initials, PHASE_LABEL } from '@/features/d
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * De qué evento es lo que se está viendo/editando: portada (o iniciales), "{caption}", nombre y

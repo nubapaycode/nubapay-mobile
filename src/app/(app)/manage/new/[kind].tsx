@@ -2,7 +2,7 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -11,6 +11,8 @@ import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addPickupPoint, addTicket, type ManageKind } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 type SheetKind = Exclude<ManageKind, 'product'>;
 
@@ -96,6 +98,7 @@ function NewItemContent() {
       <View style={styles.card}>
         <Field label="Nombre" error={touched ? errors.name : null}>
           <TextInput
+            maxFontSizeMultiplier={1.3}
             value={name}
             onChangeText={setName}
             placeholder={kind === 'ticket' ? 'Ej: General' : 'Ej: Barra principal'}
@@ -110,6 +113,7 @@ function NewItemContent() {
             <View style={styles.priceRow}>
               <Text style={styles.currency}>$</Text>
               <TextInput
+                maxFontSizeMultiplier={1.3}
                 value={price}
                 onChangeText={setPrice}
                 placeholder="0"
@@ -123,6 +127,7 @@ function NewItemContent() {
         ) : (
           <Field label="Descripción (opcional)" error={null} divider>
             <TextInput
+              maxFontSizeMultiplier={1.3}
               value={description}
               onChangeText={setDescription}
               placeholder="Ej: Al lado del escenario principal"
@@ -156,6 +161,7 @@ function NewItemContent() {
             <Animated.View entering={FadeIn.duration(240)} exiting={FadeOut.duration(140)}>
               <Field label="Cupo" error={touched ? errors.stock : null} divider>
                 <TextInput
+                  maxFontSizeMultiplier={1.3}
                   value={stock}
                   onChangeText={(t) => setStock(t.replace(/[^\d]/g, ''))}
                   placeholder="0"

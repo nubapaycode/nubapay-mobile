@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
-import { type LayoutRectangle, Pressable, StyleSheet, Text, View } from 'react-native';
+import { type LayoutRectangle, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import { type DashboardPeriod, isCustom, type RangePreset } from '@/features/das
 import { deltaRatio, formatInt, formatMoney, formatPercent } from '@/features/dashboard/format';
 import type { DashboardSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { AreaChart, type ChartPoint } from './area-chart';
 import { Icon } from './icon';

@@ -46,7 +46,7 @@ export function CountBadge({
       entering={reduceMotion ? undefined : ZoomIn.duration(180).easing(Easing.out(Easing.cubic))}
       exiting={reduceMotion ? undefined : FadeOut.duration(120)}
       style={[style, anim]}>
-      <Animated.Text style={textStyle}>{count}</Animated.Text>
+      <Animated.Text maxFontSizeMultiplier={1.3} style={textStyle}>{count}</Animated.Text>
     </Animated.View>
   );
 }

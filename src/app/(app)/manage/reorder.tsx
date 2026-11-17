@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
@@ -20,6 +20,8 @@ import {
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { ErrorState } from '@/components/ui/error-state';
+import { Text } from '@/components/ui/text';
 
 type Item = { id: string; title: string; subtitle: string | null };
 type Group = { title: string | null; items: Item[] };
@@ -46,11 +48,16 @@ export default function ReorderScreen() {
   const { kind } = useLocalSearchParams<{ kind: ReorderKind }>();
   const groups = useGroups(kind);
   useFocusStatusBar();
-  if (!groups.data) return <Loading error={groups.error} />;
+  if (!groups.data) return <Loading error={groups.error} onRetry={groups.refresh} />;
   return <ReorderList key={kind} kind={kind} initial={groups.data} eventId={groups.eventId} />;
 }
 
-function useGroups(kind: ReorderKind): { data: Group[] | null; error: string | null; eventId: string | null } {
+function useGroups(kind: ReorderKind): {
+  data: Group[] | null;
+  error: string | null;
+  eventId: string | null;
+  refresh: () => Promise<void>;
+} {
   const t = useTickets();
   const p = useProducts();
   const b = useBlocks();
@@ -58,6 +65,7 @@ function useGroups(kind: ReorderKind): { data: Group[] | null; error: string | n
     if (kind === 'tickets') {
       return {
         eventId: t.eventId,
+        refresh: t.refresh,
         error: t.error,
         data: t.tickets
           ? [{ title: null, items: t.tickets.map((x) => ({ id: x.id, title: x.name, subtitle: formatMoney(x.price) })) }]
@@ -65,17 +73,18 @@ function useGroups(kind: ReorderKind): { data: Group[] | null; error: string | n
       };
     }
     if (kind === 'products') {
-      if (!p.products) return { eventId: p.eventId, error: p.error, data: null };
+      if (!p.products) return { eventId: p.eventId, refresh: p.refresh, error: p.error, data: null };
       const map = new Map<string, Item[]>();
       for (const x of p.products) {
         const g = x.category ?? 'Sin categoría';
         if (!map.has(g)) map.set(g, []);
         map.get(g)!.push({ id: x.id, title: x.name, subtitle: formatMoney(x.price) });
       }
-      return { eventId: p.eventId, error: null, data: [...map].map(([title, items]) => ({ title, items })) };
+      return { eventId: p.eventId, refresh: p.refresh, error: null, data: [...map].map(([title, items]) => ({ title, items })) };
     }
     return {
       eventId: b.eventId,
+      refresh: b.refresh,
       error: b.error,
       data: b.blocks
         ? [
@@ -90,7 +99,7 @@ function useGroups(kind: ReorderKind): { data: Group[] | null; error: string | n
           ]
         : null,
     };
-  }, [kind, t.tickets, t.error, t.eventId, p.products, p.error, p.eventId, b.blocks, b.error, b.eventId]);
+  }, [kind, t.tickets, t.error, t.eventId, t.refresh, p.products, p.error, p.eventId, p.refresh, b.blocks, b.error, b.eventId, b.refresh]);
 }
 
 function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: Group[]; eventId: string | null }) {
@@ -187,12 +196,16 @@ function ReorderList({ kind, initial, eventId }: { kind: ReorderKind; initial: G
   );
 }
 
-function Loading({ error }: { error: string | null }) {
+function Loading({ error, onRetry }: { error: string | null; onRetry?: () => void | Promise<unknown> }) {
   const styles = useStyles();
   const { colors } = useTheme();
   return (
     <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center' }]}>
-      {error ? <Text style={styles.hint}>{error}</Text> : <ActivityIndicator color={colors.textMuted} />}
+      {error ? (
+        <ErrorState title="No pudimos cargar la lista" message={error} onRetry={onRetry} />
+      ) : (
+        <ActivityIndicator color={colors.textMuted} />
+      )}
     </View>
   );
 }

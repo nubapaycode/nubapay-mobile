@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useThemeReveal } from '@/components/fx/theme-reveal';
 import { AppearancePicker } from '@/components/ui/appearance-picker';
@@ -23,6 +23,8 @@ import { resetTips } from '@/features/tips/tips';
 import { hasScanSounds, setScanSoundEnabled, useScanSoundEnabled, useSaleSoundEnabled, setSaleSoundEnabled } from '@/lib/sounds';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
+import { Switch } from '@/components/ui/switch';
 
 const HELP_URL = 'https://www.nubapay.app/ayuda';
 

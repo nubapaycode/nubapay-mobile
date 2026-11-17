@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Text, type TextProps } from 'react-native';
+import { type TextProps } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
+import { Text } from '@/components/ui/text';
 
 /** Cuenta hasta `target` con ease-in-out (1200 ms); en cambios posteriores anima desde el valor anterior. */
 export function useCountUp(target: number, duration = 1200): number {

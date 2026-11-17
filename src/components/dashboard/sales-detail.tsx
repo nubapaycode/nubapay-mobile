@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -14,6 +14,7 @@ import {
 } from '@/features/dashboard/format';
 import type { DashboardData } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { DetailNote, enter, enterRow } from './detail-kit';
 import { Donut } from './donut';

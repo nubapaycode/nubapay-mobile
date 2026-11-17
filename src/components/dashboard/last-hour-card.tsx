@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { MOOD_LABEL, MoodMascot } from '@/components/illustrations/mood-mascot';
@@ -9,6 +9,7 @@ import { MASCOT_LINE_EVERY_MS, msUntilNextLine, nextMascotLine } from '@/feature
 import type { ActivityItem, DashboardSummary } from '@/features/dashboard/types';
 import type { MascotMood } from '@/widgets/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { LiveTicker } from './live-ticker';
@@ -112,7 +113,7 @@ export function LastHourCard({
               <View style={styles.bubbleTail} />
             </Animated.View>
           ) : mood ? (
-            <Animated.Text entering={FadeIn.duration(220)} style={styles.mood}>
+            <Animated.Text maxFontSizeMultiplier={1.3} entering={FadeIn.duration(220)} style={styles.mood}>
               {MOOD_LABEL[mood]}
             </Animated.Text>
           ) : null}

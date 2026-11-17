@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoneyCompact } from '@/features/dashboard/format';
 import type { DashboardSummary } from '@/features/dashboard/types';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { LivePill } from './live-pill';

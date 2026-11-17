@@ -1,11 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { EventForm } from '@/components/events/event-form';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { type EventDetail, getEvent } from '@/lib/api/organizer';
 import { useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
+import { ErrorState } from '@/components/ui/error-state';
 
 /** Editar evento: carga el evento (GET /api/events/<id>) y abre el formulario con sus datos. */
 export default function EditEventScreen() {
@@ -19,7 +20,7 @@ export default function EditEventScreen() {
     return (
       <View style={styles.missing}>
         {detail.error ? (
-          <Text style={styles.missingText}>{detail.error}</Text>
+          <ErrorState title="No pudimos cargar el evento" message={detail.error} onRetry={detail.refresh} />
         ) : (
           <ActivityIndicator color={colors.textMuted} />
         )}

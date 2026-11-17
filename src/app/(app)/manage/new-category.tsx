@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -9,6 +9,7 @@ import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addCategory, useCategories } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
 import { toast } from '@/components/ui/toast';
+import { Text } from '@/components/ui/text';
 
 const SUGGESTIONS = ['Bebidas', 'Tragos', 'Cervezas', 'Comida', 'Snacks', 'Merch'];
 
@@ -76,6 +77,7 @@ function NewCategoryContent() {
           {duplicate ? <Text style={styles.fieldError}>Ya existe</Text> : null}
         </View>
         <TextInput
+          maxFontSizeMultiplier={1.3}
           value={name}
           onChangeText={setName}
           placeholder="Ej: Tragos"

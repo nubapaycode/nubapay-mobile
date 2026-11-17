@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { type LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import { Radius } from '@/constants/theme';
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Option<T extends string> = { value: T; label: string };
 

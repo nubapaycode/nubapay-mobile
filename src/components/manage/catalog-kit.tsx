@@ -3,7 +3,6 @@ import { type ReactNode, useEffect } from "react";
 import {
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   type TextInputProps,
   View,
@@ -24,6 +23,7 @@ import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
 import { MoodMascot } from "@/components/illustrations/mood-mascot";
 import { Ticky } from "@/components/illustrations/ticky";
+import { Text } from "@/components/ui/text";
 
 /**
  * Piezas compartidas del catálogo (lista, formulario y sus hojas): miniatura, buscador, lista
@@ -88,6 +88,7 @@ export function SearchField({
     <View style={styles.search}>
       <Icon name="search" size={16} color={colors.textMuted} />
       <TextInput
+        maxFontSizeMultiplier={1.3}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -337,7 +338,7 @@ export function SaveText({
       accessibilityRole="button"
       style={styles.saveText}
     >
-      <Animated.Text style={[styles.saveLabel, fg]}>{label}</Animated.Text>
+      <Animated.Text maxFontSizeMultiplier={1.3} style={[styles.saveLabel, fg]}>{label}</Animated.Text>
     </Pressable>
   );
 }

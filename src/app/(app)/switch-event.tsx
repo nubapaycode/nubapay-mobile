@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { enterRow } from '@/components/dashboard/detail-kit';
@@ -14,6 +14,7 @@ import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/sel
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { confirmDeleteEvent } from '@/features/events/event-actions';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Cuántos eventos entran en la hoja; el resto está en la página de eventos. */
 const VISIBLE = 3;

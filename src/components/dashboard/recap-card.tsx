@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 

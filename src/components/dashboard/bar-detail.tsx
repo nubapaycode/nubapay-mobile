@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { DisplayFont, Radius, Spacing } from '@/constants/theme';
@@ -10,6 +10,7 @@ import {
 } from '@/features/dashboard/format';
 import type { DashboardData } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { DetailNote, enter, enterRow, HeroFacts } from './detail-kit';
 import { Donut } from './donut';

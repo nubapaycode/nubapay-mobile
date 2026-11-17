@@ -16,6 +16,7 @@ export function PulseBars({
   live,
   color,
   highlight,
+  accessibilityLabel,
 }: {
   values: number[];
   height?: number;
@@ -24,11 +25,17 @@ export function PulseBars({
   color?: string;
   /** Color del minuto actual (por defecto, lima de marca). */
   highlight?: string;
+  /** Resumen en palabras de lo que muestran las barras (el lector no puede "verlas"). */
+  accessibilityLabel?: string;
 }) {
   const { colors } = useTheme();
   const max = Math.max(1, ...values);
   return (
-    <View style={[styles.row, { height }]}>
+    <View
+      style={[styles.row, { height }]}
+      accessible={!!accessibilityLabel}
+      accessibilityRole={accessibilityLabel ? 'image' : undefined}
+      accessibilityLabel={accessibilityLabel}>
       {values.map((v, i) => (
         <Bar
           key={i}

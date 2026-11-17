@@ -1,7 +1,8 @@
-import { StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
+import { StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Props = TextInputProps & { label: string };
 
@@ -12,6 +13,7 @@ export function TextField({ label, style, ...rest }: Props) {
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
+        maxFontSizeMultiplier={1.3}
         placeholderTextColor={colors.textMuted}
         keyboardAppearance={colors.scheme}
         style={[styles.input, style]}

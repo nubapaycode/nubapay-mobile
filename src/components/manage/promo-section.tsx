@@ -3,8 +3,6 @@ import { useMemo, useState } from "react";
 import {
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -32,6 +30,8 @@ import {
   resolveWindow,
 } from "@/features/manage/promo";
 import { makeStyles, useTheme } from "@/theme";
+import { Text } from "@/components/ui/text";
+import { Switch } from "@/components/ui/switch";
 
 const LAYOUT = LinearTransition.duration(240);
 const PERCENT_PRESETS = [10, 15, 20, 30, 50];
@@ -271,6 +271,7 @@ export function PromoSection({
                     </Text>
                   ) : null}
                   <TextInput
+                    maxFontSizeMultiplier={1.3}
                     value={d.amount}
                     onChangeText={(t) => d.setAmount(t.replace(/[^\d.,]/g, ""))}
                     placeholder="0"

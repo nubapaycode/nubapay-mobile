@@ -176,9 +176,11 @@ const useStyles = makeStyles((c) =>
     backdrop: { backgroundColor: 'rgba(11, 15, 23, 0.38)' },
     panel: {
       position: 'absolute',
-      left: 0,
-      right: 0,
       bottom: 0,
+      // En tablet la hoja no se estira a todo el ancho: queda centrada con el ancho de la columna.
+      width: '100%',
+      maxWidth: 600,
+      alignSelf: 'center',
       backgroundColor: c.surface,
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
@@ -14,6 +14,7 @@ import {
 } from '@/features/team/team';
 import { useRoles } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Hoja de filtros del equipo: por roles creados y/o por permisos (se puede elegir más de uno).

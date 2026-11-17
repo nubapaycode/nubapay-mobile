@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { ScalePressable } from '@/components/motion/scale-pressable';
 import { DisplayFont, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Botón de navegación en tarjeta propia: ícono en cuadradito gris, título, subtítulo y chevron

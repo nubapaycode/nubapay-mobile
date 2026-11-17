@@ -1,6 +1,7 @@
-import { ActivityIndicator, Pressable, type PressableProps, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, type PressableProps, StyleSheet } from 'react-native';
 
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Variant = 'brand' | 'ink' | 'ghost';
 

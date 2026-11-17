@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { type Href, router } from 'expo-router';
 import { type ComponentRef, type ReactNode, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -27,6 +27,7 @@ import { useNow } from '@/hooks/use-now';
 import { makeStyles, useTheme } from '@/theme';
 
 import { expandCard } from '@/components/motion/card-expand';
+import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { FADE_EASING, FADE_MS, RISE_EASING, RISE_MS } from './detail-kit';
@@ -83,6 +84,11 @@ function TicketsTile({ data, index, wide }: { data: DashboardData; index: number
     <View style={styles.ringWrap}>
       {live ? <MilestoneHalo ratio={ratio} size={76} /> : null}
       <Rings
+        accessibilityLabel={
+          ratio != null
+            ? `Entradas vendidas ${Math.round(ratio * 100)}% del cupo`
+            : `${formatInt(tickets.sold)} entradas vendidas`
+        }
         size={76}
         stroke={4.5}
         gap={3.5}

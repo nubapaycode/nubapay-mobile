@@ -133,7 +133,7 @@ export function SlideToConfirm({
       onLayout={(e) => max.set(Math.max(1, e.nativeEvent.layout.width - THUMB - PAD * 2))}
       style={[styles.track, disabled && !loading && styles.disabled]}>
       <Animated.View style={[styles.fill, fill]} />
-      <Animated.Text style={[styles.label, text]} numberOfLines={1}>
+      <Animated.Text maxFontSizeMultiplier={1.3} style={[styles.label, text]} numberOfLines={1}>
         {label}
       </Animated.Text>
       <GestureDetector gesture={pan}>

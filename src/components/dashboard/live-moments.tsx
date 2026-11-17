@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -16,6 +16,7 @@ import { DisplayFont, Radius } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { playSaleSound } from '@/lib/sounds';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /* ───────────── Venta que entra ───────────── */
 

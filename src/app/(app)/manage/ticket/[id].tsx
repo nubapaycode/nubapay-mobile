@@ -3,12 +3,9 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { type ReactNode, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   StyleSheet,
-  Switch,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -37,7 +34,11 @@ import {
 } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { makeStyles, useTheme } from "@/theme";
+import type { Ticket as ApiTicket } from '@/lib/api/organizer';
+import { undoableDelete } from '@/lib/undoable';
 import { toast } from "@/components/ui/toast";
+import { Text } from "@/components/ui/text";
+import { Switch } from "@/components/ui/switch";
 
 const LAYOUT = LinearTransition.duration(240);
 const STOCK_PRESETS = [100, 250, 500, 1000];
@@ -160,30 +161,21 @@ function TicketForm({
     router.back();
   };
 
-  const remove = () =>
-    Alert.alert(
-      "Eliminar entrada",
-      sold > 0
-        ? `“${ticket?.name}” deja de venderse. Las ${formatInt(sold)} ya vendidas siguen valiendo.`
-        : `“${ticket?.name}” deja de estar a la venta.`,
-      [
-        { text: "Volver", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            if (!ticket || !eventId) return;
-            const res = await removeTicket(eventId, ticket.id);
-            if (!res.ok) {
-              toast.error("No se pudo eliminar", res.error);
-              return;
-            }
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            router.back();
-          },
-        },
-      ],
-    );
+  const remove = () => {
+    if (!ticket || !eventId) return;
+    undoableDelete<ApiTicket>({
+      queryKey: `tickets:${eventId}`,
+      match: (t) => t.id === ticket.id,
+      title: "Entrada eliminada",
+      message:
+        sold > 0
+          ? `${ticket.name}. Las ${formatInt(sold)} ya vendidas siguen valiendo.`
+          : ticket.name,
+      errorTitle: "No se pudo eliminar",
+      commit: () => removeTicket(eventId, ticket.id),
+      leave: () => router.back(),
+    });
+  };
 
   const free = price.trim() !== "" && amount === 0;
   const left =
@@ -262,6 +254,7 @@ function TicketForm({
             <Card danger={touched && !!errors.name}>
               <Field label="Nombre" error={touched ? errors.name : null}>
                 <TextInput
+                  maxFontSizeMultiplier={1.3}
                   value={name}
                   onChangeText={setName}
                   placeholder="Ej: General, VIP, Anticipada"
@@ -294,6 +287,7 @@ function TicketForm({
                     $
                   </Text>
                   <TextInput
+                    maxFontSizeMultiplier={1.3}
                     value={price}
                     onChangeText={setPrice}
                     placeholder="0"
@@ -347,6 +341,7 @@ function TicketForm({
                     >
                       <View style={styles.bigRow}>
                         <TextInput
+                          maxFontSizeMultiplier={1.3}
                           value={stock}
                           onChangeText={(t) =>
                             setStock(t.replace(/[^\d]/g, ""))

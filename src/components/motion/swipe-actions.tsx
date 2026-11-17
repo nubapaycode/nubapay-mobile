@@ -136,7 +136,7 @@ function Track({
   }));
 
   const icon = <Icon name={action.icon} size={17} color={tone.fg} />;
-  const text = <Animated.Text style={[styles.text, fg]}>{action.label}</Animated.Text>;
+  const text = <Animated.Text maxFontSizeMultiplier={1.3} style={[styles.text, fg]}>{action.label}</Animated.Text>;
 
   return (
     <Animated.View

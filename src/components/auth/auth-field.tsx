@@ -1,9 +1,10 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
+  interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -13,6 +14,7 @@ import Animated, {
 
 import { Icon } from '@/components/dashboard/icon';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Props = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
@@ -51,11 +53,21 @@ export function AuthField({ label, error, accessory, onFocus, onBlur, ...rest }:
 
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
 
+  // El borde pasa de neutro a foco/error con una transición corta en lugar de cambiar de golpe.
+  const border = useSharedValue(0);
+  useEffect(() => {
+    border.set(withTiming(error ? 2 : focused ? 1 : 0, { duration: reduceMotion ? 0 : 160 }));
+  }, [error, focused, reduceMotion, border]);
+  const borderStyle = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(border.value, [0, 1, 2], [colors.border, colors.text, colors.danger]),
+  }));
+
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
-      <Animated.View style={[styles.box, focused && styles.focused, !!error && styles.errored, shakeStyle]}>
+      <Animated.View style={[styles.box, borderStyle, shakeStyle]}>
         <TextInput
+          maxFontSizeMultiplier={1.3}
           accessibilityLabel={label}
           placeholderTextColor={colors.textMuted}
           keyboardAppearance={colors.scheme}
@@ -119,8 +131,6 @@ const useStyles = makeStyles((c) =>
       paddingRight: 8,
       gap: 8,
     },
-    focused: { borderColor: c.text },
-    errored: { borderColor: c.danger },
     input: { flex: 1, height: '100%', color: c.text, fontSize: 17 },
     clear: {
       width: 32,

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AuthField, AuthScreen, AuthTitle, isEmail, PillButton } from '@/components/auth';
 import { Icon } from '@/components/dashboard/icon';
@@ -14,6 +14,7 @@ import {
 } from '@/lib/biometrics';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 type Mode = 'checking' | 'biometric' | 'form';
 

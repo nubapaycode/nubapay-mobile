@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { GestureDetector, usePanGesture } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -16,6 +16,7 @@ import { DisplayFont, Radius } from '@/constants/theme';
 import { daysUntil, eventPhase, formatEventDate, PHASE_LABEL } from '@/features/dashboard/format';
 import type { EventSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /** Ancho de cada acción revelada detrás de la tarjeta (Editar y Eliminar). */
 const BTN_W = 78;

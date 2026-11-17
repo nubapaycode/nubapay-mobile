@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { type Href, router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
@@ -11,6 +11,7 @@ import Animated, {
 
 import { useEventAccess } from '@/features/access/access';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { Icon, type IconName } from './icon';
 

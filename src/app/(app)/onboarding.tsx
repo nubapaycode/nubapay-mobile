@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,6 +9,7 @@ import { MoodMascot, type MascotPose } from '@/components/illustrations/mood-mas
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { markOnboardingSeen } from '@/features/onboarding/onboarding-seen';
 import { useAuth } from '@/providers/auth-provider';
+import { Text } from '@/components/ui/text';
 
 const INK = '#080b11';
 const LIME = '#c6ff00';

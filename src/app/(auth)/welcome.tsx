@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,6 +8,7 @@ import { Aurora } from '@/components/fx/aurora';
 import { DisplayFont, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { dark, makeStyles, PaletteScope } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 /**
  * Bienvenida (sin sesión): fondo de luces de marca, logotipo y un solo botón para ingresar.

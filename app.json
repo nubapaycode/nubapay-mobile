@@ -9,7 +9,9 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.nubapay-business.ios"
+      "bundleIdentifier": "com.nubapay-business.ios",
+      "supportsTablet": true,
+      "requireFullScreen": true
     },
     "android": {
       "adaptiveIcon": {

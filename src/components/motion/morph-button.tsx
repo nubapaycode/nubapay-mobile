@@ -143,6 +143,7 @@ export function MorphButton({
             pill,
           ]}>
           <Animated.Text
+            maxFontSizeMultiplier={1.3}
             numberOfLines={1}
             style={[styles.label, { color: off ? (tone?.offFg ?? colors.textMuted) : fg }, text]}>
             {label}

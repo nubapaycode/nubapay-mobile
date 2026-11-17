@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { makeStyles } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { Card } from './card';

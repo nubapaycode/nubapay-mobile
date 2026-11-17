@@ -3,6 +3,7 @@ import { type RouterAction, useQuickActionRouting } from 'expo-quick-actions/rou
 import { router, Stack } from 'expo-router';
 import { useEffect } from 'react';
 
+import { ContentFrame } from '@/components/navigation/content-frame';
 import { DetailHeader } from '@/components/navigation/detail-header';
 import { DisplayFont } from '@/constants/theme';
 import {
@@ -74,6 +75,7 @@ export default function AppLayout() {
   useHomeShortcuts();
   usePush();
   return (
+    <ContentFrame>
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: colors.canvas },
@@ -440,5 +442,6 @@ export default function AppLayout() {
         }}
       />
     </Stack>
+    </ContentFrame>
   );
 }

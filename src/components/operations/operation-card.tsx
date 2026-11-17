@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import type { Href } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -22,6 +22,7 @@ import { orderKind, orderState, type OperationTone } from '@/features/operations
 import type { Order } from '@/lib/api/organizer';
 import type { Palette } from '@/theme';
 import { makeStyles, useTheme } from '@/theme';
+import { Text } from '@/components/ui/text';
 
 const KIND_ICON: Record<ReturnType<typeof orderKind>, IconName> = {
   tickets: 'ticket',

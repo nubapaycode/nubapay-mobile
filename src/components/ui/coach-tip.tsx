@@ -1,9 +1,10 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Radius } from '@/constants/theme';
+import { Text } from '@/components/ui/text';
 
 const INK = '#0b0f17';
 const LIME = '#c6ff00';
