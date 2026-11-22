@@ -11,7 +11,10 @@
       "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.nubapay-business.ios",
       "supportsTablet": true,
-      "requireFullScreen": true
+      "requireFullScreen": true,
+      "infoPlist": {
+        "CFBundleDisplayName": "NB Business"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -98,7 +101,13 @@
         }
       ],
       "expo-quick-actions",
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "./plugins/with-android-app-label",
+        {
+          "label": "NB Business"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
