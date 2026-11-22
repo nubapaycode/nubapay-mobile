@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   formatDecimal,
   formatInt,
@@ -238,26 +238,33 @@ export function Feed({ items }: { items: ActivityItem[] }) {
     );
   }
 
-  const groups: { title: string; items: ActivityItem[] }[] = [];
+  // Un canje de varios ítems del mismo pedido llega como un movimiento por ítem, con igual tipo,
+  // pedido y hora: la key suma el resumen y, si aun así se repite, un contador.
+  const seen = new Map<string, number>();
+  const groups: { title: string; items: { key: string; item: ActivityItem }[] }[] = [];
   for (const a of items) {
+    const base = `${a.type}-${a.order_id}-${a.at}-${a.summary}`;
+    const n = seen.get(base) ?? 0;
+    seen.set(base, n + 1);
+    const entry = { key: n ? `${base}-${n}` : base, item: a };
     const title = bucket(a.at, now);
     const last = groups[groups.length - 1];
-    if (last?.title === title) last.items.push(a);
-    else groups.push({ title, items: [a] });
+    if (last?.title === title) last.items.push(entry);
+    else groups.push({ title, items: [entry] });
   }
 
   return (
     <View style={{ gap: 14 }}>
       {groups.map((g) => {
-        const sum = g.items.reduce((acc, a) => acc + (a.amount ?? 0), 0);
+        const sum = g.items.reduce((acc, { item: a }) => acc + (a.amount ?? 0), 0);
         return (
           <Animated.View key={g.title} layout={LinearTransition.duration(260)} style={{ gap: 8 }}>
             <View style={styles.groupHead}>
               <Text style={styles.groupTitle}>{g.title}</Text>
               {sum > 0 ? <Text style={styles.groupSum}>+{formatMoney(sum)}</Text> : null}
             </View>
-            {g.items.map((a) => (
-              <FeedCard key={`${a.type}-${a.order_id}-${a.at}`} item={a} />
+            {g.items.map(({ key, item }) => (
+              <FeedCard key={key} item={item} />
             ))}
           </Animated.View>
         );
@@ -383,7 +390,7 @@ const useStyles = makeStyles((c) =>
     repeatHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     statMeta: { color: c.textMuted, fontSize: 12 },
     statLabel: { color: c.textMuted, fontSize: 12 },
-    statValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
+    statValue: { color: c.text, fontSize: 20, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     grow: { flex: 1, gap: 2 },
     card: {
       backgroundColor: c.surface,
@@ -396,16 +403,16 @@ const useStyles = makeStyles((c) =>
 
     hero: { padding: Spacing.three, gap: 4 },
     heroHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    heroCaption: { color: c.textSecondary, fontSize: 14, fontWeight: '500' },
+    heroCaption: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     heroRow: { flexDirection: 'row', alignItems: 'flex-end', marginTop: 4 },
     heroValue: {
       color: c.text,
       fontSize: 38,
       lineHeight: 44,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1.2,
     },
-    heroSuffix: { color: c.textMuted, fontSize: 15, fontWeight: '500', marginBottom: 7 },
+    heroSuffix: { color: c.textMuted, fontSize: 15, fontFamily: Font.medium, marginBottom: 7 },
     heroMeta: { color: c.textSecondary, fontSize: 13, fontVariant: ['tabular-nums'] },
     livePill: {
       flexDirection: 'row',
@@ -416,7 +423,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.brandMuted,
     },
-    livePillText: { color: c.brandText, fontSize: 11, fontWeight: '700' },
+    livePillText: { color: c.brandText, fontSize: 11, fontFamily: Font.medium },
     rangePill: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -426,7 +433,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
     },
-    rangeText: { color: c.text, fontSize: 12, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    rangeText: { color: c.text, fontSize: 12, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     axis: { flexDirection: 'row', justifyContent: 'space-between' },
     axisText: { color: c.textMuted, fontSize: 11 },
 
@@ -438,7 +445,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    sectionTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    sectionTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     sectionMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
     groupHead: {
@@ -448,8 +455,8 @@ const useStyles = makeStyles((c) =>
       paddingHorizontal: 4,
       marginTop: 2,
     },
-    groupTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600' },
-    groupSum: { color: c.textSecondary, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    groupTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
+    groupSum: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
 
     feedCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
     avatar: {
@@ -472,10 +479,10 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.surface,
     },
-    feedTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold, flexShrink: 1 },
+    feedTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium, flexShrink: 1 },
     feedMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     feedRight: { alignItems: 'flex-end', gap: 2 },
-    amount: { color: c.text, fontSize: 15, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    amount: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     emptyCard: { paddingVertical: Spacing.four },
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center' },
 
@@ -484,7 +491,7 @@ const useStyles = makeStyles((c) =>
       width: 16,
       color: c.textMuted,
       fontSize: 14,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       textAlign: 'center',
       fontVariant: ['tabular-nums'],
     },
@@ -493,7 +500,7 @@ const useStyles = makeStyles((c) =>
       marginLeft: 'auto',
       color: c.text,
       fontSize: 15,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
   }),
