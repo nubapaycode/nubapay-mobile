@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   formatInt,
   formatMoney,
@@ -176,12 +176,12 @@ const useStyles = makeStyles((c) =>
     },
 
     hero: { alignItems: 'center', gap: 12, paddingTop: Spacing.two },
-    centerCaption: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
+    centerCaption: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     centerValue: {
       color: c.text,
       fontSize: 28,
       lineHeight: 34,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
     },
     centerMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
@@ -193,7 +193,7 @@ const useStyles = makeStyles((c) =>
     partHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     dot: { width: 8, height: 8, borderRadius: 2.5 },
     label: { color: c.textSecondary, fontSize: 11, flexShrink: 1 },
-    partValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    partValue: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
 
     section: { gap: 10 },
     sectionHead: {
@@ -202,7 +202,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    sectionTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    sectionTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     sectionMeta: { color: c.textMuted, fontSize: 12 },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
@@ -217,8 +217,8 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.ink,
     },
-    starBadgeText: { color: c.onInk, fontSize: 11, fontWeight: '700' },
-    starName: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    starBadgeText: { color: c.onInk, fontSize: 11, fontFamily: Font.medium },
+    starName: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
     starNumbers: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -228,7 +228,7 @@ const useStyles = makeStyles((c) =>
     starValue: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       fontVariant: ['tabular-nums'],
     },
@@ -238,12 +238,12 @@ const useStyles = makeStyles((c) =>
       width: 18,
       color: c.textMuted,
       fontSize: 14,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       textAlign: 'center',
       fontVariant: ['tabular-nums'],
     },
     itemHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    itemName: { flex: 1, color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
-    itemValue: { color: c.text, fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    itemName: { flex: 1, color: c.text, fontSize: 15, fontFamily: Font.medium },
+    itemValue: { color: c.text, fontSize: 14, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
   }),
 );

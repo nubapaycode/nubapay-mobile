@@ -6,7 +6,7 @@ import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MoodMascot, type MascotPose } from '@/components/illustrations/mood-mascot';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { markOnboardingSeen } from '@/features/onboarding/onboarding-seen';
 import { useAuth } from '@/providers/auth-provider';
 import { Text } from '@/components/ui/text';
@@ -156,13 +156,13 @@ const styles = StyleSheet.create({
   page: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.four, gap: Spacing.four },
   badge: { backgroundColor: INK, borderRadius: 999, padding: 22 },
   texts: { alignItems: 'center', gap: Spacing.two },
-  title: { fontFamily: DisplayFont.extrabold, fontSize: 32, lineHeight: 36, textAlign: 'center' },
+  title: { fontFamily: Font.medium, fontSize: 32, lineHeight: 36, textAlign: 'center' },
   text: { fontSize: 17, lineHeight: 24, textAlign: 'center', opacity: 0.85, maxWidth: 320 },
   skip: { position: 'absolute', right: Spacing.four, padding: 4 },
-  skipText: { fontSize: 15, fontWeight: '600', opacity: 0.8 },
+  skipText: { fontSize: 15, fontFamily: Font.medium, opacity: 0.8 },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: Spacing.four, gap: Spacing.four },
   dots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 },
   dot: { height: 7, borderRadius: 4 },
   cta: { borderRadius: 999, paddingVertical: 16, alignItems: 'center' },
-  ctaText: { fontSize: 17, fontWeight: '700' },
+  ctaText: { fontSize: 17, fontFamily: Font.medium },
 });

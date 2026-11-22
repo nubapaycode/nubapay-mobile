@@ -14,24 +14,18 @@ export const Fonts = Platform.select({
 });
 
 /**
- * Bricolage Grotesque para títulos (como `--font-bricolage` en nubapay-frontend); se carga en el layout raíz.
- * Con fuentes custom se elige el peso por familia, no con `fontWeight` (en Android no lo combina).
- * Las cifras grandes siguen en la fuente del sistema: necesitan dígitos tabulares para el conteo animado.
+ * Geist en iOS y Android, solo en dos pesos: Regular (cuerpo) y Medium (títulos, labels, cifras).
+ * Se carga en el layout raíz. Con fuentes custom el peso se elige por familia, nunca con `fontWeight`:
+ * Android no combina familia + peso y iOS sintetizaría un bold que no existe.
  */
-export const DisplayFont = {
-  semibold: 'BricolageGrotesque-SemiBold',
-  bold: 'BricolageGrotesque-Bold',
-  extrabold: 'BricolageGrotesque-ExtraBold',
+export const Font = {
+  regular: 'Geist-Regular',
+  medium: 'Geist-Medium',
 } as const;
 
-/**
- * Texto de cards y detalle: SF Pro (sistema) en iOS con su peso; en Android, Bricolage Grotesque.
- * Bricolage no tiene medium cargado: en Android 500 cae en la semibold, la más cercana.
- */
-export function uiFont(weight: '500' | '600' | '700') {
-  return Platform.OS === 'android'
-    ? { fontFamily: weight === '700' ? DisplayFont.bold : DisplayFont.semibold }
-    : { fontWeight: weight };
+/** Atajo para estilos: `...font('medium')`. */
+export function font(weight: keyof typeof Font = 'regular') {
+  return { fontFamily: Font[weight] };
 }
 
 export const Spacing = {

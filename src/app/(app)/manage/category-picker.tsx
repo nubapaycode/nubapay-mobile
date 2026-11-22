@@ -13,7 +13,7 @@ import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { Icon } from "@/components/dashboard/icon";
 import { Card, CardList, SearchField } from "@/components/manage/catalog-kit";
 import { Sheet, useSheet } from "@/components/ui/sheet";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import {
   categoryPickerCurrent,
   finishCategoryPicker,
@@ -273,7 +273,7 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       paddingHorizontal: 4,
     },
@@ -310,9 +310,9 @@ const useStyles = makeStyles((c) =>
     initialText: {
       color: c.ink,
       fontSize: 14,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
-    name: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    name: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     count: { color: c.textMuted, fontSize: 12, fontVariant: ["tabular-nums"] },
     radio: {
       width: 22,
@@ -351,7 +351,7 @@ const useStyles = makeStyles((c) =>
     createTitle: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     createHint: { color: c.textSecondary, fontSize: 12 },
     hint: {

@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { type DashboardPeriod, isCustom, type RangePreset } from '@/features/dashboard/filters';
 import { deltaRatio, formatInt, formatMoney, formatPercent } from '@/features/dashboard/format';
 import type { DashboardSummary } from '@/features/dashboard/types';
@@ -81,7 +81,7 @@ export function PulseHero({
         <Text style={styles.caption} numberOfLines={1}>
           {active
             ? `${isHourly ? 'Franja de las ' : ''}${active.label}`
-            : `Recaudado · ${scopeLabel ? `${scopeLabel} · ` : ''}${periodLabel}`}
+            : periodLabel}
         </Text>
         <View>
           <RollingNumber
@@ -265,12 +265,12 @@ const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrap: { gap: Spacing.two },
     numbers: { alignItems: 'center', gap: 6 },
-    caption: { color: c.textSecondary, fontSize: 13, fontWeight: '500', textAlign: 'center' },
+    caption: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, textAlign: 'center' },
     hero: {
       color: c.text,
       fontSize: 44,
       lineHeight: 52,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1.4,
     },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 24 },
@@ -281,7 +281,7 @@ const useStyles = makeStyles((c) =>
     legendLine: { width: 14, height: 2, borderRadius: 1 },
     legendDash: { flexDirection: 'row', gap: 2 },
     legendDot: { width: 4, height: 2, borderRadius: 1 },
-    legendText: { color: c.textSecondary, fontSize: 12, fontWeight: '500' },
+    legendText: { color: c.textSecondary, fontSize: 12, fontFamily: Font.medium },
     legendOff: { color: c.textMuted, textDecorationLine: 'line-through' },
     legendName: { flexShrink: 1, maxWidth: 160 },
     meta: { color: c.textSecondary, fontSize: 13, fontVariant: ['tabular-nums'] },
@@ -293,7 +293,7 @@ const useStyles = makeStyles((c) =>
       paddingHorizontal: 9,
       borderRadius: Radius.pill,
     },
-    deltaText: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    deltaText: { fontSize: 12, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     // La curva casi de borde a borde (sin card), con un respiro para las etiquetas del eje.
     chart: { marginHorizontal: -Spacing.two, marginTop: Spacing.two },
     ranges: { flexDirection: 'row', justifyContent: 'center', gap: 4 },
@@ -314,7 +314,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.hero.glassBorder,
     },
-    rangeText: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
-    rangeTextOn: { color: c.text, fontWeight: '700' },
+    rangeText: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
+    rangeTextOn: { color: c.text, fontFamily: Font.medium },
   }),
 );

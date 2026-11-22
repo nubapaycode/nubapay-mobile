@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoneyCompact } from '@/features/dashboard/format';
 import type { DashboardSummary } from '@/features/dashboard/types';
 import { makeStyles } from '@/theme';
@@ -45,7 +45,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.brandMuted,
     },
     title: { color: c.text, fontSize: 14 },
-    strong: { color: c.text, fontSize: 14, fontWeight: '700' },
+    strong: { color: c.text, fontSize: 14, fontFamily: Font.medium },
     sub: { color: c.textSecondary, fontSize: 12, marginTop: 1 },
     bars: { width: 84 },
   }),

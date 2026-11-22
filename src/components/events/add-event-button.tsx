@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
 import { openAddEvent } from '@/features/events/add-event';
 import { makeStyles, useTheme } from '@/theme';
@@ -37,6 +37,6 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    text: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
+    text: { color: c.ink, fontSize: 15, fontFamily: Font.medium },
   }),
 );

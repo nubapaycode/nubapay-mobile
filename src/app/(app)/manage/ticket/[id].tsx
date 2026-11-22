@@ -24,7 +24,7 @@ import {
   GroupHeader,
   SaveText,
 } from "@/components/manage/catalog-kit";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import { formatInt, formatMoney } from "@/features/dashboard/format";
 import {
   removeTicket,
@@ -201,7 +201,7 @@ function TicketForm({
                     variant: canSave ? "prominent" : "plain",
                     tintColor: canSave ? colors.primary : colors.text,
                     labelStyle: {
-                      fontFamily: DisplayFont.semibold,
+                      fontFamily: Font.medium,
                       fontSize: 16,
                     },
                   },
@@ -551,11 +551,11 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.canvas,
     },
     stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
-    statLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    statLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     statValue: {
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
       fontVariant: ["tabular-nums"],
     },
@@ -572,9 +572,10 @@ const useStyles = makeStyles((c) =>
       justifyContent: "space-between",
       gap: 8,
     },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
-    fieldError: { color: c.danger, fontSize: 12, fontWeight: "600" },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
+    fieldError: { color: c.danger, fontSize: 12, fontFamily: Font.medium },
     input: {
+      fontFamily: Font.regular,
       color: c.text,
       fontSize: 16,
       paddingVertical: 6,
@@ -584,15 +585,15 @@ const useStyles = makeStyles((c) =>
     currency: {
       color: c.textMuted,
       fontSize: 26,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
     },
     bigInput: {
       flex: 1,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.6,
     },
-    unit: { color: c.textMuted, fontSize: 15, fontWeight: "600" },
+    unit: { color: c.textMuted, fontSize: 15, fontFamily: Font.medium },
 
     chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     chip: {
@@ -606,7 +607,7 @@ const useStyles = makeStyles((c) =>
     chipText: {
       color: c.ink,
       fontSize: 14,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     chipTextOn: { color: c.onInk },
@@ -627,7 +628,7 @@ const useStyles = makeStyles((c) =>
     toggleTitle: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     toggleText: { color: c.textMuted, fontSize: 13 },
 
@@ -645,6 +646,6 @@ const useStyles = makeStyles((c) =>
       gap: 8,
       height: 48,
     },
-    deleteText: { color: c.danger, fontSize: 15, fontFamily: DisplayFont.semibold },
+    deleteText: { color: c.danger, fontSize: 15, fontFamily: Font.medium },
   }),
 );

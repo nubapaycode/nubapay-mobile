@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   formatInt,
   formatMoney,
@@ -528,7 +528,7 @@ const useStyles = makeStyles((c) =>
     sectionLabel: {
       color: c.textSecondary,
       fontSize: 13,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       letterSpacing: 0.2,
       marginLeft: 4,
     },
@@ -555,18 +555,18 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    tileTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    tileTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     tileStrong: {
       color: c.text,
       fontSize: 15,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
     tileMuted: { color: c.textSecondary, fontSize: 12, fontVariant: ['tabular-nums'] },
     bigValue: {
       color: c.text,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
     },
     ringWrap: { width: 76, height: 76, alignSelf: 'center' },
@@ -580,12 +580,12 @@ const useStyles = makeStyles((c) =>
       borderTopColor: c.borderSubtle,
     },
     ringCenter: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center' },
-    ringValue: { color: c.text, fontSize: 15, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    ringValue: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     legend: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
     legendDot: { width: 8, height: 8, borderRadius: 2.5 },
     legendRow: { flexDirection: 'row', flexWrap: 'wrap', columnGap: Spacing.three, rowGap: 6 },
     legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    legendValue: { color: c.text, fontSize: 12, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    legendValue: { color: c.text, fontSize: 12, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     method: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -615,11 +615,11 @@ const useStyles = makeStyles((c) =>
       borderColor: c.raised,
     },
     methodTexts: { flex: 1, gap: 2 },
-    methodLabel: { color: c.text, fontSize: 14, fontWeight: '600' },
+    methodLabel: { color: c.text, fontSize: 14, fontFamily: Font.medium },
     methodAmount: {
       color: c.text,
       fontSize: 16,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
       fontVariant: ['tabular-nums'],
     },
@@ -645,8 +645,8 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    pendingTitle: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
-    pendingText: { fontSize: 12, fontWeight: '500', opacity: 0.85 },
+    pendingTitle: { fontSize: 14, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+    pendingText: { fontSize: 12, fontFamily: Font.medium, opacity: 0.85 },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -656,7 +656,7 @@ const useStyles = makeStyles((c) =>
       height: 22,
       borderRadius: Radius.pill,
     },
-    chipText: { fontSize: 11, fontWeight: '700' },
+    chipText: { fontSize: 11, fontFamily: Font.medium },
     activityCard: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -667,12 +667,12 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    activityOrder: { color: c.textMuted, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    activityOrder: { color: c.textMuted, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     activityRight: { alignItems: 'flex-end', gap: 2 },
     activityAmount: {
       color: c.text,
       fontSize: 14,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
     activityLive: {

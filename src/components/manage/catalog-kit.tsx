@@ -18,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Icon, type IconName } from "@/components/dashboard/icon";
-import { DisplayFont, Radius } from "@/constants/theme";
+import { Font, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import { makeStyles, useTheme } from "@/theme";
 import { MoodMascot } from "@/components/illustrations/mood-mascot";
@@ -352,7 +352,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       backgroundColor: c.raised,
     },
-    thumbInitial: { color: c.textSecondary, fontFamily: DisplayFont.semibold },
+    thumbInitial: { color: c.textSecondary, fontFamily: Font.medium },
 
     search: {
       flex: 1,
@@ -365,7 +365,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       backgroundColor: c.raised,
     },
-    searchInput: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
+    searchInput: { fontFamily: Font.regular, flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
 
     groupHead: {
       flexDirection: "row",
@@ -378,12 +378,12 @@ const useStyles = makeStyles((c) =>
       flexShrink: 1,
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
-    headerAction: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
+    headerAction: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     groupCount: {
       color: c.textMuted,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     cardShadow: {
@@ -401,7 +401,7 @@ const useStyles = makeStyles((c) =>
     },
     cardList: { gap: 8 },
     saveText: { paddingHorizontal: 8, height: 32, justifyContent: "center" },
-    saveLabel: { fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveLabel: { fontSize: 16, fontFamily: Font.medium },
 
     savingsRow: {
       flexDirection: "row",
@@ -423,7 +423,7 @@ const useStyles = makeStyles((c) =>
     },
     pillText: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
 
@@ -444,7 +444,7 @@ const useStyles = makeStyles((c) =>
     emptyTitle: {
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       textAlign: "center",
     },
     emptyText: {
@@ -465,7 +465,7 @@ const useStyles = makeStyles((c) =>
     emptyBtnText: {
       color: c.onInk,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     bone: { borderRadius: 6, backgroundColor: c.raised },

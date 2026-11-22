@@ -6,7 +6,7 @@ import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { PERMISSION_SHORT, PERMISSIONS, roleById, setMemberRole } from '@/features/team/team';
 import { useRoles, useTeam } from '@/features/team/use-team';
 import { makeStyles, useTheme } from '@/theme';
@@ -149,7 +149,7 @@ const useStyles = makeStyles((c) =>
   StyleSheet.create({
     screen: { flexGrow: 0 },
     content: { padding: Spacing.three, paddingTop: Spacing.two, gap: Spacing.four },
-    title: { color: c.text, fontSize: 22, fontFamily: DisplayFont.bold, letterSpacing: -0.5 },
+    title: { color: c.text, fontSize: 22, fontFamily: Font.medium, letterSpacing: -0.5 },
     subtitle: { color: c.textMuted, fontSize: 13 },
     list: { gap: 10 },
     option: {
@@ -164,7 +164,7 @@ const useStyles = makeStyles((c) =>
     },
     optionOn: { borderColor: c.ink },
     optionHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    optionName: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    optionName: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     optionPerms: { color: c.textMuted, fontSize: 13 },
     current: {
       paddingHorizontal: 7,
@@ -173,7 +173,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 6,
       backgroundColor: c.raised,
     },
-    currentText: { color: c.textSecondary, fontSize: 10, fontWeight: '700' },
+    currentText: { color: c.textSecondary, fontSize: 10, fontFamily: Font.medium },
     radio: {
       width: 22,
       height: 22,
@@ -193,6 +193,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.ink,
     },
-    saveText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
   }),
 );

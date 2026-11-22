@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { CountBadge } from '@/components/motion/count-badge';
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { daysUntil, formatEventDate, initials } from '@/features/dashboard/format';
 import type { EventPhase, EventSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
@@ -214,18 +214,18 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.primary,
     },
-    thumbText: { color: c.onPrimary, fontSize: 13, fontWeight: '700', letterSpacing: 0.3 },
+    thumbText: { color: c.onPrimary, fontSize: 13, fontFamily: Font.medium, letterSpacing: 0.3 },
     texts: { flex: 1, gap: 2 },
-    name: { color: c.text, fontSize: 15, fontWeight: '600' },
+    name: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     status: {
       color: c.textSecondary,
       fontSize: 12,
-      fontWeight: '500',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
       flexShrink: 1,
     },
-    statusLive: { color: c.hero.accent, fontWeight: '700' },
+    statusLive: { color: c.hero.accent, fontFamily: Font.medium },
     chevron: {
       width: 24,
       height: 24,
@@ -246,6 +246,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.primary,
     },
-    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
+    badgeText: { color: c.onPrimary, fontSize: 10, fontFamily: Font.medium },
   }),
 );

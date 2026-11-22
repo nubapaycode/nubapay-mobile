@@ -10,7 +10,7 @@ import { LogoutButton } from '@/components/ui/logout-button';
 import { NavCard } from '@/components/ui/nav-card';
 import { Sheet, useSheet } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/toast';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import {
   allowBiometricOffer,
   type BiometricKind,
@@ -221,11 +221,11 @@ const useStyles = makeStyles((c) =>
     content: { padding: Spacing.three, paddingTop: Spacing.two, gap: Spacing.four },
 
     account: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    name: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    name: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
     email: { color: c.textMuted, fontSize: 13 },
 
     appearance: { gap: 12 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600' },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     hint: { color: c.textMuted, fontSize: 12 },
     menu: { gap: 10 },
   }),

@@ -28,7 +28,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { Confetti } from '@/components/fx/confetti';
 import { Tilt } from '@/components/motion/tilt';
 import { MercadoPagoLogo } from '@/components/payouts/brand-logos';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   isReady,
   METHOD_LABEL,
@@ -660,15 +660,15 @@ const useStyles = makeStyles((c) =>
       boxShadow: c.cardShadowSubtle,
     },
     summaryTop: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    summaryLabel: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
+    summaryLabel: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     summaryValue: {
       color: c.text,
       fontSize: 30,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
       fontVariant: ['tabular-nums'],
     },
-    summaryOf: { color: c.textMuted, fontSize: 15, fontFamily: DisplayFont.semibold, letterSpacing: 0 },
+    summaryOf: { color: c.textMuted, fontSize: 15, fontFamily: Font.medium, letterSpacing: 0 },
     segments: { flexDirection: 'row', gap: 4 },
     segment: { flex: 1, height: 6, borderRadius: 3, backgroundColor: c.raised },
     segmentOn: { backgroundColor: c.success },
@@ -684,10 +684,10 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.dangerMuted,
     },
-    warningText: { flex: 1, color: c.danger, fontSize: 13, lineHeight: 18, fontWeight: '500' },
+    warningText: { flex: 1, color: c.danger, fontSize: 13, lineHeight: 18, fontFamily: Font.medium },
 
     group: { gap: 10 },
-    groupTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    groupTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
 
     card: {
       borderRadius: Radius.xl,
@@ -712,7 +712,7 @@ const useStyles = makeStyles((c) =>
     },
     markSm: { width: 32, height: 32, borderRadius: 16 },
     markPlain: { backgroundColor: c.raised, borderColor: c.raised },
-    title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     description: { color: c.textMuted, fontSize: 12, lineHeight: 16 },
     statusPill: {
       flexDirection: 'row',
@@ -724,7 +724,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
     },
     dot: { width: 6, height: 6, borderRadius: 3 },
-    status: { fontSize: 11, fontWeight: '700', flexShrink: 1 },
+    status: { fontSize: 11, fontFamily: Font.medium, flexShrink: 1 },
     features: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 },
     feature: {
       paddingHorizontal: 9,
@@ -733,7 +733,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
     },
-    featureText: { color: c.textSecondary, fontSize: 11, fontWeight: '600' },
+    featureText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium },
 
     body: { marginTop: 14 },
     sub: {
@@ -755,8 +755,8 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.text,
     },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
-    fieldValue: { color: c.text, fontSize: 15, fontWeight: '500' },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
+    fieldValue: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     toggleLine: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     disconnect: {
       flexDirection: 'row',
@@ -768,7 +768,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.dangerMuted,
     },
-    disconnectText: { color: c.danger, fontSize: 14, fontFamily: DisplayFont.semibold },
+    disconnectText: { color: c.danger, fontSize: 14, fontFamily: Font.medium },
 
     inputs: { gap: 8 },
     inputBlock: {
@@ -781,9 +781,9 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.canvas,
     },
     inputRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    input: { color: c.text, fontSize: 15, paddingVertical: 6, paddingHorizontal: 0 },
+    input: { fontFamily: Font.regular, color: c.text, fontSize: 15, paddingVertical: 6, paddingHorizontal: 0 },
     helpLink: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' },
-    helpText: { color: c.textSecondary, fontSize: 13, fontWeight: '600' },
+    helpText: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
 
     primary: {
       height: 48,
@@ -794,7 +794,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.ink,
     },
     primaryDisabled: { backgroundColor: c.raised },
-    primaryText: { color: c.onInk, fontSize: 15, fontFamily: DisplayFont.semibold },
+    primaryText: { color: c.onInk, fontSize: 15, fontFamily: Font.medium },
     primaryTextDisabled: { color: c.textMuted },
   }),
 );

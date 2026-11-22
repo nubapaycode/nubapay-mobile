@@ -6,7 +6,7 @@ import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-re
 import Svg, { Circle } from 'react-native-svg';
 
 import { MoodMascot } from '@/components/illustrations/mood-mascot';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { type SetupStep, useEventSetup } from '@/features/setup/event-setup';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -218,10 +218,10 @@ const useStyles = makeStyles((c) =>
     doneCard: { alignItems: 'center', gap: 6 },
     head: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
     headText: { flex: 1, gap: 2 },
-    title: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     sub: { color: c.textSecondary, fontSize: 13, textAlign: 'auto' },
     ringCenter: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-    ringText: { color: c.text, fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    ringText: { color: c.text, fontSize: 12, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     // Cada paso en su propia mini-card (nunca filas con divisores).
     steps: { gap: 8, marginTop: Spacing.one },
     row: {
@@ -249,7 +249,7 @@ const useStyles = makeStyles((c) =>
     optional: {
       color: c.textSecondary,
       fontSize: 11,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       backgroundColor: c.raised,
       borderRadius: 6,
       overflow: 'hidden',
@@ -257,8 +257,8 @@ const useStyles = makeStyles((c) =>
       paddingVertical: 1,
     },
     skip: { alignSelf: 'center', paddingVertical: 6, marginTop: 2 },
-    skipText: { color: c.textSecondary, fontSize: 14, fontWeight: '600' },
-    rowLabel: { color: c.text, fontSize: 15, fontWeight: '500' },
+    skipText: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
+    rowLabel: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     rowDone: { color: c.textMuted, textDecorationLine: 'line-through' },
     rowWhy: { color: c.textSecondary, fontSize: 12.5 },
     doneBtn: {
@@ -268,6 +268,6 @@ const useStyles = makeStyles((c) =>
       paddingVertical: 10,
       paddingHorizontal: 28,
     },
-    doneBtnText: { color: c.onPrimary, fontSize: 15, fontWeight: '600' },
+    doneBtnText: { color: c.onPrimary, fontSize: 15, fontFamily: Font.medium },
   }),
 );

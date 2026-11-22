@@ -16,7 +16,7 @@ import { enter } from "@/components/dashboard/detail-kit";
 import { Icon } from "@/components/dashboard/icon";
 import { Card, CardList, GroupHeader } from "@/components/manage/catalog-kit";
 import { TimeField } from "@/components/manage/time-field";
-import { DisplayFont, Radius } from "@/constants/theme";
+import { Font, Radius } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import {
   formatWindowLong,
@@ -388,14 +388,14 @@ export function PromoSection({
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     section: { gap: 8 },
-    error: { color: c.danger, fontSize: 12, fontWeight: "600" },
+    error: { color: c.danger, fontSize: 12, fontFamily: Font.medium },
     status: {
       paddingHorizontal: 8,
       height: 22,
       justifyContent: "center",
       borderRadius: Radius.pill,
     },
-    statusText: { fontSize: 12, fontWeight: "700" },
+    statusText: { fontSize: 12, fontFamily: Font.medium },
 
     toggleRow: {
       flexDirection: "row",
@@ -415,7 +415,7 @@ const useStyles = makeStyles((c) =>
     toggleTitle: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     toggleText: { color: c.textMuted, fontSize: 13 },
 
@@ -438,20 +438,20 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.elevated,
       boxShadow: "0 1px 3px rgba(11, 15, 23, 0.12)",
     },
-    kindText: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
+    kindText: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     kindTextOn: { color: c.ink },
     amountRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-    affix: { color: c.textMuted, fontSize: 26, fontFamily: DisplayFont.bold },
+    affix: { color: c.textMuted, fontSize: 26, fontFamily: Font.medium },
     amountInput: {
       minWidth: 40,
       color: c.text,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.6,
       paddingVertical: 2,
       paddingHorizontal: 0,
     },
-    off: { marginLeft: 6, color: c.textMuted, fontSize: 15, fontWeight: "600" },
+    off: { marginLeft: 6, color: c.textMuted, fontSize: 15, fontFamily: Font.medium },
 
     chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     chip: {
@@ -465,7 +465,7 @@ const useStyles = makeStyles((c) =>
     chipText: {
       color: c.ink,
       fontSize: 14,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     chipTextOn: { color: c.onInk },
@@ -479,12 +479,12 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       backgroundColor: c.canvas,
     },
-    previewLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    previewLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     previewPrices: { flexDirection: "row", alignItems: "baseline", gap: 8 },
     previewNew: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       fontVariant: ["tabular-nums"],
     },
@@ -501,7 +501,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: LIME,
     },
-    badgeText: { color: c.onBrand, fontSize: 13, fontWeight: "800" },
+    badgeText: { color: c.onBrand, fontSize: 13, fontFamily: Font.medium },
 
     window: { padding: 14, gap: 12 },
     times: { flexDirection: "row", alignItems: "flex-end", gap: 10 },

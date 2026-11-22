@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { Easing, FadeInDown } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -223,15 +223,15 @@ export function DetailNote({ children }: { children: ReactNode }) {
 export const useRowStyles = makeStyles((c) =>
   StyleSheet.create({
     top: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    name: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold, flexShrink: 1 },
+    name: { color: c.text, fontSize: 15, fontFamily: Font.medium, flexShrink: 1 },
     value: {
       marginLeft: 'auto',
       color: c.text,
       fontSize: 14,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
-    valueMuted: { color: c.textMuted, fontWeight: '400' },
+    valueMuted: { color: c.textMuted, fontFamily: Font.regular },
     bottom: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
   }),
@@ -240,19 +240,19 @@ export const useRowStyles = makeStyles((c) =>
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     hero: { gap: 6 },
-    caption: { color: c.textSecondary, fontSize: 14, fontWeight: '500' },
+    caption: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     heroRow: { flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap' },
     heroValue: {
       color: c.text,
       fontSize: 38,
       lineHeight: 44,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1.2,
     },
     heroSuffix: {
       color: c.textMuted,
       fontSize: 15,
-      fontWeight: '500',
+      fontFamily: Font.medium,
       marginBottom: 7,
       fontVariant: ['tabular-nums'],
     },
@@ -262,7 +262,7 @@ const useStyles = makeStyles((c) =>
     kv: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11 },
     kvBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderSubtle },
     kvLabel: { flex: 1, color: c.textSecondary, fontSize: 14 },
-    kvValue: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    kvValue: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
 
     stats: {
       flexDirection: 'row',
@@ -279,7 +279,7 @@ const useStyles = makeStyles((c) =>
       textAlign: 'center',
       paddingHorizontal: Spacing.three,
     },
-    factValue: { color: c.text, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    factValue: { color: c.text, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     factSep: { color: c.textMuted },
     statDivider: {
       borderLeftWidth: StyleSheet.hairlineWidth,
@@ -287,7 +287,7 @@ const useStyles = makeStyles((c) =>
       paddingLeft: 14,
     },
     statLabel: { color: c.textSecondary, fontSize: 12 },
-    statValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    statValue: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
 
     sectionHead: {
       flexDirection: 'row',
@@ -295,7 +295,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    sectionTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    sectionTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     muted: { color: c.textMuted, fontSize: 12 },
     list: {
       borderRadius: Radius.xl,
@@ -321,7 +321,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 6,
     },
     badgeDot: { width: 5, height: 5, borderRadius: 2.5 },
-    badgeText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
+    badgeText: { fontSize: 10, fontFamily: Font.medium, letterSpacing: 0.3 },
 
     note: { color: c.textMuted, fontSize: 12, textAlign: 'center', paddingHorizontal: Spacing.three },
   }),

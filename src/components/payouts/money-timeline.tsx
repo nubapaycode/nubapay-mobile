@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -132,11 +132,11 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.surface,
     },
     cardStrong: { backgroundColor: c.ink, borderColor: c.ink },
-    label: { color: c.textSecondary, fontSize: 14, fontWeight: '600' },
-    labelStrong: { color: c.onInk, fontFamily: DisplayFont.semibold, fontSize: 15 },
+    label: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
+    labelStrong: { color: c.onInk, fontFamily: Font.medium, fontSize: 15 },
     hint: { color: c.textMuted, fontSize: 12 },
     hintStrong: { color: c.onInk, opacity: 0.7 },
-    value: { color: c.text, fontSize: 16, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
+    value: { color: c.text, fontSize: 16, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     valueStrong: { color: c.onInk, fontSize: 18 },
   }),
 );

@@ -3,7 +3,7 @@ import { type Href, router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   formatInt,
   formatMoney,
@@ -178,10 +178,10 @@ const useStyles = makeStyles((c) =>
       paddingRight: Spacing.three,
     },
     divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border },
-    title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     detailRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     alertDot: { width: 6, height: 6, borderRadius: 3 },
     detail: { color: c.textSecondary, fontSize: 13, flexShrink: 1 },
-    value: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    value: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
   }),
 );

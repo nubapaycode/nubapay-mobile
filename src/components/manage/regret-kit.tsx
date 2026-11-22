@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
-import { DisplayFont, Radius } from "@/constants/theme";
+import { Font, Radius } from "@/constants/theme";
 import { initials } from "@/features/dashboard/format";
 import type { Regret } from "@/features/manage/manage";
 import { makeStyles, useTheme } from "@/theme";
@@ -79,7 +79,7 @@ const useStyles = makeStyles((c) =>
     avatar: { alignItems: "center", justifyContent: "center" },
     avatarPending: { backgroundColor: LIME },
     avatarDone: { backgroundColor: c.raised },
-    avatarText: { color: c.onBrand, fontFamily: DisplayFont.bold },
+    avatarText: { color: c.onBrand, fontFamily: Font.medium },
     avatarTextDone: { color: c.textSecondary },
     pill: {
       flexDirection: "row",
@@ -91,6 +91,6 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
     },
     pillDot: { width: 6, height: 6, borderRadius: 3 },
-    pillText: { fontSize: 12, fontWeight: "700" },
+    pillText: { fontSize: 12, fontFamily: Font.medium },
   }),
 );

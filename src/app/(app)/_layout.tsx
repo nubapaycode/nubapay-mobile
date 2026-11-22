@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 import { ContentFrame } from '@/components/navigation/content-frame';
 import { DetailHeader } from '@/components/navigation/detail-header';
-import { DisplayFont } from '@/constants/theme';
+import { Font } from '@/constants/theme';
 import {
   peekPendingBiometricOffer,
   setPendingBiometricOffer,
@@ -81,7 +81,7 @@ export default function AppLayout() {
         headerStyle: { backgroundColor: colors.canvas },
         headerTintColor: colors.text,
         headerShadowVisible: false,
-        headerTitleStyle: { fontFamily: DisplayFont.semibold, color: colors.text },
+        headerTitleStyle: { fontFamily: Font.medium, color: colors.text },
         contentStyle: { backgroundColor: colors.canvas },
       }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Inicio' }} />
@@ -113,7 +113,7 @@ export default function AppLayout() {
           animation: 'fade',
           headerLargeTitle: true,
           headerLargeTitleShadowVisible: false,
-          headerLargeTitleStyle: { fontFamily: DisplayFont.bold, color: colors.text },
+          headerLargeTitleStyle: { fontFamily: Font.medium, color: colors.text },
           headerBackButtonDisplayMode: 'minimal',
         }}
       />

@@ -19,7 +19,7 @@ import { enter } from '@/components/dashboard/detail-kit';
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { PaymentMethodIcon } from '@/components/dashboard/payment-method-icon';
 import { RollingNumber } from '@/components/dashboard/rolling-number';
-import { Radius, Spacing, uiFont } from '@/constants/theme';
+import { Font, font, Radius, Spacing } from '@/constants/theme';
 import { formatMoney, PAYMENT_LABEL, relativeTime } from '@/features/dashboard/format';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEventAccess } from '@/features/access/access';
@@ -629,17 +629,17 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       boxShadow: c.cardShadowSubtle,
     },
-    cardTitle: { color: c.text, fontSize: 15, ...uiFont('600') },
+    cardTitle: { color: c.text, fontSize: 15, ...font('medium') },
     cardMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
     hero: { alignItems: 'center', gap: 6, paddingTop: Spacing.two },
     heroAvatar: { marginBottom: 6 },
-    heroName: { color: c.textSecondary, fontSize: 15, fontWeight: '500', maxWidth: '85%' },
+    heroName: { color: c.textSecondary, fontSize: 15, fontFamily: Font.medium, maxWidth: '85%' },
     heroValue: {
       color: c.text,
       fontSize: 40,
       lineHeight: 46,
-      ...uiFont('700'),
+      ...font('medium'),
       fontVariant: ['tabular-nums'],
       letterSpacing: -1.2,
     },
@@ -659,10 +659,10 @@ const useStyles = makeStyles((c) =>
     },
     stepLine: { flex: 1, height: 2, marginHorizontal: 4, borderRadius: 1, backgroundColor: c.border },
     stepLineHidden: { opacity: 0 },
-    stepLabel: { color: c.text, fontSize: 12, ...uiFont('600') },
+    stepLabel: { color: c.text, fontSize: 12, ...font('medium') },
 
     section: { gap: 8 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     stack: { gap: 8 },
 
     contact: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
@@ -675,7 +675,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     contactAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    contactActionText: { color: c.primary, fontSize: 13, fontWeight: '600' },
+    contactActionText: { color: c.primary, fontSize: 13, fontFamily: Font.medium },
 
     item: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
     thumb: {
@@ -689,7 +689,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     itemRight: { alignItems: 'flex-end', gap: 2 },
-    itemValue: { color: c.text, fontSize: 15, ...uiFont('500'), fontVariant: ['tabular-nums'] },
+    itemValue: { color: c.text, fontSize: 15, ...font('medium'), fontVariant: ['tabular-nums'] },
     pill: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -699,7 +699,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
     },
     pillLeft: { alignSelf: 'flex-start' },
-    pillText: { fontSize: 11, fontWeight: '700' },
+    pillText: { fontSize: 11, fontFamily: Font.medium },
 
     payCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
     payIcon: {
@@ -746,7 +746,7 @@ const useStyles = makeStyles((c) =>
     },
     actionPrimary: { backgroundColor: c.ink },
     actionDanger: { backgroundColor: c.dangerMuted },
-    actionText: { color: c.onInk, fontSize: 16, ...uiFont('600') },
+    actionText: { color: c.onInk, fontSize: 16, ...font('medium') },
     actionTextDanger: { color: c.danger },
     missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background, padding: 24 },
     missingText: { color: c.textSecondary, fontSize: 15, textAlign: 'center' },

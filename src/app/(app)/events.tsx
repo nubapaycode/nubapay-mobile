@@ -9,7 +9,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { CardListSkeleton } from '@/components/dashboard/skeleton';
 import { AddEventButton } from '@/components/events/add-event-button';
 import { EventCard } from '@/components/events/event-card';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { eventPhase } from '@/features/dashboard/format';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import type { EventPhase, EventSummary } from '@/features/dashboard/types';
@@ -133,14 +133,14 @@ const useStyles = makeStyles((c) =>
     count: {
       color: c.text,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
       fontVariant: ['tabular-nums'],
     },
     countLabel: { color: c.textMuted, fontSize: 13, flexShrink: 1 },
     group: { gap: 10 },
     groupHead: { flexDirection: 'row', alignItems: 'baseline', gap: 8, paddingHorizontal: 4 },
-    groupTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    groupTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     groupCount: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
     list: { gap: 10 },
     headerAdd: {

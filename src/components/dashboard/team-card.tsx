@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatInt, formatMoney } from '@/features/dashboard/format';
 import type { DashboardInsights } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
@@ -98,8 +98,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.brandMuted,
     },
     peakLabel: { color: c.textSecondary, fontSize: 12 },
-    peakValue: { color: c.text, fontSize: 19, fontFamily: DisplayFont.bold },
-    peakStat: { color: c.text, fontSize: 14, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    peakValue: { color: c.text, fontSize: 19, fontFamily: Font.medium },
+    peakStat: { color: c.text, fontSize: 14, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     peakSub: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     staffRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     avatar: {
@@ -110,7 +110,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    avatarText: { color: c.textSecondary, fontSize: 13, fontWeight: '700' },
+    avatarText: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     staffHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     staffName: { color: c.text, fontSize: 15, flex: 1 },
     staffCount: { color: c.textSecondary, fontSize: 13, fontVariant: ['tabular-nums'] },

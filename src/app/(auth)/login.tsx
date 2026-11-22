@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 type Mode = 'checking' | 'biometric' | 'form';
 
@@ -205,8 +206,8 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    avatarText: { color: c.onBrand, fontSize: 16, fontWeight: '600' },
-    email: { flex: 1, color: c.text, fontSize: 16, fontWeight: '500' },
+    avatarText: { color: c.onBrand, fontSize: 16, fontFamily: Font.medium },
+    email: { flex: 1, color: c.text, fontSize: 16, fontFamily: Font.medium },
     error: { color: c.danger, fontSize: 14 },
   }),
 );

@@ -20,7 +20,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { Confetti } from '@/components/fx/confetti';
 import { Lottie } from '@/components/fx/lottie';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -252,7 +252,7 @@ const useStyles = makeStyles((c) =>
     icon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
     lottieSlot: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
     texts: { flex: 1, gap: 2 },
-    title: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     message: { color: c.textSecondary, fontSize: 13, lineHeight: 18 },
     action: {
       minHeight: 36,
@@ -262,6 +262,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    actionText: { color: c.text, fontSize: 14, fontFamily: DisplayFont.semibold },
+    actionText: { color: c.text, fontSize: 14, fontFamily: Font.medium },
   }),
 );

@@ -19,7 +19,7 @@ import {
   RegretStatus,
   waitingFor,
 } from "@/components/manage/regret-kit";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import { relativeTime } from "@/features/dashboard/format";
 import { type Regret, useRegrets } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
@@ -221,7 +221,7 @@ function RegretCard({ regret: r, now }: { regret: Regret; now: number }) {
           <Text
             style={[
               styles.time,
-              stale && { color: colors.warning, fontWeight: "700" },
+              stale && { color: colors.warning, fontFamily: Font.medium },
             ]}
           >
             {relativeTime(r.createdAt, now)}
@@ -266,7 +266,7 @@ const useStyles = makeStyles((c) =>
       color: c.text,
       fontSize: 48,
       lineHeight: 52,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1.6,
       fontVariant: ["tabular-nums"],
     },
@@ -274,7 +274,7 @@ const useStyles = makeStyles((c) =>
       color: c.textSecondary,
       fontSize: 15,
       lineHeight: 19,
-      fontWeight: "600",
+      fontFamily: Font.medium,
     },
     heroMetaRow: { flexDirection: "row", alignItems: "center", gap: 6 },
     heroMeta: { flex: 1, color: c.textSecondary, fontSize: 13 },
@@ -290,7 +290,7 @@ const useStyles = makeStyles((c) =>
     doneTitle: {
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     doneText: { color: c.textSecondary, fontSize: 13, lineHeight: 18 },
 
@@ -323,7 +323,7 @@ const useStyles = makeStyles((c) =>
       flex: 1,
       color: c.text,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     nameDone: { color: c.textSecondary },
     time: { color: c.textMuted, fontSize: 12, fontVariant: ["tabular-nums"] },
@@ -335,6 +335,6 @@ const useStyles = makeStyles((c) =>
       marginTop: 4,
     },
     attach: { flexDirection: "row", alignItems: "center", gap: 4 },
-    attachText: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    attachText: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
   }),
 );

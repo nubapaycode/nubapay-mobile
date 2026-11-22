@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   formatInt,
   formatMoney,
@@ -246,24 +246,24 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    centerCaption: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
+    centerCaption: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     centerValue: {
       color: c.text,
       fontSize: 34,
       lineHeight: 40,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1,
     },
     centerMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     heroNote: { color: c.textSecondary, fontSize: 13 },
-    heroNoteStrong: { color: c.text, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    heroNoteStrong: { color: c.text, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
 
     row: { flexDirection: 'row', gap: 8 },
     part: { flex: 1, gap: 6, padding: 12 },
     partHead: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
     dot: { width: 8, height: 8, borderRadius: 2.5 },
     label: { color: c.textSecondary, fontSize: 11, flexShrink: 1 },
-    partValue: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    partValue: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
 
     section: { gap: 10 },
     sectionHead: {
@@ -272,7 +272,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    sectionTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    sectionTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     sectionMeta: { color: c.textMuted, fontSize: 12 },
 
     type: { padding: 14, gap: 12 },
@@ -287,17 +287,17 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    typeName: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    typeName: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     typeNumbers: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
     typeValue: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       fontVariant: ['tabular-nums'],
     },
-    typeOf: { color: c.textMuted, fontSize: 14, fontFamily: DisplayFont.semibold, letterSpacing: 0 },
-    typeRevenue: { color: c.textSecondary, fontSize: 14, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    typeOf: { color: c.textMuted, fontSize: 14, fontFamily: Font.medium, letterSpacing: 0 },
+    typeRevenue: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     typeFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
@@ -309,7 +309,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     tagStrong: { backgroundColor: c.ink },
-    tagText: { color: c.textSecondary, fontSize: 11, fontWeight: '700' },
+    tagText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium },
     tagTextStrong: { color: c.onInk },
   }),
 );

@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { ScalePressable } from '@/components/motion/scale-pressable';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -80,7 +80,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     subtitle: { color: c.textMuted, fontSize: 12 },
   }),
 );

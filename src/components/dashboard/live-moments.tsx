@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Confetti } from '@/components/fx/confetti';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { playSaleSound } from '@/lib/sounds';
 import { makeStyles, useTheme } from '@/theme';
@@ -182,7 +182,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.brand,
     },
-    coinText: { color: c.onBrand, fontSize: 12, fontFamily: DisplayFont.extrabold },
-    chipText: { color: c.text, fontSize: 13, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
+    coinText: { color: c.onBrand, fontSize: 12, fontFamily: Font.medium },
+    chipText: { color: c.text, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
   }),
 );

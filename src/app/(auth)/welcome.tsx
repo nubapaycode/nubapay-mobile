@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PillButton } from '@/components/auth';
 import { Aurora } from '@/components/fx/aurora';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { dark, makeStyles, PaletteScope } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -65,15 +65,15 @@ const useStyles = makeStyles((c) =>
     root: { flex: 1, backgroundColor: c.background },
     safe: { flex: 1, paddingHorizontal: Spacing.four, paddingBottom: Spacing.three },
     brand: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.one },
-    wordmark: { color: WHITE, fontSize: 56, fontFamily: DisplayFont.extrabold, letterSpacing: -2 },
-    business: { color: WHITE, fontSize: 15, fontWeight: '500' },
+    wordmark: { color: WHITE, fontSize: 56, fontFamily: Font.medium, letterSpacing: -2 },
+    business: { color: WHITE, fontSize: 15, fontFamily: Font.medium },
     bottom: { gap: Spacing.four },
     copy: { gap: 10 },
     title: {
       color: WHITE,
       fontSize: 34,
       lineHeight: 36,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
     },
     subtitle: { color: WHITE, fontSize: 16, lineHeight: 23 },

@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   PERMISSION_LABEL,
   PERMISSIONS,
@@ -125,10 +125,10 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    title: { color: c.text, fontSize: 22, fontFamily: DisplayFont.bold, letterSpacing: -0.5 },
-    reset: { color: c.textSecondary, fontSize: 14, fontWeight: '600' },
+    title: { color: c.text, fontSize: 22, fontFamily: Font.medium, letterSpacing: -0.5 },
+    reset: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     section: { gap: 10 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: {
       height: 38,
@@ -138,7 +138,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     chipOn: { backgroundColor: c.ink },
-    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontFamily: Font.medium },
     chipTextOn: { color: c.onInk },
     card: {
       borderRadius: Radius.xl,
@@ -168,6 +168,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.ink,
     },
-    applyText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    applyText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
   }),
 );

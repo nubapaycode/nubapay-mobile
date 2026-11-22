@@ -5,7 +5,7 @@ import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
 import { SlideToConfirm } from '@/components/motion/slide-to-confirm';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { awaitingCash, remainingOf, SCAN_COPY, scanKind } from '@/features/operations/scan';
 import { confirmCash, type Order, type OrderItem, redeemItems } from '@/lib/api/organizer';
@@ -219,10 +219,10 @@ const useStyles = makeStyles((c) =>
   StyleSheet.create({
     panel: { gap: 12 },
     head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    title: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    title: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
     customer: { color: c.textMuted, fontSize: 14 },
-    total: { color: c.text, fontSize: 18, fontFamily: DisplayFont.semibold, fontVariant: ['tabular-nums'] },
-    prompt: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    total: { color: c.text, fontSize: 18, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+    prompt: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     list: { gap: 8 },
     item: {
       flexDirection: 'row',
@@ -237,7 +237,7 @@ const useStyles = makeStyles((c) =>
     },
     itemOn: { borderColor: c.ink },
     itemDone: { backgroundColor: c.canvas },
-    itemName: { color: c.text, fontSize: 15, fontWeight: '500' },
+    itemName: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     itemMeta: { color: c.textMuted, fontSize: 12 },
     muted: { color: c.textMuted },
     stepper: { flexDirection: 'row', alignItems: 'center', gap: 10 },
@@ -254,11 +254,11 @@ const useStyles = makeStyles((c) =>
       textAlign: 'center',
       color: c.text,
       fontSize: 16,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
     doneTag: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    doneText: { fontSize: 12, fontWeight: '600' },
+    doneText: { fontSize: 12, fontFamily: Font.medium },
     cashCard: {
       alignItems: 'center',
       gap: 6,
@@ -268,7 +268,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     cashLabel: { color: c.textSecondary, fontSize: 14, textAlign: 'center' },
-    cashValue: { color: c.text, fontSize: 30, fontFamily: DisplayFont.bold, letterSpacing: -0.8 },
+    cashValue: { color: c.text, fontSize: 30, fontFamily: Font.medium, letterSpacing: -0.8 },
     warn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -288,6 +288,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    secondaryText: { color: c.ink, fontSize: 15, fontWeight: '600' },
+    secondaryText: { color: c.ink, fontSize: 15, fontFamily: Font.medium },
   }),
 );

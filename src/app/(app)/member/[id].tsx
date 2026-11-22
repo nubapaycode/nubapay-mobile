@@ -9,7 +9,7 @@ import { Icon, type IconName } from '@/components/dashboard/icon';
 import { ProgressBar } from '@/components/dashboard/progress-bar';
 import { RollingNumber } from '@/components/dashboard/rolling-number';
 import { MemberAvatar, PERMISSION_ICON, RoleChip } from '@/components/team/member-card';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatPercent } from '@/features/dashboard/format';
 import { PERMISSION_LABEL, PERMISSIONS, removeMember, resendAccess } from '@/features/team/team';
 import { useTeam } from '@/features/team/use-team';
@@ -305,7 +305,7 @@ const useStyles = makeStyles((c) =>
     name: {
       color: c.text,
       fontSize: 24,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       textAlign: 'center',
       marginTop: 10,
@@ -319,7 +319,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.brandMuted,
     },
-    youText: { color: c.brandText, fontSize: 12, fontWeight: '700' },
+    youText: { color: c.brandText, fontSize: 12, fontFamily: Font.medium },
 
     quick: { flexDirection: 'row', justifyContent: 'center', gap: 24 },
     quickItem: { alignItems: 'center', gap: 6, width: 84 },
@@ -334,7 +334,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       boxShadow: c.cardShadowSubtle,
     },
-    quickLabel: { color: c.textSecondary, fontSize: 12, fontWeight: '600' },
+    quickLabel: { color: c.textSecondary, fontSize: 12, fontFamily: Font.medium },
 
     section: { gap: 8 },
     sectionHead: {
@@ -343,17 +343,17 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600' },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     sectionMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
     stat: { padding: Spacing.three, gap: 10 },
     statHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    statCaption: { color: c.textSecondary, fontSize: 14, fontWeight: '500' },
+    statCaption: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     statValue: {
       color: c.text,
       fontSize: 34,
       lineHeight: 40,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1,
     },
     statMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
@@ -365,7 +365,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     rankFirst: { backgroundColor: c.ink },
-    rankText: { color: c.textSecondary, fontSize: 11, fontWeight: '700' },
+    rankText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium },
     rankTextFirst: { color: c.onInk },
     emptyCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
     emptyIcon: {
@@ -391,8 +391,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     permIconOn: { backgroundColor: c.ink },
-    permText: { color: c.text, fontSize: 14, fontWeight: '600' },
-    permTextOff: { color: c.textMuted, fontWeight: '500' },
+    permText: { color: c.text, fontSize: 14, fontFamily: Font.medium },
+    permTextOff: { color: c.textMuted, fontFamily: Font.medium },
 
     remove: {
       flexDirection: 'row',
@@ -404,7 +404,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.dangerMuted,
     },
-    removeText: { color: c.danger, fontSize: 15, fontFamily: DisplayFont.semibold },
+    removeText: { color: c.danger, fontSize: 15, fontFamily: Font.medium },
 
     missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background },
     missingText: { color: c.textSecondary, fontSize: 15 },

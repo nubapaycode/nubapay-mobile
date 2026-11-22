@@ -7,6 +7,7 @@ import { Text } from '@/components/ui/text';
 
 import { Card } from './card';
 import { ProgressBar } from './progress-bar';
+import { Font } from '@/constants/theme';
 
 /** Medios de pago: barra apilada + una fila por medio (leyenda directa). */
 export function PaymentMethodsCard({
@@ -100,7 +101,7 @@ const useStyles = makeStyles((c) =>
     swatch: { width: 8, height: 8, borderRadius: 2 },
     label: { color: c.text, fontSize: 15 },
     sub: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
-    value: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    value: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     split: { flexDirection: 'row', gap: 12 },
     legendHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   }),

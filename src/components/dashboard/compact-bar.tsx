@@ -17,7 +17,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { BlurView } from '@/components/fx/blur';
 import { CountBadge } from '@/components/motion/count-badge';
-import { DisplayFont } from '@/constants/theme';
+import { Font } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -288,10 +288,10 @@ const useStyles = makeStyles((c) =>
       color: c.text,
       fontSize: 19,
       lineHeight: 23,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
     },
-    period: { flexShrink: 1, color: c.textSecondary, fontSize: 13, fontWeight: '600' },
+    period: { flexShrink: 1, color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     badge: {
       position: 'absolute',
       top: -3,
@@ -304,6 +304,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.primary,
     },
-    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
+    badgeText: { color: c.onPrimary, fontSize: 10, fontFamily: Font.medium },
   }),
 );

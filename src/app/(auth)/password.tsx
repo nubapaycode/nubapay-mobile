@@ -7,6 +7,7 @@ import { setPendingBiometricOffer } from '@/lib/biometrics';
 import { useAuth } from '@/providers/auth-provider';
 import { makeStyles } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 /**
  * Ingreso, paso 2: la contraseña del email elegido. Al entrar, el layout raíz lleva solo a la app
@@ -109,11 +110,11 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    avatarText: { color: c.onBrand, fontSize: 13, fontWeight: '600' },
+    avatarText: { color: c.onBrand, fontSize: 13, fontFamily: Font.medium },
     chipEmail: { color: c.text, fontSize: 14, flexShrink: 1 },
     change: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: c.brandMuted },
-    changeText: { color: c.brandText, fontSize: 13, fontWeight: '600' },
+    changeText: { color: c.brandText, fontSize: 13, fontFamily: Font.medium },
     forgot: { alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 4 },
-    forgotText: { color: c.brandText, fontSize: 15, fontWeight: '600' },
+    forgotText: { color: c.brandText, fontSize: 15, fontFamily: Font.medium },
   }),
 );

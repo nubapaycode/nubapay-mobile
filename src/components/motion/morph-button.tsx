@@ -14,7 +14,7 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { useTheme } from '@/theme';
 
 export type MorphStatus = 'idle' | 'loading' | 'done';
@@ -183,6 +183,6 @@ export function MorphButton({
 
 const styles = StyleSheet.create({
   pill: { alignItems: 'center', justifyContent: 'center', borderCurve: 'continuous', overflow: 'visible' },
-  label: { fontSize: 16, fontFamily: DisplayFont.semibold, paddingHorizontal: 16 },
+  label: { fontSize: 16, fontFamily: Font.medium, paddingHorizontal: 16 },
   center: { alignItems: 'center', justifyContent: 'center' },
 });

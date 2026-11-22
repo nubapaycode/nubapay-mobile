@@ -14,6 +14,7 @@ import { storeBlocker, useEventSetup, usePublicStore } from '@/features/setup/ev
 import { usePullRefresh } from '@/hooks/use-pull-refresh';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 const HELP_URL = 'https://www.nubapay.app/ayuda';
 
@@ -215,7 +216,7 @@ export default function MoreScreen() {
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     group: { gap: 10 },
-    groupTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    groupTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     list: { gap: 10 },
     badge: {
       minWidth: 22,
@@ -226,6 +227,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.brandMuted,
     },
-    badgeText: { color: c.brandText, fontSize: 12, fontWeight: '700' },
+    badgeText: { color: c.brandText, fontSize: 12, fontFamily: Font.medium },
   }),
 );

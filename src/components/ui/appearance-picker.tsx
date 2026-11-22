@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { type AppearancePreference, dark, light, makeStyles, type Palette, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -191,7 +191,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.raised,
     },
-    label: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
-    labelOn: { color: c.text, fontWeight: '700' },
+    label: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
+    labelOn: { color: c.text, fontFamily: Font.medium },
   }),
 );

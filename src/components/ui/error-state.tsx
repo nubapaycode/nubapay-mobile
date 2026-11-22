@@ -6,7 +6,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ticky } from '@/components/illustrations/ticky';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { isConnectionError } from '@/lib/api';
 import { onReconnect } from '@/lib/network';
 import { makeStyles, useTheme } from '@/theme';
@@ -81,7 +81,7 @@ const useStyles = makeStyles((c) =>
     wrap: { alignItems: 'center', gap: Spacing.three, paddingVertical: Spacing.five, paddingHorizontal: Spacing.three },
     compact: { paddingVertical: Spacing.three },
     texts: { alignItems: 'center', gap: 4 },
-    title: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold, textAlign: 'center' },
+    title: { color: c.text, fontSize: 17, fontFamily: Font.medium, textAlign: 'center' },
     message: { color: c.textSecondary, fontSize: 14, lineHeight: 20, textAlign: 'center' },
   }),
 );

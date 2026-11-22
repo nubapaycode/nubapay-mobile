@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
 
 import { Icon } from "@/components/dashboard/icon";
-import { DisplayFont, Radius } from "@/constants/theme";
+import { Font, Radius } from "@/constants/theme";
 import { formatTime } from "@/features/manage/promo";
 import { makeStyles, useTheme } from "@/theme";
 import { Text } from "@/components/ui/text";
@@ -75,7 +75,7 @@ export function TimeField({
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrap: { flex: 1, gap: 6 },
-    label: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    label: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     iosRow: { flexDirection: "row", alignItems: "center", minHeight: 40 },
     chip: {
       flexDirection: "row",
@@ -89,7 +89,7 @@ const useStyles = makeStyles((c) =>
     chipText: {
       color: c.ink,
       fontSize: 17,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
   }),

@@ -16,7 +16,7 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 
 const BACK = { duration: 280, easing: Easing.out(Easing.cubic) };
 /** Fracción del ancho a cruzar para que soltar ejecute la acción. */
@@ -177,5 +177,5 @@ const styles = StyleSheet.create({
   start: { justifyContent: 'flex-start' },
   end: { justifyContent: 'flex-end' },
   content: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  text: { fontSize: 14, fontFamily: DisplayFont.semibold },
+  text: { fontSize: 14, fontFamily: Font.medium },
 });

@@ -30,7 +30,7 @@ import {
   promoAnchor,
   usePromoDraft,
 } from "@/components/manage/promo-section";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import { useDashboardSnapshot } from "@/features/dashboard/dashboard-store";
 import { formatInt, formatMoney } from "@/features/dashboard/format";
 import { openCategoryPicker } from "@/features/manage/category-picker";
@@ -301,7 +301,7 @@ function ProductForm({
                     variant: canSave ? "prominent" : "plain",
                     tintColor: canSave ? colors.primary : colors.text,
                     labelStyle: {
-                      fontFamily: DisplayFont.semibold,
+                      fontFamily: Font.medium,
                       fontSize: 16,
                     },
                   },
@@ -985,7 +985,7 @@ const useStyles = makeStyles((c) =>
     coverTitle: {
       color: c.text,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     coverHint: { color: c.textMuted, fontSize: 13 },
     coverActions: { flexDirection: "row", gap: 8, marginTop: 4 },
@@ -1008,7 +1008,7 @@ const useStyles = makeStyles((c) =>
     pillText: {
       color: c.ink,
       fontSize: 13,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     // Métricas
@@ -1021,11 +1021,11 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.canvas,
     },
     stat: { flex: 1, alignItems: "center", gap: 3, paddingHorizontal: 6 },
-    statLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    statLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     statValue: {
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
       fontVariant: ["tabular-nums"],
     },
@@ -1043,14 +1043,15 @@ const useStyles = makeStyles((c) =>
       justifyContent: "space-between",
       gap: 8,
     },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     fieldHint: {
       color: c.textMuted,
       fontSize: 12,
       fontVariant: ["tabular-nums"],
     },
-    fieldError: { color: c.danger, fontSize: 12, fontWeight: "600" },
+    fieldError: { color: c.danger, fontSize: 12, fontFamily: Font.medium },
     input: {
+      fontFamily: Font.regular,
       color: c.text,
       fontSize: 16,
       paddingVertical: 6,
@@ -1061,12 +1062,12 @@ const useStyles = makeStyles((c) =>
     currency: {
       color: c.textMuted,
       fontSize: 26,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
     },
     priceInput: {
       flex: 1,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.6,
     },
     savingsWrap: { paddingHorizontal: 4 },
@@ -1091,7 +1092,7 @@ const useStyles = makeStyles((c) =>
     settingTitle: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     settingValue: {
       flex: 1,
@@ -1102,14 +1103,14 @@ const useStyles = makeStyles((c) =>
     toggleText: { color: c.textMuted, fontSize: 13 },
 
     // Combo
-    link: { color: c.primary, fontSize: 14, fontWeight: "600" },
+    link: { color: c.primary, fontSize: 14, fontFamily: Font.medium },
     lineRow: {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
       padding: 12,
     },
-    lineName: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    lineName: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     lineMeta: {
       color: c.textMuted,
       fontSize: 13,
@@ -1136,7 +1137,7 @@ const useStyles = makeStyles((c) =>
       textAlign: "center",
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     comboEmpty: {
@@ -1168,7 +1169,7 @@ const useStyles = makeStyles((c) =>
     comboAddText: {
       color: c.ink,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     delete: {
@@ -1181,7 +1182,7 @@ const useStyles = makeStyles((c) =>
     deleteText: {
       color: c.danger,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     missing: {

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
 import { LivePill } from '@/components/dashboard/live-pill';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { eventPhase, formatEventDate, initials, PHASE_LABEL } from '@/features/dashboard/format';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
@@ -98,10 +98,10 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.primary,
     },
-    thumbText: { color: c.onPrimary, fontSize: 15, fontWeight: '700' },
+    thumbText: { color: c.onPrimary, fontSize: 15, fontFamily: Font.medium },
     texts: { flex: 1, gap: 1 },
-    caption: { color: c.textMuted, fontSize: 11, fontWeight: '600', letterSpacing: 0.2 },
-    name: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    caption: { color: c.textMuted, fontSize: 11, fontFamily: Font.medium, letterSpacing: 0.2 },
+    name: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     status: { color: c.textSecondary, fontSize: 12, fontVariant: ['tabular-nums'], flexShrink: 1 },
     change: {
@@ -113,6 +113,6 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
     },
-    changeText: { color: c.text, fontSize: 12, fontWeight: '600' },
+    changeText: { color: c.text, fontSize: 12, fontFamily: Font.medium },
   }),
 );

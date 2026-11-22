@@ -6,7 +6,7 @@ import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import { ScalePressable } from '@/components/motion/scale-pressable';
 import { enter, enterRow } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
 import { ErrorState } from '@/components/ui/error-state';
@@ -168,7 +168,7 @@ const useStyles = makeStyles((c) =>
     summaryValue: {
       color: c.text,
       fontSize: 28,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.8,
       fontVariant: ['tabular-nums'],
     },
@@ -184,7 +184,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    addText: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
+    addText: { color: c.ink, fontSize: 15, fontFamily: Font.medium },
 
     card: {
       padding: 14,
@@ -198,10 +198,10 @@ const useStyles = makeStyles((c) =>
     cardOff: { backgroundColor: c.canvas },
     cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold, flexShrink: 1 },
+    title: { color: c.text, fontSize: 16, fontFamily: Font.medium, flexShrink: 1 },
     off: { color: c.textMuted },
     subtitle: { color: c.textMuted, fontSize: 13 },
-    value: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    value: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     paused: {
       paddingHorizontal: 7,
       height: 20,
@@ -209,7 +209,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 6,
       backgroundColor: c.raised,
     },
-    pausedText: { color: c.textSecondary, fontSize: 10, fontWeight: '700' },
+    pausedText: { color: c.textSecondary, fontSize: 10, fontFamily: Font.medium },
     footer: { gap: 8 },
   }),
 );

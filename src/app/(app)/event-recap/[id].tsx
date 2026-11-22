@@ -18,7 +18,7 @@ import { AnimatedNumber } from '@/components/dashboard/animated-number';
 import { Icon } from '@/components/dashboard/icon';
 import { Confetti } from '@/components/fx/confetti';
 import { MoodMascot, type MascotPose } from '@/components/illustrations/mood-mascot';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatEventDate, formatInt, formatMoney, formatMoneyCompact, formatPercent } from '@/features/dashboard/format';
 import type { DashboardData } from '@/features/dashboard/types';
 import { useEventDashboard, useEvents } from '@/features/dashboard/use-event-dashboard';
@@ -405,9 +405,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     padding: 18,
   },
-  eyebrow: { fontSize: 17, fontWeight: '700', opacity: 0.8, marginTop: Spacing.three },
-  big: { fontSize: 52, lineHeight: 58, fontFamily: DisplayFont.extrabold, fontVariant: ['tabular-nums'] },
-  lines: { fontSize: 19, lineHeight: 26, fontWeight: '500', opacity: 0.9 },
+  eyebrow: { fontSize: 17, fontFamily: Font.medium, opacity: 0.8, marginTop: Spacing.three },
+  big: { fontSize: 52, lineHeight: 58, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+  lines: { fontSize: 19, lineHeight: 26, fontFamily: Font.medium, opacity: 0.9 },
   final: { flex: 1, paddingHorizontal: Spacing.four, justifyContent: 'center', gap: Spacing.four },
   card: {
     backgroundColor: INK,
@@ -419,15 +419,15 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardBrand: { color: LIME, fontFamily: DisplayFont.extrabold, fontSize: 18 },
-  cardDate: { color: '#9aa3b2', fontSize: 13, fontWeight: '500' },
-  cardName: { color: WHITE, fontFamily: DisplayFont.extrabold, fontSize: 28, lineHeight: 32, marginTop: Spacing.two },
+  cardBrand: { color: LIME, fontFamily: Font.medium, fontSize: 18 },
+  cardDate: { color: '#9aa3b2', fontSize: 13, fontFamily: Font.medium },
+  cardName: { color: WHITE, fontFamily: Font.medium, fontSize: 28, lineHeight: 32, marginTop: Spacing.two },
   cardMascot: { alignItems: 'center', marginVertical: Spacing.two },
-  cardLabel: { color: '#9aa3b2', fontSize: 14, fontWeight: '600' },
-  cardTotal: { color: WHITE, fontFamily: DisplayFont.extrabold, fontSize: 40, fontVariant: ['tabular-nums'] },
+  cardLabel: { color: '#9aa3b2', fontSize: 14, fontFamily: Font.medium },
+  cardTotal: { color: WHITE, fontFamily: Font.medium, fontSize: 40, fontVariant: ['tabular-nums'] },
   cardStats: { flexDirection: 'row', gap: Spacing.three, marginTop: Spacing.two },
   cardStat: { flex: 1, gap: 2 },
-  cardStatValue: { color: WHITE, fontSize: 16, fontWeight: '700' },
+  cardStatValue: { color: WHITE, fontSize: 16, fontFamily: Font.medium },
   cardStatLabel: { color: '#9aa3b2', fontSize: 12 },
   actions: { gap: Spacing.two },
   primary: {
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: 15,
   },
-  primaryText: { color: INK, fontSize: 16, fontWeight: '700' },
+  primaryText: { color: INK, fontSize: 16, fontFamily: Font.medium },
   secondary: { alignItems: 'center', paddingVertical: 12 },
-  secondaryText: { color: WHITE, fontSize: 15, fontWeight: '600', opacity: Platform.OS === 'ios' ? 0.85 : 1 },
+  secondaryText: { color: WHITE, fontSize: 15, fontFamily: Font.medium, opacity: Platform.OS === 'ios' ? 0.85 : 1 },
 });

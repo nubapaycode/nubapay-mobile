@@ -19,7 +19,7 @@ import {
   SearchField,
 } from "@/components/manage/catalog-kit";
 import { Sheet, useSheet } from "@/components/ui/sheet";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import { formatMoney } from "@/features/dashboard/format";
 import {
   comboPickerMode,
@@ -236,7 +236,7 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
     },
     subtitle: { color: c.textMuted, fontSize: 13 },
@@ -250,7 +250,7 @@ const useStyles = makeStyles((c) =>
     group: { gap: 8 },
     row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12 },
     rowOn: { backgroundColor: c.canvas },
-    name: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    name: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     price: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
     check: {
       width: 24,
@@ -275,13 +275,13 @@ const useStyles = makeStyles((c) =>
     footerCount: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     footerClear: {
       color: c.textMuted,
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       marginTop: 2,
     },
     submit: {
@@ -295,7 +295,7 @@ const useStyles = makeStyles((c) =>
     submitText: {
       color: c.onInk,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
   }),
 );

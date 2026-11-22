@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/dashboard/icon';
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -109,6 +109,6 @@ const useStyles = makeStyles((c) =>
     },
     dateChip: { flex: 1 },
     pressed: { backgroundColor: c.border },
-    chipText: { color: c.ink, fontSize: 15, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    chipText: { color: c.ink, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
   }),
 );

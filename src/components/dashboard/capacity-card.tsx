@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoney, formatPercent } from '@/features/dashboard/format';
 import type { DashboardInsights } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
@@ -166,24 +166,24 @@ const useStyles = makeStyles((c) =>
     top: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
     ringWrap: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center' },
     ringCenter: { position: 'absolute', alignItems: 'center' },
-    ringValue: { color: c.text, fontSize: 26, fontWeight: '700', letterSpacing: -0.6 },
+    ringValue: { color: c.text, fontSize: 26, fontFamily: Font.medium, letterSpacing: -0.6 },
     ringLabel: { color: c.textMuted, fontSize: 11, marginTop: -2 },
     legend: { flex: 1, gap: 10 },
     legendHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     swatch: { width: 8, height: 8, borderRadius: 2 },
     legendLabel: { color: c.textSecondary, fontSize: 12 },
-    legendValue: { color: c.text, fontSize: 16, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    legendValue: { color: c.text, fontSize: 16, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     note: { color: c.textSecondary, fontSize: 12 },
     typeHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    typeName: { color: c.text, fontSize: 15, fontWeight: '500', flexShrink: 1 },
+    typeName: { color: c.text, fontSize: 15, fontFamily: Font.medium, flexShrink: 1 },
     typeCount: {
       marginLeft: 'auto',
       color: c.text,
       fontSize: 14,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
-    typeMuted: { color: c.textMuted, fontWeight: '400' },
+    typeMuted: { color: c.textMuted, fontFamily: Font.regular },
     typeMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     badge: {
       paddingHorizontal: 6,
@@ -192,7 +192,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.sm,
       backgroundColor: c.raised,
     },
-    badgeText: { color: c.textSecondary, fontSize: 10, fontWeight: '700', letterSpacing: 0.3 },
+    badgeText: { color: c.textSecondary, fontSize: 10, fontFamily: Font.medium, letterSpacing: 0.3 },
     legendInline: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     legendText: { color: c.textMuted, fontSize: 11 },
   }),

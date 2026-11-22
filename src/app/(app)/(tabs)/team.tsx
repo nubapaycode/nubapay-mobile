@@ -13,7 +13,7 @@ import { MemberCard } from '@/components/team/member-card';
 import { NoAccess } from '@/components/ui/no-access';
 import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { useEventAccess } from '@/features/access/access';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import {
   activeTeamFilters,
   DEFAULT_TEAM_FILTERS,
@@ -231,7 +231,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.background,
     },
-    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
+    badgeText: { color: c.onPrimary, fontSize: 10, fontFamily: Font.medium },
     searchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     // Igual que en Operaciones.
     search: {
@@ -254,15 +254,15 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
+    input: { fontFamily: Font.regular, flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
     resultRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 4,
     },
-    resultText: { color: c.textSecondary, fontSize: 13, fontWeight: '500', fontVariant: ['tabular-nums'] },
-    clear: { color: c.primary, fontSize: 13, fontWeight: '600' },
+    resultText: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+    clear: { color: c.primary, fontSize: 13, fontFamily: Font.medium },
 
     groups: { gap: 22 },
     group: { gap: 8 },
@@ -273,8 +273,8 @@ const useStyles = makeStyles((c) =>
       paddingHorizontal: 4,
       marginBottom: 2,
     },
-    groupTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
-    groupCount: { color: c.textMuted, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    groupTitle: { color: c.text, fontSize: 17, fontFamily: Font.medium },
+    groupCount: { color: c.textMuted, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
 
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
     emptyBox: {
@@ -298,7 +298,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
       marginBottom: 6,
     },
-    emptyTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    emptyTitle: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     emptyText: { color: c.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
   }),
 );

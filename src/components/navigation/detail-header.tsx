@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont } from '@/constants/theme';
+import { Font } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -63,6 +63,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    title: { flex: 1, textAlign: 'center', color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    title: { flex: 1, textAlign: 'center', color: c.text, fontSize: 17, fontFamily: Font.medium },
   }),
 );

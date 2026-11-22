@@ -29,7 +29,7 @@ import { ErrorState } from '@/components/ui/error-state';
 import { CoachTip } from '@/components/ui/coach-tip';
 import { NoAccess } from '@/components/ui/no-access';
 import { useEventAccess } from '@/features/access/access';
-import { Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import {
   activeFilterCount,
   defaultFilters,
@@ -310,7 +310,7 @@ const useStyles = makeStyles((c) =>
     content: { paddingHorizontal: Spacing.three, gap: Spacing.four },
     sections: { gap: Spacing.four },
     error: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.six },
-    errorTitle: { color: c.text, fontSize: 16, fontWeight: '600' },
+    errorTitle: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     errorText: { color: c.textSecondary, fontSize: 14, textAlign: 'center' },
   }),
 );

@@ -6,7 +6,7 @@ import { BarDetail } from '@/components/dashboard/bar-detail';
 import { SalesDetail } from '@/components/dashboard/sales-detail';
 import { TicketsDetail } from '@/components/dashboard/tickets-detail';
 import { Button } from '@/components/ui';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { useDashboardSnapshot } from '@/features/dashboard/dashboard-store';
 import { periodNote } from '@/features/dashboard/filters';
 import { eventOffer } from '@/features/dashboard/offer';
@@ -42,7 +42,7 @@ export default function DetailScreen() {
           headerLargeTitle: false,
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-          headerTitleStyle: { fontFamily: DisplayFont.semibold, color: colors.text },
+          headerTitleStyle: { fontFamily: Font.medium, color: colors.text },
           contentStyle: { backgroundColor: colors.background },
         }}
       />

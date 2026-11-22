@@ -5,6 +5,7 @@ import { Text } from '@/components/ui/text';
 
 import { AnimatedNumber } from './animated-number';
 import { Card } from './card';
+import { Font } from '@/constants/theme';
 
 export type Stat = {
   label: string;
@@ -48,7 +49,7 @@ const useStyles = makeStyles((c) =>
       paddingLeft: 14,
     },
     label: { color: c.textSecondary, fontSize: 12 },
-    value: { color: c.text, fontSize: 20, fontWeight: '700', letterSpacing: -0.4 },
+    value: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
     warning: { color: c.warning },
   }),
 );

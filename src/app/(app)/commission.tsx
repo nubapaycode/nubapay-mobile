@@ -7,7 +7,7 @@ import { Breakdown, DetailHero, enter } from '@/components/dashboard/detail-kit'
 import { Icon } from '@/components/dashboard/icon';
 import { ProgressBar } from '@/components/dashboard/progress-bar';
 import { MoneyTimeline } from '@/components/payouts/money-timeline';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   eventPhase,
   formatEventDate,
@@ -180,8 +180,8 @@ const useStyles = makeStyles((c) =>
       borderWidth: 1,
       borderColor: c.border,
     },
-    eventLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
-    eventName: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold, letterSpacing: -0.3 },
+    eventLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
+    eventName: { color: c.text, fontSize: 17, fontFamily: Font.medium, letterSpacing: -0.3 },
     eventMeta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
     switchBtn: {
       flexDirection: 'row',
@@ -192,7 +192,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.raised,
     },
-    switchText: { color: c.ink, fontSize: 13, fontFamily: DisplayFont.semibold },
+    switchText: { color: c.ink, fontSize: 13, fontFamily: Font.medium },
 
     loading: { paddingVertical: Spacing.six, alignItems: 'center' },
 
@@ -207,12 +207,12 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       backgroundColor: c.canvas,
     },
-    dueLabel: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    dueLabel: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     dueHint: { color: c.textMuted, fontSize: 12 },
     dueValue: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       fontVariant: ['tabular-nums'],
     },

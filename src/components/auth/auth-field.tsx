@@ -15,6 +15,7 @@ import Animated, {
 import { Icon } from '@/components/dashboard/icon';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 type Props = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
@@ -118,7 +119,7 @@ export function AuthField({ label, error, accessory, onFocus, onBlur, ...rest }:
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrapper: { gap: 8 },
-    label: { color: c.textSecondary, fontSize: 13, fontWeight: '500', paddingLeft: 4 },
+    label: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingLeft: 4 },
     box: {
       height: 58,
       borderRadius: 16,
@@ -131,7 +132,7 @@ const useStyles = makeStyles((c) =>
       paddingRight: 8,
       gap: 8,
     },
-    input: { flex: 1, height: '100%', color: c.text, fontSize: 17 },
+    input: { fontFamily: Font.regular, flex: 1, height: '100%', color: c.text, fontSize: 17 },
     clear: {
       width: 32,
       height: 32,

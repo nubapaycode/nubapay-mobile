@@ -7,7 +7,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { enterRow } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { ManageScreen, ManageSummary } from '@/components/manage/manage-ui';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatInt } from '@/features/dashboard/format';
 import { removeCategory, renameCategory, useCategories, useProducts } from '@/features/manage/manage';
 import type { Category } from '@/lib/api/organizer';
@@ -194,7 +194,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.surface,
     },
     row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    name: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    name: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     meta: { color: c.textMuted, fontSize: 13 },
     round: {
       width: 36,
@@ -205,8 +205,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     editRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    input: { flex: 1, color: c.text, fontSize: 16, paddingVertical: 4 },
-    cancel: { color: c.textSecondary, fontSize: 14, fontWeight: '600' },
+    input: { fontFamily: Font.regular, flex: 1, color: c.text, fontSize: 16, paddingVertical: 4 },
+    cancel: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     saveBtn: {
       height: 34,
       paddingHorizontal: 14,
@@ -215,6 +215,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.ink,
     },
-    saveText: { color: c.onInk, fontSize: 14, fontWeight: '600' },
+    saveText: { color: c.onInk, fontSize: 14, fontFamily: Font.medium },
   }),
 );

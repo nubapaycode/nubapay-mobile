@@ -6,7 +6,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { hasLinkPreview, PreviewLink } from '@/components/motion/preview-link';
 import { SwipeActions } from '@/components/motion/swipe-actions';
-import { Radius, uiFont } from '@/constants/theme';
+import { Font, font, Radius } from '@/constants/theme';
 import {
   type Member,
   OWNER_ROLE,
@@ -206,7 +206,7 @@ const useStyles = makeStyles((c) =>
     grow: { flex: 1, gap: 8 },
     line: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     nameRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
-    name: { flexShrink: 1, color: c.text, fontSize: 18, letterSpacing: -0.2, ...uiFont('500') },
+    name: { flexShrink: 1, color: c.text, fontSize: 18, letterSpacing: -0.2, ...font('medium') },
     you: {
       paddingHorizontal: 7,
       height: 20,
@@ -214,7 +214,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: Radius.pill,
       backgroundColor: c.brandMuted,
     },
-    youText: { color: c.brandText, fontSize: 11, ...uiFont('600') },
+    youText: { color: c.brandText, fontSize: 11, ...font('medium') },
 
     perms: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     perm: {
@@ -227,7 +227,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     permAll: { backgroundColor: c.ink },
-    permText: { color: c.textSecondary, fontSize: 11, fontWeight: '600' },
+    permText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium },
 
     role: {
       paddingHorizontal: 9,
@@ -237,7 +237,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     roleAdmin: { backgroundColor: c.ink },
-    roleText: { color: c.text, fontSize: 12, fontWeight: '700' },
+    roleText: { color: c.text, fontSize: 12, fontFamily: Font.medium },
     roleTextAdmin: { color: c.onInk },
   }),
 );

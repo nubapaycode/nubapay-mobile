@@ -27,6 +27,7 @@ import {
 } from '@/lib/biometrics';
 import { dark, makeStyles, PaletteScope, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 /**
  * Oferta de ingreso con biometría, justo después de entrar con contraseña. Va en oscuro como el
@@ -247,7 +248,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
     },
     benefitCopy: { flex: 1, gap: 2 },
-    benefitTitle: { color: c.text, fontSize: 15, fontWeight: '600' },
+    benefitTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     benefitText: { color: c.textSecondary, fontSize: 14, lineHeight: 19 },
   }),
 );

@@ -18,6 +18,7 @@ import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
 import { Icon, type IconName } from './icon';
+import { Font } from '@/constants/theme';
 
 /** Cuánto queda cada ítem antes de pasar al siguiente (ms) y cuántos recientes rotan. */
 const DWELL = 3400;
@@ -118,8 +119,8 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.hero.glassBorder,
     },
     text: { flex: 1, color: c.textSecondary, fontSize: 13 },
-    who: { color: c.text, fontWeight: '600' },
-    amount: { color: c.text, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    who: { color: c.text, fontFamily: Font.medium },
+    amount: { color: c.text, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     time: { color: c.textMuted, fontSize: 11, fontVariant: ['tabular-nums'] },
   }),
 );

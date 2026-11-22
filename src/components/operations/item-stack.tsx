@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
-import { uiFont } from '@/constants/theme';
+import { font } from '@/constants/theme';
 import { makeStyles } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -83,7 +83,7 @@ const useStyles = makeStyles((c) =>
       opacity: 0.45,
       transform: [{ translateX: 9 }, { translateY: -3 }, { rotate: '9deg' }, { scale: 0.86 }],
     },
-    empty: { color: c.textMuted, fontSize: 20, ...uiFont('600') },
+    empty: { color: c.textMuted, fontSize: 20, ...font('medium') },
     badge: {
       position: 'absolute',
       right: -2,
@@ -98,6 +98,6 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.surface,
     },
-    badgeText: { color: c.onInk, fontSize: 11, fontVariant: ['tabular-nums'], ...uiFont('700') },
+    badgeText: { color: c.onInk, fontSize: 11, fontVariant: ['tabular-nums'], ...font('medium') },
   }),
 );

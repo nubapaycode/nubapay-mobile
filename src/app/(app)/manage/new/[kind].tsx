@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View }
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addPickupPoint, addTicket, type ManageKind } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
@@ -222,7 +222,7 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       paddingHorizontal: 4,
     },
@@ -236,13 +236,13 @@ const useStyles = makeStyles((c) =>
     divider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.borderSubtle },
     field: { paddingTop: 11, paddingBottom: 7, gap: 2 },
     fieldHead: { flexDirection: 'row', justifyContent: 'space-between' },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     fieldError: { color: c.danger, fontSize: 12 },
-    input: { color: c.text, fontSize: 16, paddingVertical: 6, paddingHorizontal: 0 },
+    input: { fontFamily: Font.regular, color: c.text, fontSize: 16, paddingVertical: 6, paddingHorizontal: 0 },
     priceRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     currency: { color: c.textMuted, fontSize: 16 },
     section: { gap: 10 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     boxInput: {
       height: 48,
       paddingHorizontal: 14,
@@ -261,9 +261,9 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontFamily: Font.medium },
     toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13 },
-    toggleTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    toggleTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     toggleText: { color: c.textMuted, fontSize: 13 },
     submit: {
       height: 54,
@@ -274,7 +274,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.ink,
     },
     submitOff: { backgroundColor: c.raised },
-    submitText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    submitText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
     submitTextOff: { color: c.textMuted },
   }),
 );

@@ -9,7 +9,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { EventContext } from '@/components/events/event-context';
 import { EmptyState, ProductThumb } from '@/components/manage/catalog-kit';
 import { NoAccess } from '@/components/ui/no-access';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
 import { formatInt } from '@/features/dashboard/format';
 import { setBlockActive, useBlocks, useProducts } from '@/features/manage/manage';
@@ -257,7 +257,7 @@ const useStyles = makeStyles((c) =>
     statValue: {
       color: c.text,
       fontSize: 20,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.4,
       fontVariant: ['tabular-nums'],
     },
@@ -274,7 +274,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.ink,
     },
-    primaryText: { color: c.onInk, fontSize: 15, fontFamily: DisplayFont.semibold },
+    primaryText: { color: c.onInk, fontSize: 15, fontFamily: Font.medium },
     secondary: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -286,16 +286,16 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    secondaryText: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    secondaryText: { color: c.text, fontSize: 15, fontFamily: Font.medium },
 
     list: { gap: 10 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
 
     block: { overflow: 'hidden' },
     blockOff: { backgroundColor: c.canvas },
     banner: { height: 96, backgroundColor: c.raised },
     noBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-    noBannerText: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
+    noBannerText: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     blockBody: { padding: 14, gap: 12 },
     blockHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     position: {
@@ -306,8 +306,8 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    positionText: { color: c.text, fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
-    title: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    positionText: { color: c.text, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+    title: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     off: { color: c.textMuted },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
 
@@ -322,6 +322,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    moreText: { color: c.textSecondary, fontSize: 13, fontWeight: '700' },
+    moreText: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
   }),
 );

@@ -12,7 +12,7 @@ import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
-import { DisplayFont, Radius, uiFont } from '@/constants/theme';
+import { Font, font, Radius } from '@/constants/theme';
 import { NoAccess } from '@/components/ui/no-access';
 import { CoachTip } from '@/components/ui/coach-tip';
 import { useEventAccess } from '@/features/access/access';
@@ -341,7 +341,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.borderSubtle,
       backgroundColor: c.surfaceSoft,
     },
-    input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
+    input: { fontFamily: Font.regular, flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
     filterBtn: {
       width: 48,
       height: 48,
@@ -364,7 +364,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.background,
     },
-    badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
+    badgeText: { color: c.onPrimary, fontSize: 10, fontFamily: Font.medium },
 
     resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
     resultText: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
@@ -379,7 +379,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 1,
       borderColor: c.borderSubtle,
     },
-    tagText: { color: c.textSecondary, fontSize: 12, fontWeight: '600' },
+    tagText: { color: c.textSecondary, fontSize: 12, fontFamily: Font.medium },
 
     groups: { gap: 32 },
     group: { gap: 10 },
@@ -391,7 +391,7 @@ const useStyles = makeStyles((c) =>
       marginBottom: 6,
     },
     // Títulos de sección como Fuse ("Current positions"): oscuros, medium, sin mayúsculas.
-    groupTitle: { color: c.text, fontSize: 19, letterSpacing: -0.3, ...uiFont('500') },
+    groupTitle: { color: c.text, fontSize: 19, letterSpacing: -0.3, ...font('medium') },
     groupSum: { color: c.textMuted, fontSize: 15, fontVariant: ['tabular-nums'] },
 
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
@@ -415,7 +415,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
       marginBottom: 6,
     },
-    emptyTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    emptyTitle: { color: c.text, fontSize: 16, fontFamily: Font.medium },
     emptyText: { color: c.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
     more: {
       height: 50,
@@ -426,7 +426,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 1,
       borderColor: c.borderSubtle,
     },
-    moreText: { color: c.text, fontSize: 15, fontVariant: ['tabular-nums'], ...uiFont('500') },
+    moreText: { color: c.text, fontSize: 15, fontVariant: ['tabular-nums'], ...font('medium') },
   }),
 );
 

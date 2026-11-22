@@ -12,7 +12,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { Network } from '@/lib/network';
 import { useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -115,5 +115,5 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
     boxShadow: '0 6px 20px rgba(0,0,0,0.22)',
   },
-  text: { fontSize: 13, fontFamily: DisplayFont.semibold },
+  text: { fontSize: 13, fontFamily: Font.medium },
 });

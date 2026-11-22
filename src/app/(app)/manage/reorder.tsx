@@ -8,7 +8,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { MorphButton, useMorphStatus } from '@/components/motion/morph-button';
 import { SortableList } from '@/components/motion/sortable-list';
 import { GroupHeader } from '@/components/manage/catalog-kit';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import {
   type ReorderKind,
@@ -228,8 +228,8 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       backgroundColor: c.surface,
     },
-    pos: { width: 22, color: c.textMuted, fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
-    title: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    pos: { width: 22, color: c.textMuted, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
+    title: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     subtitle: { color: c.textMuted, fontSize: 12 },
     grip: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
     footer: {

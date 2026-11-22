@@ -12,7 +12,7 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { daysUntil, eventPhase, formatEventDate, PHASE_LABEL } from '@/features/dashboard/format';
 import type { EventSummary } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
@@ -222,7 +222,7 @@ const useStyles = makeStyles((c) =>
     },
     edit: { backgroundColor: c.raised },
     delete: { backgroundColor: c.danger },
-    actionText: { color: c.onPrimary, fontSize: 12, fontWeight: '700' },
+    actionText: { color: c.onPrimary, fontSize: 12, fontFamily: Font.medium },
 
     card: {
       flexDirection: 'row',
@@ -239,7 +239,7 @@ const useStyles = makeStyles((c) =>
     cardSelected: { borderColor: c.primary, backgroundColor: 'rgba(0, 105, 255, 0.035)' },
 
     body: { flex: 1, gap: 8 },
-    name: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold, letterSpacing: -0.3 },
+    name: { color: c.text, fontSize: 17, fontFamily: Font.medium, letterSpacing: -0.3 },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     date: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'], flexShrink: 1 },
     staff: { color: c.textMuted, fontSize: 13 },
@@ -251,7 +251,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     chipLive: { backgroundColor: c.brandMuted },
-    chipText: { color: c.textSecondary, fontSize: 11, fontWeight: '700', letterSpacing: 0.1 },
+    chipText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium, letterSpacing: 0.1 },
     chipTextLive: { color: c.brandText },
 
     radio: {

@@ -1,6 +1,6 @@
 import { StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -26,8 +26,9 @@ export function TextField({ label, style, ...rest }: Props) {
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     wrapper: { gap: Spacing.two },
-    label: { color: c.textSecondary, fontSize: 14, fontWeight: '500' },
+    label: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     input: {
+      fontFamily: Font.regular,
       height: 52,
       borderRadius: Radius.md,
       borderWidth: 1,

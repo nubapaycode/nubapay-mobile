@@ -27,7 +27,7 @@ import { RollingNumber } from '@/components/dashboard/rolling-number';
 import { Confetti } from '@/components/fx/confetti';
 import { Ticky } from '@/components/illustrations/ticky';
 import { DeliverPanel } from '@/components/operations/deliver-panel';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useEventAccess } from '@/features/access/access';
 import { formatInt, formatMoney } from '@/features/dashboard/format';
 import { parseOrderId, remainingOf, SCAN_COPY, scanKind } from '@/features/operations/scan';
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#05070b' },
   overlay: { flex: 1, paddingHorizontal: Spacing.three },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  title: { color: '#ffffff', fontSize: 17, fontFamily: DisplayFont.semibold },
+  title: { color: '#ffffff', fontSize: 17, fontFamily: Font.medium },
   round: {
     width: 40,
     height: 40,
@@ -699,8 +699,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   countDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#3ddc84' },
-  countValue: { color: '#ffffff', fontSize: 15, lineHeight: 18, fontFamily: DisplayFont.bold },
-  countLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '600' },
+  countValue: { color: '#ffffff', fontSize: 15, lineHeight: 18, fontFamily: Font.medium },
+  countLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 13, fontFamily: Font.medium },
   recent: { gap: 6, minHeight: 40 },
   recentRow: {
     flexDirection: 'row',
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   recentDot: { width: 8, height: 8, borderRadius: 4 },
-  recentTitle: { color: '#ffffff', fontSize: 13, fontFamily: DisplayFont.semibold },
+  recentTitle: { color: '#ffffff', fontSize: 13, fontFamily: Font.medium },
   recentLine: { flex: 1, color: 'rgba(255,255,255,0.7)', fontSize: 12 },
   frame: { width: FRAME, height: FRAME },
   frameClip: { ...StyleSheet.absoluteFill, borderRadius: Radius.xl, overflow: 'hidden' },
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#ffffff',
   },
-  permissionBtnText: { color: '#000000', fontSize: 15, fontFamily: DisplayFont.semibold },
+  permissionBtnText: { color: '#000000', fontSize: 15, fontFamily: Font.medium },
   sheet: {
     position: 'absolute',
     left: 0,
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
   outcomeBadge: { marginTop: -34, marginLeft: 76, transform: [{ scale: 0.72 }] },
   outcomeRing: { position: 'absolute', width: 52, height: 52, borderRadius: 26, borderWidth: 2 },
   outcomeIcon: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
-  outcomeTitle: { color: '#000000', fontSize: 20, fontFamily: DisplayFont.bold, textAlign: 'center' },
+  outcomeTitle: { color: '#000000', fontSize: 20, fontFamily: Font.medium, textAlign: 'center' },
   outcomeText: { color: light.textSecondary, fontSize: 14, lineHeight: 20, textAlign: 'center' },
   nextBtn: {
     overflow: 'hidden',
@@ -786,12 +786,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#000000',
   },
-  nextText: { color: '#ffffff', fontSize: 16, fontFamily: DisplayFont.semibold },
+  nextText: { color: '#ffffff', fontSize: 16, fontFamily: Font.medium },
   // Se llena de izquierda a derecha mientras corre la cuenta del escaneo continuo.
   nextFill: {
     ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(255,255,255,0.18)',
     transformOrigin: 'left center',
   },
-  link: { color: light.textSecondary, fontSize: 14, fontWeight: '600', textDecorationLine: 'underline' },
+  link: { color: light.textSecondary, fontSize: 14, fontFamily: Font.medium, textDecorationLine: 'underline' },
 });

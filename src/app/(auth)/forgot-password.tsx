@@ -7,6 +7,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { apiFetch, authPaths } from '@/lib/api';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 const RESEND_SECONDS = 30;
 
@@ -233,7 +234,7 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    strong: { color: c.text, fontWeight: '600' },
+    strong: { color: c.text, fontFamily: Font.medium },
     notice: {
       flexDirection: 'row',
       alignItems: 'flex-start',

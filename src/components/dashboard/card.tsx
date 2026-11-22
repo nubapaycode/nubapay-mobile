@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { makeStyles } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -55,7 +55,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'space-between',
       gap: Spacing.two,
     },
-    title: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold, letterSpacing: -0.2 },
+    title: { color: c.text, fontSize: 17, fontFamily: Font.medium, letterSpacing: -0.2 },
     subtitle: { color: c.textMuted, fontSize: 12, marginTop: 2 },
   }),
 );

@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react
 
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
 import { addCategory, useCategories } from '@/features/manage/manage';
 import { makeStyles, useTheme } from '@/theme';
@@ -157,7 +157,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: '#C6FF00',
     },
-    title: { color: c.text, fontSize: 22, fontFamily: DisplayFont.bold, letterSpacing: -0.5 },
+    title: { color: c.text, fontSize: 22, fontFamily: Font.medium, letterSpacing: -0.5 },
     subtitle: { color: c.textMuted, fontSize: 13 },
     card: {
       borderRadius: Radius.xl,
@@ -170,15 +170,15 @@ const useStyles = makeStyles((c) =>
       gap: 2,
     },
     fieldHead: { flexDirection: 'row', justifyContent: 'space-between' },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
-    fieldError: { color: c.danger, fontSize: 12, fontWeight: '600' },
-    input: { color: c.text, fontSize: 18, fontFamily: DisplayFont.semibold, paddingVertical: 6, paddingHorizontal: 0 },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
+    fieldError: { color: c.danger, fontSize: 12, fontFamily: Font.medium },
+    input: { color: c.text, fontSize: 18, fontFamily: Font.medium, paddingVertical: 6, paddingHorizontal: 0 },
 
     block: { gap: 10 },
     blockTitle: {
       color: c.textSecondary,
       fontSize: 12,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
       paddingHorizontal: 4,
@@ -195,7 +195,7 @@ const useStyles = makeStyles((c) =>
     },
     chipStatic: { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.border },
     chipDup: { borderColor: c.danger },
-    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontFamily: Font.medium },
 
     submit: {
       height: 54,
@@ -206,7 +206,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.ink,
     },
     submitOff: { backgroundColor: c.raised },
-    submitText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    submitText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
     submitTextOff: { color: c.textMuted },
   }),
 );

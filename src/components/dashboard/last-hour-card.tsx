@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { MOOD_LABEL, MoodMascot } from '@/components/illustrations/mood-mascot';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoneyCompact } from '@/features/dashboard/format';
 import { MASCOT_LINE_EVERY_MS, msUntilNextLine, nextMascotLine } from '@/features/dashboard/mascot-lines';
 import type { ActivityItem, DashboardSummary } from '@/features/dashboard/types';
@@ -157,7 +157,7 @@ const useStyles = makeStyles((c) =>
     },
     top: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
     texts: { flex: 1, gap: 2 },
-    mood: { color: c.hero.accent, fontSize: 13, fontWeight: '600' },
+    mood: { color: c.hero.accent, fontSize: 13, fontFamily: Font.medium },
     bubble: {
       alignSelf: 'flex-start',
       marginTop: 4,
@@ -174,7 +174,7 @@ const useStyles = makeStyles((c) =>
       shadowOffset: { width: 0, height: 2 },
       elevation: 2,
     },
-    bubbleText: { color: c.text, fontSize: 13, fontWeight: '500' },
+    bubbleText: { color: c.text, fontSize: 13, fontFamily: Font.medium },
     bubbleTail: {
       position: 'absolute',
       right: -5,
@@ -187,7 +187,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       transform: [{ rotate: '45deg' }],
     },
-    label: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
-    value: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold, fontVariant: ['tabular-nums'] },
+    label: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
+    value: { color: c.text, fontSize: 15, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
   }),
 );

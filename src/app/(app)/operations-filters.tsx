@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   CHANNEL_FILTER_LABEL,
   type ChannelFilter,
@@ -115,14 +115,14 @@ const useStyles = makeStyles((c) =>
     screen: { flexGrow: 0 },
     content: { padding: Spacing.three, paddingTop: Spacing.two, gap: Spacing.four },
     head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: 4 },
-    title: { color: c.text, fontSize: 22, fontFamily: DisplayFont.bold, letterSpacing: -0.5 },
-    reset: { color: c.textSecondary, fontSize: 14, fontWeight: '600' },
+    title: { color: c.text, fontSize: 22, fontFamily: Font.medium, letterSpacing: -0.5 },
+    reset: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     section: { gap: 10 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: { height: 38, paddingHorizontal: 14, borderRadius: Radius.pill, justifyContent: 'center', backgroundColor: c.raised },
     chipOn: { backgroundColor: c.ink },
-    chipText: { color: c.ink, fontSize: 14, fontWeight: '600' },
+    chipText: { color: c.ink, fontSize: 14, fontFamily: Font.medium },
     chipTextOn: { color: c.onInk },
     apply: {
       height: 54,
@@ -132,6 +132,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.ink,
     },
-    applyText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    applyText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
   }),
 );

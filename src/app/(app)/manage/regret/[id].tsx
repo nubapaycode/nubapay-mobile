@@ -22,7 +22,7 @@ import {
   RegretStatus,
   waitingFor,
 } from "@/components/manage/regret-kit";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import { setRegretStatus, useRegrets } from "@/features/manage/manage";
 import { useFocusStatusBar } from "@/hooks/use-focus-status-bar";
 import { useNow } from "@/hooks/use-now";
@@ -443,7 +443,7 @@ const useStyles = makeStyles((c) =>
     name: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
     },
     when: { color: c.textMuted, fontSize: 13 },
@@ -470,7 +470,7 @@ const useStyles = makeStyles((c) =>
     quickLabel: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     quickValue: { color: c.textMuted, fontSize: 12 },
 
@@ -482,7 +482,7 @@ const useStyles = makeStyles((c) =>
       color: c.text,
       fontSize: 17,
       lineHeight: 24,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     alias: {
@@ -494,11 +494,11 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       backgroundColor: c.canvas,
     },
-    aliasLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    aliasLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     aliasValue: {
       color: c.text,
       fontSize: 20,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
     },
     copyBtn: {
@@ -514,7 +514,7 @@ const useStyles = makeStyles((c) =>
     copyText: {
       color: c.ink,
       fontSize: 13,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     receipt: {
@@ -540,7 +540,7 @@ const useStyles = makeStyles((c) =>
     receiptOpenText: {
       color: c.ink,
       fontSize: 13,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     noReceipt: {
       flexDirection: "row",
@@ -581,7 +581,7 @@ const useStyles = makeStyles((c) =>
     stepTitle: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       lineHeight: 20,
     },
     stepText: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
@@ -611,7 +611,7 @@ const useStyles = makeStyles((c) =>
     actionText: {
       color: c.onInk,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     actionTextSecondary: { color: c.ink },
 

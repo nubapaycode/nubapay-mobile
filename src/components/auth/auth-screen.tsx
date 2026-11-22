@@ -6,7 +6,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon } from '@/components/dashboard/icon';
 import { Aurora } from '@/components/fx/aurora';
 import { hasKeyboardController, KeyboardScroll, KeyboardSticky } from '@/components/fx/keyboard';
-import { DisplayFont, Spacing } from '@/constants/theme';
+import { Font, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -148,7 +148,7 @@ const useStyles = makeStyles((c) =>
     footer: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, paddingBottom: Spacing.three, gap: Spacing.two },
     titleBlock: { gap: 10 },
     center: { alignItems: 'center' },
-    title: { color: c.text, fontSize: 34, lineHeight: 37, fontFamily: DisplayFont.bold, letterSpacing: -0.8 },
+    title: { color: c.text, fontSize: 34, lineHeight: 37, fontFamily: Font.medium, letterSpacing: -0.8 },
     subtitle: { color: c.textSecondary, fontSize: 16, lineHeight: 23 },
     textCenter: { textAlign: 'center' },
   }),

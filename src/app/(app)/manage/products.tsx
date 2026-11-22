@@ -36,7 +36,7 @@ import {
   ProductThumb,
   SearchField,
 } from "@/components/manage/catalog-kit";
-import { DisplayFont, Radius, Spacing, uiFont } from "@/constants/theme";
+import { Font, font, Radius, Spacing } from "@/constants/theme";
 import { formatInt, formatMoney } from "@/features/dashboard/format";
 import {
   activeCatalogFilters,
@@ -625,7 +625,7 @@ const useStyles = makeStyles((c) =>
     popoverText: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
 
     searchRow: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -652,7 +652,7 @@ const useStyles = makeStyles((c) =>
       borderWidth: 2,
       borderColor: c.background,
     },
-    badgeCountText: { color: c.onBrand, fontSize: 10, fontWeight: "800" },
+    badgeCountText: { color: c.onBrand, fontSize: 10, fontFamily: Font.medium },
 
     // Pestañas a todo el ancho (salen del padding de la pantalla para poder deslizarse hasta el borde).
     tabsScroll: { marginHorizontal: -Spacing.three, marginTop: -4 },
@@ -667,7 +667,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     tabOn: { backgroundColor: c.ink },
-    tabText: { color: c.text, fontSize: 14, ...uiFont("500") },
+    tabText: { color: c.text, fontSize: 14, ...font('medium') },
     tabTextOn: { color: c.onInk },
     tabCount: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
     tabCountOn: { color: c.onInk, opacity: 0.6 },
@@ -680,7 +680,7 @@ const useStyles = makeStyles((c) =>
       flexShrink: 1,
       color: c.text,
       fontSize: 15,
-      ...uiFont("500"),
+      ...font('medium'),
     },
     comboTag: {
       flexDirection: "row",
@@ -694,7 +694,7 @@ const useStyles = makeStyles((c) =>
     comboTagText: {
       color: c.brandText,
       fontSize: 10,
-      fontWeight: "800",
+      fontFamily: Font.medium,
       letterSpacing: 0.2,
     },
     priceRow: { flexDirection: "row", alignItems: "baseline", gap: 5 },
@@ -719,14 +719,14 @@ const useStyles = makeStyles((c) =>
       flexShrink: 1,
       color: c.textSecondary,
       fontSize: 10.5,
-      ...uiFont("600"),
+      ...font('medium'),
       fontVariant: ["tabular-nums"],
     },
     promoLive: { backgroundColor: LIME },
     price: {
       color: c.text,
       fontSize: 15,
-      ...uiFont("600"),
+      ...font('medium'),
       fontVariant: ["tabular-nums"],
     },
     off: { color: c.textMuted },

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatPercent } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -40,7 +40,7 @@ const useStyles = makeStyles((c) =>
       height: 22,
       borderRadius: Radius.pill,
     },
-    text: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
+    text: { fontSize: 12, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     suffix: { color: c.textMuted, fontSize: 12 },
   }),
 );

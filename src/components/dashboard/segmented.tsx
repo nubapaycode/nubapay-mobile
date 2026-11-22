@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -84,7 +84,7 @@ const useStyles = makeStyles((c) =>
       shadowOffset: { width: 0, height: 1 },
     },
     option: { flex: 1, height: 32, alignItems: 'center', justifyContent: 'center' },
-    label: { color: c.textMuted, fontSize: 13, fontWeight: '600' },
+    label: { color: c.textMuted, fontSize: 13, fontFamily: Font.medium },
     labelSelected: { color: c.text },
   }),
 );

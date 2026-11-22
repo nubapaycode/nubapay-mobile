@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -41,7 +41,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
       marginBottom: 4,
     },
-    title: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
+    title: { color: c.text, fontSize: 17, fontFamily: Font.medium },
     text: { color: c.textMuted, fontSize: 14, lineHeight: 20, textAlign: 'center' },
   }),
 );

@@ -19,7 +19,7 @@ import {
   GroupHeader,
   HeaderAction,
 } from "@/components/manage/catalog-kit";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import {
   formatInt,
   formatMoney,
@@ -430,11 +430,11 @@ const useStyles = makeStyles((c) =>
       borderCurve: "continuous",
       backgroundColor: c.canvas,
     },
-    heroCaption: { color: c.textSecondary, fontSize: 13, fontWeight: "600" },
+    heroCaption: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
     heroValue: {
       color: c.text,
       fontSize: 36,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -1.2,
       fontVariant: ["tabular-nums"],
     },
@@ -447,7 +447,7 @@ const useStyles = makeStyles((c) =>
     heroStat: { color: c.textSecondary, fontSize: 13 },
     heroStatValue: {
       color: c.text,
-      fontWeight: "700",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     heroDot: {
@@ -465,14 +465,13 @@ const useStyles = makeStyles((c) =>
     capacityPct: {
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
     capacityOf: {
       color: c.textMuted,
       fontSize: 12,
-      fontFamily: undefined,
-      fontWeight: "500",
+      fontFamily: Font.medium,
     },
 
     section: { gap: 10 },
@@ -498,14 +497,14 @@ const useStyles = makeStyles((c) =>
       flex: 1,
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     off: { color: c.textMuted },
     priceRow: { flexDirection: "row", alignItems: "center", gap: 10 },
     price: {
       color: c.text,
       fontSize: 24,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.6,
       fontVariant: ["tabular-nums"],
     },
@@ -520,7 +519,7 @@ const useStyles = makeStyles((c) =>
     pillDot: { width: 6, height: 6, borderRadius: 3 },
     pillText: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
 
@@ -551,18 +550,18 @@ const useStyles = makeStyles((c) =>
     },
     figures: { flexDirection: "row", gap: 12 },
     figure: { flex: 1, gap: 2 },
-    figureLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    figureLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     figureValue: {
       color: c.text,
       fontSize: 17,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.3,
       fontVariant: ["tabular-nums"],
     },
     figureSuffix: {
       color: c.textMuted,
       fontSize: 13,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
       letterSpacing: 0,
     },
     barRow: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -571,7 +570,7 @@ const useStyles = makeStyles((c) =>
       textAlign: "right",
       color: c.textSecondary,
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: Font.medium,
       fontVariant: ["tabular-nums"],
     },
   }),

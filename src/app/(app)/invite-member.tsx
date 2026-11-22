@@ -19,7 +19,7 @@ import { Icon } from "@/components/dashboard/icon";
 import { FieldCheck } from "@/components/motion/field-check";
 import { MorphButton, useMorphStatus } from "@/components/motion/morph-button";
 import { Sheet, useSheet } from "@/components/ui/sheet";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import {
   DEFAULT_PERMISSIONS,
   inviteMember,
@@ -386,7 +386,7 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
     },
     subtitle: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
@@ -407,9 +407,10 @@ const useStyles = makeStyles((c) =>
     },
     field: { paddingTop: 11, paddingBottom: 7, gap: 2 },
     fieldHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", minHeight: 16 },
-    fieldLabel: { color: c.textMuted, fontSize: 12, fontWeight: "600" },
+    fieldLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     fieldError: { color: c.danger, fontSize: 12 },
     input: {
+      fontFamily: Font.regular,
       color: c.text,
       fontSize: 16,
       paddingVertical: 6,
@@ -420,7 +421,7 @@ const useStyles = makeStyles((c) =>
     sectionTitle: {
       color: c.textSecondary,
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       paddingHorizontal: 4,
     },
     roleInput: {
@@ -443,7 +444,7 @@ const useStyles = makeStyles((c) =>
       justifyContent: "center",
       backgroundColor: c.raised,
     },
-    chipText: { color: c.ink, fontSize: 14, fontWeight: "600" },
+    chipText: { color: c.ink, fontSize: 14, fontFamily: Font.medium },
     hint: { color: c.textSecondary, fontSize: 13, paddingHorizontal: 4 },
     error: { color: c.danger, fontSize: 13, paddingHorizontal: 4 },
 
@@ -455,7 +456,7 @@ const useStyles = makeStyles((c) =>
     link: {
       color: c.textSecondary,
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: Font.medium,
       paddingHorizontal: 4,
     },
     permRow: {

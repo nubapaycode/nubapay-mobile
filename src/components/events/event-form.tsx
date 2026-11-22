@@ -25,7 +25,7 @@ import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon } from '@/components/dashboard/icon';
 import { Segmented } from '@/components/dashboard/segmented';
 import { DateTimeField } from '@/components/events/date-time-field';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { setSelectedEventId } from '@/features/dashboard/selected-event';
 import { eventPhase, PHASE_LABEL } from '@/features/dashboard/format';
 import { toLocalIso } from '@/features/events/event-actions';
@@ -239,7 +239,7 @@ export function EventForm({ event }: { event?: EventDetail }) {
                       // sin cambios: la cápsula de vidrio normal, atenuada.
                       variant: canSave ? 'prominent' : 'plain',
                       tintColor: canSave ? colors.primary : colors.text,
-                      labelStyle: { fontFamily: DisplayFont.semibold, fontSize: 16 },
+                      labelStyle: { fontFamily: Font.medium, fontSize: 16 },
                     },
                   ],
                 }
@@ -541,7 +541,7 @@ const useStyles = makeStyles((c) =>
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
 
     summary: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4 },
-    summaryName: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
+    summaryName: { color: c.text, fontSize: 20, fontFamily: Font.medium, letterSpacing: -0.4 },
     summaryMeta: { flexDirection: 'row', gap: 6 },
     chip: {
       paddingHorizontal: 8,
@@ -552,11 +552,11 @@ const useStyles = makeStyles((c) =>
     },
     chipLive: { backgroundColor: c.brandMuted },
     chipOff: { backgroundColor: c.dangerMuted },
-    chipText: { color: c.textSecondary, fontSize: 11, fontWeight: '700' },
+    chipText: { color: c.textSecondary, fontSize: 11, fontFamily: Font.medium },
     chipTextLive: { color: c.brandText },
 
     section: { gap: 8 },
-    sectionTitle: { color: c.textSecondary, fontSize: 13, fontWeight: '600', paddingHorizontal: 4 },
+    sectionTitle: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium, paddingHorizontal: 4 },
     card: {
       borderRadius: Radius.xl,
       borderCurve: 'continuous',
@@ -570,9 +570,9 @@ const useStyles = makeStyles((c) =>
 
     inputBlock: { paddingTop: 12, paddingBottom: 10, gap: 2 },
     inputHead: { flexDirection: 'row', justifyContent: 'space-between' },
-    inputLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
+    inputLabel: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
     counter: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
-    input: { color: c.text, fontSize: 16, paddingVertical: 6, paddingHorizontal: 0 },
+    input: { fontFamily: Font.regular, color: c.text, fontSize: 16, paddingVertical: 6, paddingHorizontal: 0 },
     textarea: { minHeight: 96, lineHeight: 22 },
 
     dateRow: {
@@ -584,12 +584,12 @@ const useStyles = makeStyles((c) =>
     },
     dateRowStacked: { flexDirection: 'column', alignItems: 'stretch', gap: 10 },
     switchRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-    rowTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    rowTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     rowDescription: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
     error: { color: c.danger, fontSize: 13, marginTop: -12, paddingHorizontal: 4 },
 
     save: { paddingHorizontal: 8, height: 32, justifyContent: 'center' },
-    saveText: { fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveText: { fontSize: 16, fontFamily: Font.medium },
 
     statusBlock: { paddingVertical: 14, gap: 10 },
     cover: {
@@ -600,7 +600,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     coverEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-    coverText: { color: c.textMuted, fontSize: 14, fontWeight: '600' },
+    coverText: { color: c.textMuted, fontSize: 14, fontFamily: Font.medium },
     coverBadge: {
       position: 'absolute',
       right: 10,
@@ -613,7 +613,7 @@ const useStyles = makeStyles((c) =>
       borderRadius: 14,
       backgroundColor: 'rgba(0,0,0,0.55)',
     },
-    coverBadgeText: { color: '#ffffff', fontSize: 12, fontWeight: '600' },
+    coverBadgeText: { color: '#ffffff', fontSize: 12, fontFamily: Font.medium },
   }),
 );
 

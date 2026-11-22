@@ -14,6 +14,7 @@ import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
 import { Icon, type IconName } from './icon';
+import { Font } from '@/constants/theme';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 
@@ -102,6 +103,6 @@ const useStyles = makeStyles((c) =>
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.hero.glassBorder,
     },
-    label: { color: c.textSecondary, fontSize: 12, fontWeight: '500' },
+    label: { color: c.textSecondary, fontSize: 12, fontFamily: Font.medium },
   }),
 );

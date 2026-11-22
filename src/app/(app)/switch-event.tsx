@@ -9,7 +9,7 @@ import { Icon } from '@/components/dashboard/icon';
 import { AddEventButton } from '@/components/events/add-event-button';
 import { EventCard } from '@/components/events/event-card';
 import { Sheet, useSheet } from '@/components/ui/sheet';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { setSelectedEventId, useSelectedEventId } from '@/features/dashboard/selected-event';
 import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { confirmDeleteEvent } from '@/features/events/event-actions';
@@ -110,7 +110,7 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
       paddingHorizontal: 4,
       marginBottom: 4,
@@ -126,7 +126,7 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.canvas,
     },
-    moreText: { flex: 1, color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    moreText: { flex: 1, color: c.text, fontSize: 15, fontFamily: Font.medium },
     moreCount: {
       minWidth: 24,
       height: 22,
@@ -139,7 +139,7 @@ const useStyles = makeStyles((c) =>
     moreCountText: {
       color: c.textSecondary,
       fontSize: 12,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
   }),

@@ -6,7 +6,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { Icon } from '@/components/dashboard/icon';
 import { Sheet, useSheet } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/toast';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import {
   PERMISSION_LABEL,
   PERMISSIONS,
@@ -133,9 +133,9 @@ const useStyles = makeStyles((c) =>
     screen: { flexGrow: 0 },
     content: { padding: Spacing.three, paddingTop: Spacing.two, gap: Spacing.four },
     head: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingHorizontal: 4 },
-    title: { color: c.text, fontSize: 22, fontFamily: DisplayFont.bold, letterSpacing: -0.5 },
+    title: { color: c.text, fontSize: 22, fontFamily: Font.medium, letterSpacing: -0.5 },
     subtitle: { color: c.textMuted, fontSize: 13 },
-    link: { color: c.textSecondary, fontSize: 14, fontWeight: '600', paddingTop: 4 },
+    link: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium, paddingTop: 4 },
     list: { gap: 10 },
     option: {
       flexDirection: 'row',
@@ -148,7 +148,7 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
     },
     optionOn: { borderColor: c.ink },
-    optionText: { flex: 1, color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    optionText: { flex: 1, color: c.text, fontSize: 16, fontFamily: Font.medium },
     check: {
       width: 22,
       height: 22,
@@ -168,6 +168,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.ink,
     },
-    saveText: { color: c.onInk, fontSize: 16, fontFamily: DisplayFont.semibold },
+    saveText: { color: c.onInk, fontSize: 16, fontFamily: Font.medium },
   }),
 );

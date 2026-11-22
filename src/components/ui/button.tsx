@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, type PressableProps, StyleSheet } from 'react-native';
 
 import { ScalePressable } from '@/components/motion/scale-pressable';
-import { Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -56,6 +56,6 @@ const useStyles = makeStyles((c) =>
     primary: { backgroundColor: c.primary },
     ghost: { backgroundColor: 'transparent' },
     disabled: { opacity: 0.6 },
-    label: { color: c.onPrimary, fontSize: 16, fontWeight: '600' },
+    label: { color: c.onPrimary, fontSize: 16, fontFamily: Font.medium },
   }),
 );

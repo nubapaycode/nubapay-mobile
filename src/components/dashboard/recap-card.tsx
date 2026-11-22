@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { MoodMascot } from '@/components/illustrations/mood-mascot';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -55,9 +55,9 @@ const useStyles = makeStyles((c) =>
       padding: Spacing.three,
     },
     texts: { flex: 1, gap: 4 },
-    eyebrow: { color: c.textSecondary, fontSize: 13, fontWeight: '500' },
-    title: { color: c.text, fontSize: 18, fontFamily: DisplayFont.semibold },
+    eyebrow: { color: c.textSecondary, fontSize: 13, fontFamily: Font.medium },
+    title: { color: c.text, fontSize: 18, fontFamily: Font.medium },
     cta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-    ctaText: { color: c.hero.accent, fontSize: 14, fontWeight: '600' },
+    ctaText: { color: c.hero.accent, fontSize: 14, fontFamily: Font.medium },
   }),
 );

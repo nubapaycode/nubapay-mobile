@@ -16,7 +16,7 @@ import { Icon, type IconName } from '@/components/dashboard/icon';
 import { hasLinkPreview, PreviewLink } from '@/components/motion/preview-link';
 import { SwipeActions } from '@/components/motion/swipe-actions';
 import { ItemStack } from '@/components/operations/item-stack';
-import { uiFont } from '@/constants/theme';
+import { font } from '@/constants/theme';
 import { formatMoney } from '@/features/dashboard/format';
 import { orderState, type OperationTone, type OrderStateKey } from '@/features/operations/operations';
 import type { Order } from '@/lib/api/organizer';
@@ -223,7 +223,7 @@ const useStyles = makeStyles((c) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      paddingVertical: 28,
+      paddingVertical: 14,
       paddingLeft: 20,
       paddingRight: 18,
       borderRadius: CARD_RADIUS,
@@ -234,7 +234,7 @@ const useStyles = makeStyles((c) =>
       boxShadow: c.cardShadowSmooth,
     },
     cardCancelled: { opacity: 0.7 },
-    grow: { flex: 1, gap: 12 },
+    grow: { flex: 1, gap: 8 },
     line: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
     lineTop: { alignItems: 'center' },
     flex: { flex: 1 },
@@ -253,13 +253,13 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
     },
     meta: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
-    state: { fontSize: 12, ...uiFont('600') },
-    name: { color: c.text, fontSize: 18, letterSpacing: -0.2, ...uiFont('500') },
+    state: { fontSize: 12, ...font('medium') },
+    name: { color: c.text, fontSize: 18, letterSpacing: -0.2, ...font('medium') },
     amount: {
       color: c.text,
       fontSize: 17,
       fontVariant: ['tabular-nums'],
-      ...uiFont('500'),
+      ...font('medium'),
     },
     amountCancelled: { color: c.textMuted, textDecorationLine: 'line-through' },
   }),

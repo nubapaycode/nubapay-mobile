@@ -7,6 +7,7 @@ import { Text } from '@/components/ui/text';
 
 import { Card } from './card';
 import { ProgressBar } from './progress-bar';
+import { Font } from '@/constants/theme';
 
 /** Ranking por unidades, con barra relativa al primero (patrón YouTube Studio / Square). */
 export function TopProductsCard({
@@ -69,7 +70,7 @@ const useStyles = makeStyles((c) =>
       width: 14,
       color: c.textMuted,
       fontSize: 12,
-      fontWeight: '700',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
     name: { color: c.text, fontSize: 15, flex: 1 },
@@ -77,7 +78,7 @@ const useStyles = makeStyles((c) =>
     revenue: {
       color: c.text,
       fontSize: 14,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       minWidth: 84,
       textAlign: 'right',
       fontVariant: ['tabular-nums'],

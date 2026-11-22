@@ -8,7 +8,7 @@ import { enter, enterRow, StatsRow } from '@/components/dashboard/detail-kit';
 import { Icon } from '@/components/dashboard/icon';
 import { ProgressBar } from '@/components/dashboard/progress-bar';
 import { AddButton } from '@/components/manage/manage-ui';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { formatInt, formatMoneyCompact, formatPercent } from '@/features/dashboard/format';
 import { type PickupPoint, setPickupActive, usePickupPoints } from '@/features/manage/manage';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
@@ -186,7 +186,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.brandMuted,
     },
     queueDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.brand },
-    queueText: { flex: 1, color: c.brandText, fontSize: 14, fontWeight: '600' },
+    queueText: { flex: 1, color: c.brandText, fontSize: 14, fontFamily: Font.medium },
 
     list: { gap: 10 },
     empty: {
@@ -220,13 +220,13 @@ const useStyles = makeStyles((c) =>
     },
     iconOff: { backgroundColor: c.border },
     nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    name: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold, flexShrink: 1 },
+    name: { color: c.text, fontSize: 16, fontFamily: Font.medium, flexShrink: 1 },
     off: { color: c.textMuted },
     description: { color: c.textMuted, fontSize: 13 },
     bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
-    revenue: { color: c.text, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    revenue: { color: c.text, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     badge: { paddingHorizontal: 8, height: 22, justifyContent: 'center', borderRadius: 7 },
-    badgeText: { fontSize: 11, fontWeight: '700' },
+    badgeText: { fontSize: 11, fontFamily: Font.medium },
   }),
 );

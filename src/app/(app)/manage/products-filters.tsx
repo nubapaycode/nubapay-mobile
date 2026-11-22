@@ -13,7 +13,7 @@ import Animated, { ZoomIn } from "react-native-reanimated";
 import { Icon, type IconName } from "@/components/dashboard/icon";
 import { Card, CardList, GroupHeader } from "@/components/manage/catalog-kit";
 import { Sheet, useSheet } from "@/components/ui/sheet";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { Font, Radius, Spacing } from "@/constants/theme";
 import {
   type CatalogFilters,
   DEFAULT_CATALOG_FILTERS,
@@ -228,10 +228,10 @@ const useStyles = makeStyles((c) =>
     title: {
       color: c.text,
       fontSize: 22,
-      fontFamily: DisplayFont.bold,
+      fontFamily: Font.medium,
       letterSpacing: -0.5,
     },
-    reset: { color: c.textSecondary, fontSize: 14, fontWeight: "600" },
+    reset: { color: c.textSecondary, fontSize: 14, fontFamily: Font.medium },
     content: {
       paddingHorizontal: Spacing.three,
       paddingBottom: Spacing.two,
@@ -255,7 +255,7 @@ const useStyles = makeStyles((c) =>
       flex: 1,
       color: c.text,
       fontSize: 15,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     count: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
     radio: {
@@ -311,7 +311,7 @@ const useStyles = makeStyles((c) =>
     applyText: {
       color: c.onInk,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
   }),
 );

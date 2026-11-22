@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { formatInt, formatMoney } from '@/features/dashboard/format';
 import type { DashboardInsights } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
@@ -58,12 +58,12 @@ export function PickupPointsCard({
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    name: { color: c.text, fontSize: 15, fontWeight: '500', flexShrink: 1 },
+    name: { color: c.text, fontSize: 15, fontFamily: Font.medium, flexShrink: 1 },
     revenue: {
       marginLeft: 'auto',
       color: c.text,
       fontSize: 14,
-      fontWeight: '600',
+      fontFamily: Font.medium,
       fontVariant: ['tabular-nums'],
     },
     meta: { color: c.textMuted, fontSize: 12 },
@@ -77,6 +77,6 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.warningMuted,
     },
     pendingDot: { width: 5, height: 5, borderRadius: 3 },
-    pendingText: { color: c.warning, fontSize: 11, fontWeight: '600' },
+    pendingText: { color: c.warning, fontSize: 11, fontFamily: Font.medium },
   }),
 );

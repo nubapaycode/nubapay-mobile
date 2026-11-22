@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOut } from 'react-native-reanimated';
 
 import { Icon } from '@/components/dashboard/icon';
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { Text } from '@/components/ui/text';
 
 const INK = '#0b0f17';
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
   },
   text: { flex: 1, color: '#ffffff', fontSize: 14, lineHeight: 19 },
-  strong: { color: LIME, fontWeight: '700' },
+  strong: { color: LIME, fontFamily: Font.medium },
   arrow: { width: 12, height: 12, backgroundColor: INK, transform: [{ rotate: '45deg' }], position: 'relative', zIndex: -1 },
   arrowDown: { marginTop: -6 },
   arrowUp: { marginBottom: -6 },

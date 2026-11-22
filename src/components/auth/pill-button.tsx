@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, type PressableProps, StyleSheet } from 'r
 
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { Font } from '@/constants/theme';
 
 type Variant = 'brand' | 'ink' | 'ghost';
 
@@ -55,6 +56,6 @@ const useStyles = makeStyles((c) =>
     ghost: { height: 52, backgroundColor: 'transparent' },
     pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
     disabled: { opacity: 0.4 },
-    label: { fontSize: 17, fontWeight: '600' },
+    label: { fontSize: 17, fontFamily: Font.medium },
   }),
 );

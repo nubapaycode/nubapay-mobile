@@ -1,9 +1,8 @@
 import {
-  BricolageGrotesque_600SemiBold,
-  BricolageGrotesque_700Bold,
-  BricolageGrotesque_800ExtraBold,
+  Geist_400Regular,
+  Geist_500Medium,
   useFonts,
-} from "@expo-google-fonts/bricolage-grotesque";
+} from "@expo-google-fonts/geist";
 import {
   DarkTheme,
   DefaultTheme,
@@ -23,7 +22,7 @@ import { SplashHandoff } from "@/components/fx/splash-handoff";
 import { ThemeReveal } from "@/components/fx/theme-reveal";
 import { CardExpandHost } from "@/components/motion/card-expand";
 import { ToastHost } from "@/components/ui/toast";
-import { DisplayFont } from "@/constants/theme";
+import { Font } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
 import { dark, PaletteScope, ThemeProvider, useTheme } from "@/theme";
 
@@ -39,11 +38,10 @@ function RootNavigator() {
   const { colors: themeColors, loaded: themeLoaded } = useTheme();
   // Sin sesión (bienvenida, login, recuperar contraseña) siempre en oscuro, sin importar el tema elegido.
   const colors = token ? themeColors : dark;
-  // Bricolage Grotesque (títulos, igual que nubapay-frontend). Si falla la carga se sigue con la del sistema.
+  // Geist Regular/Medium en toda la app. Si falla la carga se sigue con la del sistema.
   const [fontsLoaded, fontError] = useFonts({
-    [DisplayFont.semibold]: BricolageGrotesque_600SemiBold,
-    [DisplayFont.bold]: BricolageGrotesque_700Bold,
-    [DisplayFont.extrabold]: BricolageGrotesque_800ExtraBold,
+    [Font.regular]: Geist_400Regular,
+    [Font.medium]: Geist_500Medium,
   });
   const ready = !isLoading && themeLoaded && (fontsLoaded || !!fontError);
 

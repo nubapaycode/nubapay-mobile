@@ -17,7 +17,7 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { Icon } from '@/components/dashboard/icon';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles, useTheme } from '@/theme';
 
 const HEIGHT = 58;
@@ -184,7 +184,7 @@ const useStyles = makeStyles((c) =>
       textAlign: 'center',
       color: c.onInk,
       fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontFamily: Font.medium,
     },
     thumb: {
       position: 'absolute',

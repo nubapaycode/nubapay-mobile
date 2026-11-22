@@ -14,7 +14,7 @@ import { enter } from '@/components/dashboard/detail-kit';
 import { hiddenNativeSpinner, PulseRefresh } from '@/components/dashboard/pulse-refresh';
 import { Icon } from '@/components/dashboard/icon';
 import { BlurView } from '@/components/fx/blur';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
@@ -164,7 +164,7 @@ const useStyles = makeStyles((c) =>
     screen: { flex: 1, backgroundColor: c.background },
     content: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.five, gap: Spacing.four },
     head: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 4, transformOrigin: 'left center' },
-    title: { color: c.text, fontSize: 28, fontFamily: DisplayFont.bold, letterSpacing: -0.8 },
+    title: { color: c.text, fontSize: 28, fontFamily: Font.medium, letterSpacing: -0.8 },
     subtitle: { color: c.textMuted, fontSize: 13 },
     picker: {
       alignSelf: 'flex-start',
@@ -179,7 +179,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     pickerPressed: { backgroundColor: c.border },
-    pickerText: { flexShrink: 1, color: c.text, fontSize: 13, fontWeight: '600' },
+    pickerText: { flexShrink: 1, color: c.text, fontSize: 13, fontFamily: Font.medium },
     bar: {
       position: 'absolute',
       top: 0,
@@ -191,6 +191,6 @@ const useStyles = makeStyles((c) =>
       borderBottomColor: c.border,
       overflow: 'hidden',
     },
-    barTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
+    barTitle: { color: c.text, fontSize: 16, fontFamily: Font.medium },
   }),
 );

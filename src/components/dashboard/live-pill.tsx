@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Radius } from '@/constants/theme';
+import { Font, Radius } from '@/constants/theme';
 import { makeStyles } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -61,6 +61,6 @@ const useStyles = makeStyles((c) =>
     dotWrap: { width: 8, height: 8, alignItems: 'center', justifyContent: 'center' },
     halo: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: c.hero.accent },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.hero.accent },
-    label: { color: c.hero.accent, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+    label: { color: c.hero.accent, fontSize: 11, fontFamily: Font.medium, letterSpacing: 0.8 },
   }),
 );

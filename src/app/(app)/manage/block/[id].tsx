@@ -19,7 +19,7 @@ import { enter } from '@/components/dashboard/detail-kit';
 import { KeyboardScroll } from "@/components/fx/keyboard";
 import { Icon } from '@/components/dashboard/icon';
 import { Card, CardList, GroupHeader, HeaderAction, ProductThumb, SaveText } from '@/components/manage/catalog-kit';
-import { DisplayFont, Radius, Spacing } from '@/constants/theme';
+import { Font, Radius, Spacing } from '@/constants/theme';
 import { openBlockProductsPicker } from '@/features/manage/combo-picker';
 import { type CatalogBlock, removeBlock, saveBlock, useBlocks, useProducts } from '@/features/manage/manage';
 import { useFocusStatusBar } from '@/hooks/use-focus-status-bar';
@@ -186,7 +186,7 @@ function BlockForm({ block }: { block?: CatalogBlock }) {
                     disabled: !canSave,
                     variant: canSave ? 'prominent' : 'plain',
                     tintColor: canSave ? colors.primary : colors.text,
-                    labelStyle: { fontFamily: DisplayFont.semibold, fontSize: 16 },
+                    labelStyle: { fontFamily: Font.medium, fontSize: 16 },
                   },
                 ],
               }
@@ -374,8 +374,8 @@ const useStyles = makeStyles((c) =>
     content: { padding: Spacing.three, paddingBottom: Spacing.six, gap: Spacing.four },
     section: { gap: 10 },
     field: { gap: 4, paddingVertical: 4 },
-    label: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
-    input: { color: c.text, fontSize: 16, paddingVertical: 6 },
+    label: { color: c.textMuted, fontSize: 12, fontFamily: Font.medium },
+    input: { fontFamily: Font.regular, color: c.text, fontSize: 16, paddingVertical: 6 },
     error: { color: c.danger, fontSize: 13 },
     banner: {
       height: 120,
@@ -385,7 +385,7 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     bannerEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-    bannerText: { color: c.textMuted, fontSize: 14, fontWeight: '600' },
+    bannerText: { color: c.textMuted, fontSize: 14, fontFamily: Font.medium },
     addProducts: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -396,9 +396,9 @@ const useStyles = makeStyles((c) =>
       borderCurve: 'continuous',
       backgroundColor: c.raised,
     },
-    addProductsText: { color: c.ink, fontSize: 15, fontFamily: DisplayFont.semibold },
+    addProductsText: { color: c.ink, fontSize: 15, fontFamily: Font.medium },
     productRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    productName: { color: c.text, fontSize: 15, fontWeight: '500' },
+    productName: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     productMeta: { color: c.textMuted, fontSize: 12 },
     off: { color: c.textMuted },
     small: {
@@ -410,10 +410,10 @@ const useStyles = makeStyles((c) =>
       backgroundColor: c.raised,
     },
     toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 4 },
-    toggleTitle: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
+    toggleTitle: { color: c.text, fontSize: 15, fontFamily: Font.medium },
     toggleText: { color: c.textMuted, fontSize: 13, lineHeight: 18 },
     delete: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48 },
-    deleteText: { color: c.danger, fontSize: 15, fontFamily: DisplayFont.semibold },
+    deleteText: { color: c.danger, fontSize: 15, fontFamily: Font.medium },
     missing: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.background },
     missingText: { color: c.textSecondary, fontSize: 15 },
   }),

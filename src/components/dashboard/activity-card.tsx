@@ -9,6 +9,7 @@ import { Text } from '@/components/ui/text';
 
 import { Card } from './card';
 import { Icon, type IconName } from './icon';
+import { Font } from '@/constants/theme';
 
 const KIND: Record<ActivityItem['type'], { icon: IconName; series: 0 | 1 | 2; label: string }> = {
   sale: { icon: 'cart', series: 0, label: 'Venta' },
@@ -82,10 +83,10 @@ const useStyles = makeStyles((c) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    title: { color: c.text, fontSize: 15, fontWeight: '600' },
-    muted: { color: c.textMuted, fontWeight: '400' },
+    title: { color: c.text, fontSize: 15, fontFamily: Font.medium },
+    muted: { color: c.textMuted, fontFamily: Font.regular },
     sub: { color: c.textSecondary, fontSize: 12 },
-    amount: { color: c.text, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    amount: { color: c.text, fontSize: 13, fontFamily: Font.medium, fontVariant: ['tabular-nums'] },
     time: { color: c.textMuted, fontSize: 11 },
   }),
 );
