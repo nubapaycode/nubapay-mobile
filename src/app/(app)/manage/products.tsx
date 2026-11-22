@@ -25,7 +25,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScalePressable } from "@/components/motion/scale-pressable";
 import { CountBadge } from "@/components/motion/count-badge";
-import { EventContext } from "@/components/events/event-context";
 import { enter, enterItem } from "@/components/dashboard/detail-kit";
 import { Icon, type IconName } from "@/components/dashboard/icon";
 import {
@@ -37,11 +36,13 @@ import {
   ProductThumb,
   SearchField,
 } from "@/components/manage/catalog-kit";
-import { DisplayFont, Radius, Spacing } from "@/constants/theme";
+import { DisplayFont, Radius, Spacing, uiFont } from "@/constants/theme";
 import { formatInt, formatMoney } from "@/features/dashboard/format";
 import {
   activeCatalogFilters,
+  type CatalogStatus,
   DEFAULT_CATALOG_FILTERS,
+  hasPromo,
   matchesCatalogFilters,
   type Product,
   setCatalogFilters,
@@ -143,12 +144,14 @@ export default function ProductsScreen() {
     return [...m.entries()].filter(([, items]) => items.length > 0);
   }, [products, filtered]);
 
-  const narrowed = !!q || activeFilters > 0;
-  const onSale = products.filter((p) => p.isActive).length;
-  const soldTotal = products.reduce((a, p) => a + p.sold, 0);
-  const promos = products.filter(
-    (p) => p.promo && p.promo.isActive && !promoEnded(p.promo),
-  ).length;
+  const narrowed = !!q || activeFilters > 0 || filters.status !== "all";
+  // Cuántos hay en cada pestaña (sobre todo el catálogo, como Shopify).
+  const statusCounts: Record<CatalogStatus, number> = {
+    all: products.length,
+    active: products.filter((p) => p.isActive).length,
+    paused: products.filter((p) => !p.isActive).length,
+    promo: products.filter(hasPromo).length,
+  };
   const clearAll = () => {
     Haptics.selectionAsync();
     setQuery("");
@@ -212,9 +215,6 @@ export default function ProductsScreen() {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View entering={enter(0)}>
-          <EventContext caption="Catálogo de" />
-        </Animated.View>
         {/* Buscador + filtros (estado y categorías) */}
         <Animated.View entering={enter(0)} style={styles.searchRow}>
           <SearchField
@@ -247,6 +247,17 @@ export default function ProductsScreen() {
             ) : null}
           </Pressable>
         </Animated.View>
+
+        {list && products.length > 0 ? (
+          <StatusTabs
+            value={filters.status}
+            counts={statusCounts}
+            onChange={(status) => {
+              Haptics.selectionAsync();
+              setCatalogFilters({ ...filters, status });
+            }}
+          />
+        ) : null}
 
         {!list ? (
           error ? (
@@ -283,16 +294,6 @@ export default function ProductsScreen() {
           </Animated.View>
         ) : (
           <>
-          {!narrowed ? (
-            <Animated.View entering={FadeIn.duration(300)}>
-              {/* Resumen del catálogo, cada dato en su card. */}
-              <View style={styles.stats}>
-                <Stat label="A la venta" value={`${formatInt(onSale)}`} suffix={`/ ${formatInt(products.length)}`} />
-                <Stat label="Vendidos" value={formatInt(soldTotal)} />
-                <Stat label="En promo" value={formatInt(promos)} accent={promos > 0} />
-              </View>
-            </Animated.View>
-          ) : null}
           {groups.map(([name, items]) => (
             <Animated.View
               key={name}
@@ -413,34 +414,63 @@ function CreatePopover({
   );
 }
 
-function Stat({
-  label,
+const STATUS_TABS: { value: CatalogStatus; label: string }[] = [
+  { value: "all", label: "Todos" },
+  { value: "active", label: "A la venta" },
+  { value: "paused", label: "Pausados" },
+  { value: "promo", label: "En promo" },
+];
+
+/**
+ * Pestañas de estado con su cantidad (referencias: Shopify Products y el inventario de alias): reemplazan
+ * a las stats, porque además de contar sirven para filtrar. "En promo" solo aparece si hay alguna.
+ */
+function StatusTabs({
   value,
-  suffix,
-  accent,
+  counts,
+  onChange,
 }: {
-  label: string;
-  value: string;
-  suffix?: string;
-  accent?: boolean;
+  value: CatalogStatus;
+  counts: Record<CatalogStatus, number>;
+  onChange: (v: CatalogStatus) => void;
 }) {
   const styles = useStyles();
+  const tabs = STATUS_TABS.filter((t) => t.value !== "promo" || counts.promo > 0 || value === "promo");
   return (
-    <View style={[styles.stat, accent && styles.statAccent]}>
-      <Text style={[styles.statLabel, accent && styles.statLabelAccent]} numberOfLines={1}>
-        {label}
-      </Text>
-      <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-        {value}
-        {suffix ? <Text style={styles.statSuffix}> {suffix}</Text> : null}
-      </Text>
-    </View>
+    <Animated.View entering={enter(1)}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
+        style={styles.tabsScroll}
+      >
+        {tabs.map((t) => {
+          const on = t.value === value;
+          return (
+            <Pressable
+              key={t.value}
+              onPress={() => !on && onChange(t.value)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={`${t.label}, ${counts[t.value]}`}
+              style={[styles.tab, on && styles.tabOn]}
+            >
+              <Text style={[styles.tabText, on && styles.tabTextOn]}>{t.label}</Text>
+              <Text style={[styles.tabCount, on && styles.tabCountOn]}>
+                {formatInt(counts[t.value])}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </Animated.View>
   );
 }
 
 /**
  * Producto en su card: miniatura, nombre (y "Combo"), contenido del combo, precio (con el de lista
- * tachado si hay promo vigente), vendidos o "Pausado", la promo y el switch de venta.
+ * tachado si hay promo vigente), vendidos, la promo y el switch de venta (pausado se ve atenuado y
+ * con el switch apagado).
  */
 function ProductRow({
   product: p,
@@ -512,29 +542,28 @@ function ProductRow({
           ) : null}
         </View>
         <View style={styles.tags}>
-          {!p.isActive ? (
-            <View style={styles.tag}>
-              <Icon name="minus" size={10} color={colors.textSecondary} />
-              <Text style={styles.tagText}>Pausado</Text>
-            </View>
-          ) : p.sold > 0 ? (
+          {p.isActive && p.sold > 0 ? (
             <View style={styles.tag}>
               <Icon name="cart" size={10} color={colors.textSecondary} />
               <Text style={styles.tagText}>{formatInt(p.sold)} vendidos</Text>
             </View>
           ) : null}
           {promo ? (
-            <View style={[styles.tag, live && styles.promoLive]}>
+            <View style={[styles.tag, live && p.isActive && styles.promoLive]}>
               <Icon
                 name={live ? "bolt" : "clock"}
                 size={10}
-                color={live ? colors.onBrand : colors.textSecondary}
+                color={!p.isActive ? colors.textMuted : live ? colors.onBrand : colors.textSecondary}
               />
               <Text
-                style={[styles.tagText, live && { color: colors.onBrand }]}
+                style={[
+                  styles.tagText,
+                  live && p.isActive && { color: colors.onBrand },
+                  !p.isActive && styles.off,
+                ]}
                 numberOfLines={1}
               >
-                {promo.label} · {live ? "ahora" : formatWindowShort(promo)}
+                {live ? "Promo" : `Promo · ${formatWindowShort(promo)}`}
               </Text>
             </View>
           ) : null}
@@ -606,12 +635,9 @@ const useStyles = makeStyles((c) =>
       borderRadius: 23,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: c.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
-      boxShadow: c.cardShadowSubtle,
+      backgroundColor: c.raised,
     },
-    filterBtnOn: { backgroundColor: c.ink, borderColor: c.ink },
+    filterBtnOn: { backgroundColor: c.ink },
     badgeCount: {
       position: "absolute",
       top: -3,
@@ -628,29 +654,23 @@ const useStyles = makeStyles((c) =>
     },
     badgeCountText: { color: c.onBrand, fontSize: 10, fontWeight: "800" },
 
-    stats: { flexDirection: "row", gap: 8 },
-    stat: {
-      flex: 1,
-      gap: 4,
-      padding: 12,
-      borderRadius: Radius.xl,
-      borderCurve: "continuous",
-      backgroundColor: c.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
-      boxShadow: c.cardShadowSubtle,
+    // Pestañas a todo el ancho (salen del padding de la pantalla para poder deslizarse hasta el borde).
+    tabsScroll: { marginHorizontal: -Spacing.three, marginTop: -4 },
+    tabs: { gap: 8, paddingHorizontal: Spacing.three },
+    tab: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      height: 36,
+      paddingHorizontal: 14,
+      borderRadius: Radius.pill,
+      backgroundColor: c.raised,
     },
-    statAccent: { backgroundColor: c.brandMuted, borderColor: "transparent", boxShadow: "none" },
-    statLabel: { color: c.textSecondary, fontSize: 11 },
-    statLabelAccent: { color: c.brandText },
-    statValue: {
-      color: c.text,
-      fontSize: 20,
-      fontFamily: DisplayFont.bold,
-      letterSpacing: -0.4,
-      fontVariant: ["tabular-nums"],
-    },
-    statSuffix: { color: c.textMuted, fontSize: 13, fontFamily: DisplayFont.semibold, letterSpacing: 0 },
+    tabOn: { backgroundColor: c.ink },
+    tabText: { color: c.text, fontSize: 14, ...uiFont("500") },
+    tabTextOn: { color: c.onInk },
+    tabCount: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
+    tabCountOn: { color: c.onInk, opacity: 0.6 },
 
     group: { gap: 8, marginTop: 8 },
     row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12 },
@@ -659,8 +679,8 @@ const useStyles = makeStyles((c) =>
     name: {
       flexShrink: 1,
       color: c.text,
-      fontSize: 16,
-      fontFamily: DisplayFont.semibold,
+      fontSize: 15,
+      ...uiFont("500"),
     },
     comboTag: {
       flexDirection: "row",
@@ -680,7 +700,7 @@ const useStyles = makeStyles((c) =>
     priceRow: { flexDirection: "row", alignItems: "baseline", gap: 5 },
     priceOld: {
       color: c.textMuted,
-      fontSize: 13,
+      fontSize: 12,
       textDecorationLine: "line-through",
       fontVariant: ["tabular-nums"],
     },
@@ -698,18 +718,18 @@ const useStyles = makeStyles((c) =>
     tagText: {
       flexShrink: 1,
       color: c.textSecondary,
-      fontSize: 11,
-      fontWeight: "700",
+      fontSize: 10.5,
+      ...uiFont("600"),
       fontVariant: ["tabular-nums"],
     },
     promoLive: { backgroundColor: LIME },
     price: {
       color: c.text,
-      fontSize: 16,
-      fontFamily: DisplayFont.bold,
+      fontSize: 15,
+      ...uiFont("600"),
       fontVariant: ["tabular-nums"],
     },
     off: { color: c.textMuted },
-    meta: { color: c.textMuted, fontSize: 13, fontVariant: ["tabular-nums"] },
+    meta: { color: c.textMuted, fontSize: 12, fontVariant: ["tabular-nums"] },
   }),
 );

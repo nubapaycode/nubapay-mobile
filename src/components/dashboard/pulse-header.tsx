@@ -17,6 +17,7 @@ import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
+import { FaceAvatar } from '@/components/ui/face-avatar';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 
@@ -61,7 +62,7 @@ export function PulseHeader({
         accessibilityRole="button"
         accessibilityLabel="Perfil: cuenta, apariencia y cerrar sesión"
         style={({ pressed }) => [styles.round, pressed && styles.pressed]}>
-        <Text style={styles.avatarText}>{userName ? initials(userName) : '·'}</Text>
+        <FaceAvatar seed={userName ?? ''} size={ROUND - 4} />
       </Pressable>
 
       <EventSelector event={event} phase={phase} onPress={onOpenEvents} />
@@ -191,7 +192,6 @@ const useStyles = makeStyles((c) =>
     },
     roundSpacer: { width: ROUND, height: ROUND },
     pressed: { opacity: 0.7 },
-    avatarText: { color: c.text, fontSize: 14, fontWeight: '700' },
     selectorSlot: { flex: 1 },
     selector: {
       flexDirection: 'row',

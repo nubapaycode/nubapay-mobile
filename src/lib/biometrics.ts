@@ -143,6 +143,21 @@ export async function allowBiometricOffer() {
 }
 
 /**
+ * Después de cerrar sesión no se pide la biometría sola al volver al login: si no, Face ID vuelve a
+ * entrar a la misma cuenta antes de poder elegir otra. Solo en memoria: al abrir la app de cero
+ * se vuelve a pedir automáticamente.
+ */
+let autoPromptSuppressed = false;
+
+export function suppressBiometricAutoPrompt() {
+  autoPromptSuppressed = true;
+}
+
+export function isBiometricAutoPromptSuppressed() {
+  return autoPromptSuppressed;
+}
+
+/**
  * Oferta pendiente después de ingresar con contraseña. Vive solo en memoria (nunca se persiste):
  * la pantalla de login la deja y el layout de la app la levanta al montar.
  */

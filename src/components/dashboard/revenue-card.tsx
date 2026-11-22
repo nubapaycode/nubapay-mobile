@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { formatInt, formatMoney, formatPercent, PAYMENT_LABEL } from '@/features/dashboard/format';
-import type { DashboardInsights, DashboardSummary } from '@/features/dashboard/types';
+import type { DashboardInsights, DashboardSummary, PaymentKey } from '@/features/dashboard/types';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
@@ -18,11 +18,14 @@ export function PaymentMethodsCard({
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const color = {
+  // La paleta validada tiene 3 colores de serie: los canales menos usados van en gris.
+  const color: Record<PaymentKey, string> = {
     mp: colors.chart.series[0],
     cash: colors.chart.series[1],
     transfer: colors.chart.series[2],
-  } as const;
+    sipago: colors.textSecondary,
+    mobbex: colors.textMuted,
+  };
   const total = summary.payment_breakdown.reduce((a, p) => a + p.revenue, 0);
 
   return (

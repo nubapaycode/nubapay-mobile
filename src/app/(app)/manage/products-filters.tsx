@@ -26,15 +26,10 @@ import {
 import { makeStyles, useTheme } from "@/theme";
 import { Text } from "@/components/ui/text";
 
-const STATUS: { value: CatalogFilters["status"]; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "active", label: "A la venta" },
-  { value: "paused", label: "Pausados" },
-];
-
 /**
- * Filtros del catálogo: estado (todos / a la venta / pausados) y categorías (varias), cada opción
- * en su card con cuántos productos tiene; al final, atajos para gestionar categorías y ordenar.
+ * Filtros del catálogo: categorías (varias), cada una en su card con cuántos productos tiene; al
+ * final, atajos para gestionar categorías y ordenar. El estado (a la venta, pausados, en promo) se
+ * elige con las pestañas de la lista y se conserva al aplicar.
  * El botón dice cuántos van a quedar antes de aplicar.
  */
 export default function CatalogFiltersSheet() {
@@ -54,7 +49,6 @@ function FiltersContent() {
   const categories = useCategories().data ?? [];
   const { products } = useProducts();
   const [selected, setSelected] = useState<string[]>(current.categories);
-  const [status, setStatus] = useState(current.status);
 
   const all = useMemo(() => products ?? [], [products]);
   const counts = useMemo(() => {
@@ -64,15 +58,10 @@ function FiltersContent() {
     );
     return m;
   }, [all]);
-  const statusCount = {
-    all: all.length,
-    active: all.filter((p) => p.isActive).length,
-    paused: all.filter((p) => !p.isActive).length,
-  };
 
-  const next: CatalogFilters = { categories: selected, status };
+  const next: CatalogFilters = { categories: selected, status: current.status };
   const result = all.filter((p) => matchesCatalogFilters(p, next)).length;
-  const dirty = selected.length > 0 || status !== "all";
+  const dirty = selected.length > 0;
 
   const toggle = (name: string) => {
     Haptics.selectionAsync();
@@ -90,7 +79,6 @@ function FiltersContent() {
             onPress={() => {
               Haptics.selectionAsync();
               setSelected(DEFAULT_CATALOG_FILTERS.categories);
-              setStatus(DEFAULT_CATALOG_FILTERS.status);
             }}
             hitSlop={10}
             accessibilityRole="button"
@@ -104,41 +92,6 @@ function FiltersContent() {
         style={{ flexShrink: 1 }}
         contentContainerStyle={styles.content}
       >
-        <View style={styles.section}>
-          <GroupHeader title="Estado" />
-          <CardList>
-            {STATUS.map((o) => {
-              const on = status === o.value;
-              return (
-                <Card key={o.value}>
-                  <Pressable
-                    onPress={() => {
-                      if (on) return;
-                      Haptics.selectionAsync();
-                      setStatus(o.value);
-                    }}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: on }}
-                    accessibilityLabel={`${o.label}, ${statusCount[o.value]} productos`}
-                    style={styles.row}
-                  >
-                    <Text style={styles.name}>{o.label}</Text>
-                    <Text style={styles.count}>{statusCount[o.value]}</Text>
-                    <View style={[styles.radio, on && styles.radioOn]}>
-                      {on ? (
-                        <Animated.View
-                          entering={ZoomIn.duration(160)}
-                          style={styles.radioDot}
-                        />
-                      ) : null}
-                    </View>
-                  </Pressable>
-                </Card>
-              );
-            })}
-          </CardList>
-        </View>
-
         <View style={styles.section}>
           <GroupHeader title="Categorías" />
           {categories.length === 0 ? (

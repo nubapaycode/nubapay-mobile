@@ -31,8 +31,8 @@ import { ErrorState } from '@/components/ui/error-state';
 import { Text } from '@/components/ui/text';
 
 /**
- * Equipo del evento (mismo lenguaje que Operaciones): filtros e invitar arriba a la derecha,
- * buscador, y las personas agrupadas por rol, cada una en su card con permisos y escaneos.
+ * Equipo del evento (mismo lenguaje que Operaciones): invitar arriba a la derecha, buscador con
+ * filtros al lado, y las personas agrupadas por rol, cada una en su card con permisos y escaneos.
  */
 export default function TeamScreen() {
   const { isStaff } = useEventAccess();
@@ -71,54 +71,56 @@ function TeamContent() {
           <Pressable
             onPress={() => {
               Haptics.selectionAsync();
-              router.push('/team-filters');
-            }}
-            hitSlop={6}
-            accessibilityRole="button"
-            accessibilityLabel={`Filtros${active ? `, ${active} activos` : ''}`}
-            style={({ pressed }) => [styles.round, pressed && styles.pressed]}>
-            <Icon name="filter" size={17} color={colors.text} />
-            {active > 0 ? (
-              <CountBadge count={active} style={styles.badge} textStyle={styles.badgeText} />
-            ) : null}
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
               router.push('/invite-member');
             }}
             hitSlop={6}
             accessibilityRole="button"
             accessibilityLabel="Agregar al equipo"
             style={({ pressed }) => [styles.round, styles.roundPrimary, pressed && styles.pressed]}>
-            <Icon name="userPlus" size={17} color={colors.onInk} />
+            <Icon name="plus" size={18} color={colors.onBrand} />
           </Pressable>
         </View>
       }>
       <Animated.View entering={enter(1)} style={{ gap: 12 }}>
-        <View style={styles.search}>
-          <Icon name="search" size={16} color={colors.textMuted} />
-          <TextInput
-            maxFontSizeMultiplier={1.3}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Buscar por nombre, email o rol"
-            placeholderTextColor={colors.textMuted}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="search"
-            style={styles.input}
-            accessibilityLabel="Buscar en el equipo"
-          />
-          {query ? (
-            <Pressable
-              onPress={() => setQuery('')}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Borrar búsqueda">
-              <Icon name="clearCircle" size={17} color={colors.textMuted} />
-            </Pressable>
-          ) : null}
+        <View style={styles.searchRow}>
+          <View style={styles.search}>
+            <Icon name="search" size={16} color={colors.textMuted} />
+            <TextInput
+              maxFontSizeMultiplier={1.3}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Buscar por nombre, email o rol"
+              placeholderTextColor={colors.textMuted}
+              autoCorrect={false}
+              autoCapitalize="none"
+              returnKeyType="search"
+              style={styles.input}
+              accessibilityLabel="Buscar en el equipo"
+            />
+            {query ? (
+              <Pressable
+                onPress={() => setQuery('')}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Borrar búsqueda">
+                <Icon name="clearCircle" size={17} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+          </View>
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push('/team-filters');
+            }}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityLabel={`Filtros${active ? `, ${active} activos` : ''}`}
+            style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}>
+            <Icon name="filter" size={17} color={colors.text} />
+            {active > 0 ? (
+              <CountBadge count={active} style={styles.badge} textStyle={styles.badgeText} />
+            ) : null}
+          </Pressable>
         </View>
         {team && (active > 0 || query.trim()) ? (
           <Animated.View entering={FadeIn.duration(260)} style={styles.resultRow}>
@@ -213,7 +215,8 @@ const useStyles = makeStyles((c) =>
       borderColor: c.border,
       boxShadow: c.cardShadowSubtle,
     },
-    roundPrimary: { backgroundColor: c.ink, borderColor: c.ink },
+    // Mismo lima que los botones de Catálogo (fijo en claro y oscuro).
+    roundPrimary: { backgroundColor: '#C6FF00', borderColor: '#C6FF00' },
     badge: {
       position: 'absolute',
       top: -3,
@@ -229,14 +232,26 @@ const useStyles = makeStyles((c) =>
       borderColor: c.background,
     },
     badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
+    searchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    // Igual que en Operaciones.
     search: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
-      height: 46,
-      paddingHorizontal: 14,
-      borderRadius: Radius.lg,
-      borderCurve: 'continuous',
+      height: 48,
+      paddingHorizontal: 16,
+      borderRadius: Radius.pill,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
+      backgroundColor: c.surfaceSoft,
+    },
+    filterBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: c.raised,
     },
     input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },

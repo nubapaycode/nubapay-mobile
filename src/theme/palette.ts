@@ -10,6 +10,11 @@ export type Palette = {
   background: string;
   backgroundTranslucent: string;
   surface: string;
+  /**
+   * Card apagada sobre el fondo (referencia: Fuse): gris apenas visible en claro, sin sombra, con
+   * `borderSubtle`. En oscuro es la misma `surface`.
+   */
+  surfaceSoft: string;
   /** Cards flotantes sobre blur: deja ver lo de atrás difuminado. */
   surfaceGlass: string;
   /** Pieza que se apoya sobre `raised` (pulgar de segmentado, botón chico sobre una card). */
@@ -44,6 +49,8 @@ export type Palette = {
   cardShadow: string;
   /** Aún más leve, para pantallas de detalle con muchas cards apiladas. */
   cardShadowSubtle: string;
+  /** Sombra muy difusa y tenue (cards de Operaciones): se nota como halo, no como borde. */
+  cardShadowSmooth: string;
   /** Home: degradé del hero y piezas "de vidrio" que se apoyan sobre él. */
   hero: {
     top: string;
@@ -76,6 +83,7 @@ export const dark: Palette = {
   background: '#080b11',
   backgroundTranslucent: 'rgba(8, 11, 17, 0.94)',
   surface: '#0e1219',
+  surfaceSoft: '#0e1219',
   surfaceGlass: 'rgba(14, 18, 25, 0.55)',
   elevated: '#262d3a',
   raised: '#161b25',
@@ -103,6 +111,7 @@ export const dark: Palette = {
   warningMuted: 'rgba(255, 176, 32, 0.12)',
   cardShadow: '0 1px 2px rgba(0, 0, 0, 0.28), 0 6px 16px rgba(0, 0, 0, 0.22)',
   cardShadowSubtle: '0 1px 3px rgba(0, 0, 0, 0.16)',
+  cardShadowSmooth: '0 12px 40px rgba(0, 0, 0, 0.32)',
   hero: {
     top: '#0a3591',
     mid: '#071c4b',
@@ -129,6 +138,7 @@ export const light: Palette = {
   background: '#ffffff',
   backgroundTranslucent: 'rgba(255, 255, 255, 0.94)',
   surface: '#ffffff',
+  surfaceSoft: '#f8f9fa',
   surfaceGlass: 'rgba(255, 255, 255, 0.6)',
   elevated: '#ffffff',
   raised: '#eef0f4',
@@ -156,6 +166,7 @@ export const light: Palette = {
   warningMuted: 'rgba(230, 150, 0, 0.14)',
   cardShadow: '0 1px 2px rgba(11, 15, 23, 0.04), 0 6px 16px rgba(11, 15, 23, 0.05)',
   cardShadowSubtle: '0 1px 3px rgba(11, 15, 23, 0.035)',
+  cardShadowSmooth: '0 12px 40px rgba(11, 15, 23, 0.05)',
   hero: {
     // Degradé del inicio en claro: suave, para que no tiña tanto la pantalla.
     top: '#e3edff',

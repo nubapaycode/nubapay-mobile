@@ -61,6 +61,8 @@ export const PAYMENT_LABEL: Record<PaymentKey, string> = {
   mp: 'Mercado Pago',
   cash: 'Efectivo',
   transfer: 'Transferencia',
+  sipago: 'Sipago',
+  mobbex: 'Mobbex',
 };
 
 export const PHASE_LABEL: Record<EventPhase, string> = {

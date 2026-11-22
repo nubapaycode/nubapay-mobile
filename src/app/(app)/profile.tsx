@@ -11,7 +11,6 @@ import { NavCard } from '@/components/ui/nav-card';
 import { Sheet, useSheet } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/toast';
 import { DisplayFont, Spacing } from '@/constants/theme';
-import { initials } from '@/features/dashboard/format';
 import {
   allowBiometricOffer,
   type BiometricKind,
@@ -25,6 +24,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 import { Switch } from '@/components/ui/switch';
+import { FaceAvatar } from '@/components/ui/face-avatar';
 
 const HELP_URL = 'https://www.nubapay.app/ayuda';
 
@@ -50,9 +50,7 @@ function ProfileContent() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.account}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials(name) || '·'}</Text>
-        </View>
+        <FaceAvatar seed={name} size={52} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={styles.name} numberOfLines={1}>
             {name}
@@ -223,15 +221,6 @@ const useStyles = makeStyles((c) =>
     content: { padding: Spacing.three, paddingTop: Spacing.two, gap: Spacing.four },
 
     account: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    avatar: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.text,
-    },
-    avatarText: { color: c.surface, fontSize: 18, fontFamily: DisplayFont.bold },
     name: { color: c.text, fontSize: 20, fontFamily: DisplayFont.bold, letterSpacing: -0.4 },
     email: { color: c.textMuted, fontSize: 13 },
 

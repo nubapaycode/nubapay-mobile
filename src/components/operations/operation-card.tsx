@@ -13,42 +13,61 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Icon, type IconName } from '@/components/dashboard/icon';
-import { PaymentMethodIcon } from '@/components/dashboard/payment-method-icon';
 import { hasLinkPreview, PreviewLink } from '@/components/motion/preview-link';
 import { SwipeActions } from '@/components/motion/swipe-actions';
-import { DisplayFont, Radius } from '@/constants/theme';
-import { formatMoney, initials, PAYMENT_LABEL } from '@/features/dashboard/format';
-import { orderKind, orderState, type OperationTone } from '@/features/operations/operations';
+import { ItemStack } from '@/components/operations/item-stack';
+import { uiFont } from '@/constants/theme';
+import { formatMoney } from '@/features/dashboard/format';
+import { orderState, type OperationTone, type OrderStateKey } from '@/features/operations/operations';
 import type { Order } from '@/lib/api/organizer';
 import type { Palette } from '@/theme';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
-const KIND_ICON: Record<ReturnType<typeof orderKind>, IconName> = {
-  tickets: 'ticket',
-  products: 'cart',
-  mixed: 'receipt',
-};
+const CARD_RADIUS = 28;
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 
-export function toneColors(tone: OperationTone, c: Palette) {
-  if (tone === 'danger') return { fg: c.danger, bg: c.dangerMuted };
-  if (tone === 'success') return { fg: c.success, bg: c.successMuted };
-  if (tone === 'attention') return { fg: c.brandText, bg: c.brandMuted };
-  return { fg: c.textSecondary, bg: c.raised };
-}
+/**
+ * Colores del chip de estado: amarillo pendiente, verde pagado/entregado, rojo cancelado o rechazado.
+ * Las letras amarilla y verde van oscurecidas para pasar 4.5:1 de contraste sobre su fondo.
+ * En oscuro el fondo es el mismo color translúcido (los pasteles claros encandilan sobre negro).
+ */
+const TONE_HEX: Record<Exclude<OperationTone, 'neutral'>, { fg: string; bg: string }> = {
+  attention: { fg: '#A06F00', bg: '#FEF8E6' },
+  success: { fg: '#008A34', bg: '#E2FBDE' },
+  danger: { fg: '#FF0000', bg: '#FFE5E5' },
+};
+/** En oscuro van los tonos vivos originales: sobre negro sí se leen. */
+const TONE_DARK_FG: Record<Exclude<OperationTone, 'neutral'>, string> = {
+  attention: '#FBC42B',
+  success: '#00A83E',
+  danger: '#FF4D4D',
+};
+const TONE_DARK_BG: Record<Exclude<OperationTone, 'neutral'>, string> = {
+  attention: 'rgba(251, 196, 43, 0.16)',
+  success: 'rgba(0, 168, 62, 0.18)',
+  danger: 'rgba(255, 0, 0, 0.16)',
+};
 
-export function StatusChip({ order }: { order: Order }) {
-  const styles = useStyles();
-  const { colors } = useTheme();
-  const s = orderState(order);
-  const t = toneColors(s.tone, colors);
-  return (
-    <View style={[styles.chip, { backgroundColor: t.bg }]}>
-      <View style={[styles.chipDot, { backgroundColor: t.fg }]} />
-      <Text style={[styles.chipText, { color: t.fg }]}>{s.label}</Text>
-    </View>
-  );
+/**
+ * Indicador de estado en la esquina de la card (círculo de color con ícono): verde los pagados (reloj
+ * si falta retirar, tilde si ya se entregó), ámbar entrega parcial, ámbar/rojo las excepciones, que
+ * además llevan chip con el nombre.
+ */
+const STATE_MARK: Record<OrderStateKey, { icon: IconName; color: (c: Palette) => string }> = {
+  ready: { icon: 'clock', color: () => '#00A83E' },
+  partial: { icon: 'chevronsRight', color: () => '#E8A800' },
+  delivered: { icon: 'checkmark', color: () => '#00A83E' },
+  unpaid: { icon: 'alert', color: () => '#E8A800' },
+  rejected: { icon: 'close', color: () => '#FF3B30' },
+  cancelled: { icon: 'close', color: () => '#FF3B30' },
+};
+
+export function toneColors(tone: OperationTone, c: Palette) {
+  if (tone === 'neutral') return { fg: c.textSecondary, bg: c.raised };
+  const t = TONE_HEX[tone];
+  if (c.scheme === 'dark') return { fg: TONE_DARK_FG[tone], bg: TONE_DARK_BG[tone] };
+  return t;
 }
 
 const clock = (iso: string) => {
@@ -57,17 +76,22 @@ const clock = (iso: string) => {
 };
 
 /**
- * Pedido en su propia card (estilo movimientos de Revolut): avatar del cliente con el tipo de compra
- * en la esquina, nombre, número y qué compró; monto y hora a la derecha; abajo el estado y el medio.
+ * Pedido en su propia card (referencia: Fuse), solo lo justo para ubicarlo: a la izquierda las fotos de
+ * lo que compró apiladas como tarjetas; arriba número y hora, con el ícono de estado en la esquina
+ * (y un chip con el nombre si es una excepción); abajo el nombre y el monto a la misma altura.
+ * Lo demás (qué compró, medio de pago) queda en el detalle.
  */
 export function OperationCard({
   order: o,
+  photos,
   onPress,
   onDeliver,
   href,
   fresh = false,
 }: {
   order: Order;
+  /** Foto de cada producto por id (ver `useProductPhotos`). */
+  photos?: Map<string, string | null>;
   onPress: () => void;
   /** Ruta del detalle: en iOS, mantener apretado muestra la vista previa con acciones. */
   href?: Href;
@@ -97,12 +121,17 @@ export function OperationCard({
   const press = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const glowStyle = useAnimatedStyle(() => ({ opacity: glow.value }));
   const cancelled = o.status === 'cancelled';
-  const kind = orderKind(o);
   const name = o.customerName || o.customerEmail || 'Sin nombre';
-  const summary = o.items.map((i) => `${i.quantity}× ${i.name}`).join(', ');
+  const state = orderState(o);
+  // Primero los ítems con foto, así la tarjeta de adelante muestra una si hay.
+  const thumbs = o.items
+    .map((i) => photos?.get(i.productId) ?? null)
+    .sort((a, b) => Number(!a) - Number(!b));
+  const stateTone = toneColors(state.tone, colors);
 
   return (
     <SwipeActions
+      radius={CARD_RADIUS}
       start={
         onDeliver
           ? {
@@ -140,58 +169,37 @@ export function OperationCard({
         onPressOut={() => scale.set(withTiming(1, PRESS))}
         accessibilityRole="button"
         accessibilityLabel={`Pedido ${o.orderNumber ?? ''}, ${name}, ${formatMoney(o.total)}, ${
-          orderState(o).label
-        }. Ver detalle`}
+          state.label
+        }, ${clock(o.createdAt)}. Ver detalle`}
         accessibilityActions={canDeliver ? [{ name: 'deliver', label: tickets ? 'Registrar ingreso' : 'Entregar' }] : undefined}
         onAccessibilityAction={(e) => e.nativeEvent.actionName === 'deliver' && onDeliver?.()}
         style={StyleSheet.flatten([styles.card, cancelled && styles.cardCancelled])}>
-        <View style={styles.top}>
-          <View>
-            <View style={styles.avatar}>
-              {o.customerName ? (
-                <Text style={styles.avatarText}>{initials(o.customerName)}</Text>
-              ) : (
-                <Icon name="person" size={18} color={colors.textMuted} />
-              )}
-            </View>
-            <View style={[styles.kind, kind !== 'tickets' && { backgroundColor: colors.primary }]}>
-              <Icon
-                name={KIND_ICON[kind]}
-                size={9}
-                color={kind !== 'tickets' ? colors.onPrimary : colors.onInk}
-              />
+        <ItemStack photos={thumbs} />
+        <View style={styles.grow}>
+          <View style={[styles.line, styles.lineTop]}>
+            <Text style={[styles.meta, styles.flex]} numberOfLines={1}>
+              {o.orderNumber ? `#${o.orderNumber} · ` : ''}
+              {clock(o.createdAt)}
+            </Text>
+            {state.exception ? (
+              <View style={[styles.chip, { backgroundColor: stateTone.bg }]}>
+                <Text style={[styles.state, { color: stateTone.fg }]} numberOfLines={1}>
+                  {state.short}
+                </Text>
+              </View>
+            ) : null}
+            <View style={[styles.mark, { backgroundColor: STATE_MARK[state.key].color(colors) }]}>
+              <Icon name={STATE_MARK[state.key].icon} size={8} color="#ffffff" />
             </View>
           </View>
-
-          <View style={styles.grow}>
-            <Text style={styles.name} numberOfLines={1}>
+          <View style={styles.line}>
+            <Text style={[styles.name, styles.flex]} numberOfLines={1}>
               {name}
             </Text>
-            <Text style={styles.meta} numberOfLines={1}>
-              {o.orderNumber ? <Text style={styles.number}>#{o.orderNumber} · </Text> : null}
-              {summary}
-            </Text>
-          </View>
-
-          <View style={styles.right}>
-            <Text style={[styles.amount, cancelled && styles.amountCancelled]}>
-              {formatMoney(o.total)}
-            </Text>
-            <Text style={styles.meta}>{clock(o.createdAt)}</Text>
+            <Text style={[styles.amount, cancelled && styles.amountCancelled]}>{formatMoney(o.total)}</Text>
           </View>
         </View>
-
-        <View style={styles.bottom}>
-          <StatusChip order={o} />
-          {o.paymentMethod ? (
-            <View style={styles.method}>
-              <PaymentMethodIcon method={o.paymentMethod} size={11} />
-              <Text style={styles.methodText}>{PAYMENT_LABEL[o.paymentMethod]}</Text>
-            </View>
-          ) : null}
-          <View style={{ flex: 1 }} />
-          <Icon name="chevronRight" size={12} color={colors.textMuted} />
-        </View>
+        <Icon name="chevronRight" size={13} color={colors.textMuted} />
       </Pressable>
       </PreviewLink>
       <Animated.View pointerEvents="none" style={[styles.glow, glowStyle]} />
@@ -200,79 +208,59 @@ export function OperationCard({
   );
 }
 
-const AVATAR = 42;
-
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     glow: {
       ...StyleSheet.absoluteFill,
-      borderRadius: Radius.xl,
+      borderRadius: CARD_RADIUS,
       borderCurve: 'continuous',
       borderWidth: 2,
       borderColor: c.brand,
       backgroundColor: c.brandMuted,
     },
+    // Estilo Fuse: más redondeada, sin sombra, borde apenas visible y con aire.
     card: {
-      gap: 16,
-      padding: 18,
-      borderRadius: Radius.xl,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 28,
+      paddingLeft: 20,
+      paddingRight: 18,
+      borderRadius: CARD_RADIUS,
       borderCurve: 'continuous',
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
       backgroundColor: c.surface,
-      boxShadow: c.cardShadowSubtle,
+      boxShadow: c.cardShadowSmooth,
     },
     cardCancelled: { opacity: 0.7 },
-    top: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    grow: { flex: 1, gap: 5 },
-    avatar: {
-      width: AVATAR,
-      height: AVATAR,
-      borderRadius: AVATAR / 2,
+    grow: { flex: 1, gap: 12 },
+    line: { flexDirection: 'row', alignItems: 'baseline', gap: 12 },
+    lineTop: { alignItems: 'center' },
+    flex: { flex: 1 },
+    mark: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.raised,
     },
-    avatarText: { color: c.text, fontSize: 14, fontWeight: '700' },
-    kind: {
-      position: 'absolute',
-      right: -3,
-      bottom: -3,
-      width: 19,
-      height: 19,
-      borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: c.ink,
-      borderWidth: 2,
-      borderColor: c.surface,
-    },
-    name: { color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
-    meta: { color: c.textMuted, fontSize: 12, fontVariant: ['tabular-nums'] },
-    number: { color: c.textSecondary, fontWeight: '600' },
-    right: { alignItems: 'flex-end', gap: 5 },
-    amount: { color: c.text, fontSize: 16, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
-    amountCancelled: { color: c.textMuted, textDecorationLine: 'line-through' },
-    bottom: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     chip: {
-      flexDirection: 'row',
+      height: 24,
+      paddingHorizontal: 10,
+      borderRadius: 999,
       alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: 8,
-      height: 22,
-      borderRadius: Radius.pill,
+      justifyContent: 'center',
     },
-    chipDot: { width: 6, height: 6, borderRadius: 3 },
-    chipText: { fontSize: 11, fontWeight: '700' },
-    method: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingHorizontal: 8,
-      height: 22,
-      borderRadius: Radius.pill,
-      backgroundColor: c.raised,
+    meta: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
+    state: { fontSize: 12, ...uiFont('600') },
+    name: { color: c.text, fontSize: 18, letterSpacing: -0.2, ...uiFont('500') },
+    amount: {
+      color: c.text,
+      fontSize: 17,
+      fontVariant: ['tabular-nums'],
+      ...uiFont('500'),
     },
-    methodText: { color: c.textSecondary, fontSize: 11, fontWeight: '600' },
+    amountCancelled: { color: c.textMuted, textDecorationLine: 'line-through' },
   }),
 );

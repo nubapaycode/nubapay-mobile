@@ -45,7 +45,7 @@ import {
 } from '@/lib/api/organizer';
 import { invalidate, setQueryData, useQuery } from '@/lib/query';
 
-import { parsePromo, type Promo, promoLabel, type PromoInput, promoPriceFor } from './promo';
+import { parsePromo, type Promo, promoEnded, promoLabel, type PromoInput, promoPriceFor } from './promo';
 
 /**
  * Gestión del evento conectada al backend (routes/event_workspace.py, event_regrets.py):
@@ -471,17 +471,24 @@ export async function setRegretStatus(eventId: string, id: string, status: Regre
 
 /* ── Filtros del catálogo (compartidos entre la lista y su hoja de filtros) ── */
 
-export type CatalogFilters = { categories: string[]; status: 'all' | 'active' | 'paused' };
+/** `status` se elige con las pestañas de la lista; las categorías, en la hoja de filtros. */
+export type CatalogStatus = 'all' | 'active' | 'paused' | 'promo';
+export type CatalogFilters = { categories: string[]; status: CatalogStatus };
 export const DEFAULT_CATALOG_FILTERS: CatalogFilters = { categories: [], status: 'all' };
 
 export function matchesCatalogFilters(p: Product, f: CatalogFilters): boolean {
   if (f.categories.length && !f.categories.includes(p.category ?? '')) return false;
   if (f.status === 'active' && !p.isActive) return false;
   if (f.status === 'paused' && p.isActive) return false;
+  if (f.status === 'promo' && !hasPromo(p)) return false;
   return true;
 }
 
-export const activeCatalogFilters = (f: CatalogFilters) => f.categories.length + (f.status !== 'all' ? 1 : 0);
+/** Tiene una promo activa o programada (las que ya terminaron no cuentan). */
+export const hasPromo = (p: Product) => !!p.promo && p.promo.isActive && !promoEnded(p.promo);
+
+/** Filtros de la hoja (categorías): el estado ya se ve en las pestañas, no suma al badge. */
+export const activeCatalogFilters = (f: CatalogFilters) => f.categories.length;
 
 let catalogFilters: CatalogFilters = DEFAULT_CATALOG_FILTERS;
 const catalogListeners = new Set<() => void>();

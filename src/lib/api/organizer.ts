@@ -6,6 +6,7 @@
 import { apiFetch, type ApiResult, apiUpload } from '@/lib/api';
 
 import { eventPaths } from './paths';
+import type { PaymentKey } from '@/features/dashboard/types';
 
 const ws = eventPaths.workspace;
 const json = (method: string, body?: unknown): RequestInit => ({
@@ -127,6 +128,8 @@ export async function uploadEventCover(eventId: string, uri: string) {
 export type OrderUiStatus = 'pending' | 'partially_delivered' | 'delivered' | 'cancelled';
 export type OrderItem = {
   id: string;
+  /** Id del producto o de la entrada (o el nombre si el ítem ya no existe). */
+  productId: string;
   name: string;
   price: number;
   quantity: number;
@@ -150,7 +153,7 @@ export type Order = {
   paymentStatus: string | null;
   createdAt: string;
   updatedAt: string;
-  paymentMethod: 'mp' | 'cash' | 'transfer' | null;
+  paymentMethod: PaymentKey | null;
 };
 export type OrdersQuery = {
   q?: string;
@@ -184,9 +187,6 @@ export const previewScan = (eventId: string, orderId: string) =>
 /** Registra la entrega (productos) o el ingreso (entradas): `{ [itemId]: cantidad }`. */
 export const redeemItems = (eventId: string, orderId: string, itemQuantities: Record<string, number>) =>
   scanCall(ws(eventId, 'scan-qr'), { order_id: orderId, item_quantities: itemQuantities });
-/** Borra los pedidos de prueba que siguen sin pagar. */
-export const purgeTestOrders = (eventId: string) =>
-  apiFetch<{ ok: true; deleted: number }>(ws(eventId, 'orders/purge-test'), json('POST'));
 export const confirmCash = async (eventId: string, orderId: string) =>
   unwrap(await apiFetch<{ order: Order }>(ws(eventId, `orders/${orderId}/confirm-cash`), json('POST')), 'order');
 

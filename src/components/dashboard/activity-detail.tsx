@@ -8,7 +8,6 @@ import {
   formatInt,
   formatMoney,
   formatPercent,
-  initials,
 } from '@/features/dashboard/format';
 import type { ActivityItem, DashboardData } from '@/features/dashboard/types';
 import { useNow } from '@/hooks/use-now';
@@ -22,6 +21,7 @@ import { ProgressBar } from './progress-bar';
 import { PulseBars } from './pulse-bars';
 import { RollingNumber } from './rolling-number';
 import { Segmented } from './segmented';
+import { FaceAvatar } from '@/components/ui/face-avatar';
 
 export type ActivityFilter = 'all' | ActivityItem['type'];
 type Filter = ActivityFilter;
@@ -290,7 +290,7 @@ function FeedCard({ item: a }: { item: ActivityItem }) {
       <View>
         <View style={styles.avatar}>
           {a.customer_name ? (
-            <Text style={styles.avatarText}>{initials(a.customer_name)}</Text>
+            <FaceAvatar seed={a.customer_name} size={AVATAR} />
           ) : (
             <Icon name={k.icon} size={16} color={tone[a.type]} />
           )}
@@ -337,11 +337,7 @@ function Team({ scans }: { scans: DashboardData['insights']['staff_scans'] }) {
         return (
           <Animated.View key={s.user_id} entering={enterRow(i)} style={[styles.card, styles.staff]}>
             <Text style={[styles.rank, first && { color: colors.text }]}>{i + 1}</Text>
-            <View style={[styles.avatar, first && styles.avatarFirst]}>
-              <Text style={[styles.avatarText, first && styles.avatarTextFirst]}>
-                {s.name ? initials(s.name) : '?'}
-              </Text>
-            </View>
+            <FaceAvatar seed={s.name || s.user_id} size={AVATAR} />
             <View style={[styles.grow, { gap: 8 }]}>
               <View style={styles.staffHead}>
                 <Text style={styles.feedTitle} numberOfLines={1}>
@@ -464,9 +460,6 @@ const useStyles = makeStyles((c) =>
       justifyContent: 'center',
       backgroundColor: c.raised,
     },
-    avatarFirst: { backgroundColor: c.text },
-    avatarText: { color: c.textSecondary, fontSize: 13, fontWeight: '700' },
-    avatarTextFirst: { color: c.surface },
     badge: {
       position: 'absolute',
       right: -3,

@@ -6,8 +6,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 import { Icon, type IconName } from '@/components/dashboard/icon';
 import { hasLinkPreview, PreviewLink } from '@/components/motion/preview-link';
 import { SwipeActions } from '@/components/motion/swipe-actions';
-import { DisplayFont, Radius } from '@/constants/theme';
-import { formatInt, initials } from '@/features/dashboard/format';
+import { Radius, uiFont } from '@/constants/theme';
 import {
   type Member,
   OWNER_ROLE,
@@ -17,10 +16,12 @@ import {
 } from '@/features/team/team';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
+import { FaceAvatar } from '@/components/ui/face-avatar';
 
 const PRESS = { duration: 120, easing: Easing.out(Easing.quad) };
 const LIFT = { duration: 180, easing: Easing.out(Easing.cubic) };
-const MAX_PERMS = 3;
+const MAX_PERMS = 2;
+const CARD_RADIUS = 28;
 
 /** Ícono de cada permiso (cards del equipo y grilla del detalle). */
 export const PERMISSION_ICON: Record<PermissionId, IconName> = {
@@ -35,22 +36,9 @@ export const PERMISSION_ICON: Record<PermissionId, IconName> = {
 
 export const isAdmin = (m: Member) => m.isOwner || m.roleId === OWNER_ROLE;
 
-/** Avatar con iniciales (administración va en tinta fuerte). */
+/** Carita de la persona (siempre la misma para el mismo nombre; ver FaceAvatar). */
 export function MemberAvatar({ member, size = 44 }: { member: Member; size?: number }) {
-  const styles = useStyles();
-  const admin = isAdmin(member);
-  return (
-    <View
-      style={[
-        styles.avatar,
-        { width: size, height: size, borderRadius: size / 2 },
-        admin && styles.avatarAdmin,
-      ]}>
-      <Text style={[styles.avatarText, { fontSize: size * 0.34 }, admin && styles.avatarTextAdmin]}>
-        {initials(member.name) || '?'}
-      </Text>
-    </View>
-  );
+  return <FaceAvatar seed={member.name || member.email} size={size} />;
 }
 
 export function RoleChip({ member }: { member: Member }) {
@@ -64,8 +52,9 @@ export function RoleChip({ member }: { member: Member }) {
 }
 
 /**
- * Persona del equipo en su propia card: avatar, nombre y email; escaneos a la derecha; abajo sus
- * permisos como chips con ícono. El rol va en el título del grupo.
+ * Persona del equipo en su propia card (mismo estilo que Operaciones, referencia Fuse): avatar a la
+ * izquierda; el nombre y debajo sus permisos como chips con ícono; chevron al costado. El rol va en
+ * el título del grupo; el email y los escaneos, en el detalle.
  */
 export function MemberCard({
   member,
@@ -88,11 +77,16 @@ export function MemberCard({
   const all = perms.length === PERMISSIONS.length;
   const shown = all ? [] : perms.slice(0, MAX_PERMS);
   const extra = all ? 0 : perms.length - shown.length;
-  const { scans } = member.stats;
+  const permsLine = all
+    ? 'Todos los permisos'
+    : perms.length === 0
+      ? 'Sin permisos'
+      : [...shown.map((p) => PERMISSION_SHORT[p]), ...(extra > 0 ? [`+${extra}`] : [])].join(' · ');
   const preview = !!href && hasLinkPreview;
 
   return (
     <SwipeActions
+      radius={CARD_RADIUS}
       start={
         onChangeRole
           ? {
@@ -141,13 +135,11 @@ export function MemberCard({
         accessibilityActions={onChangeRole ? [{ name: 'changeRole', label: 'Cambiar rol' }] : undefined}
         onAccessibilityAction={(e) => e.nativeEvent.actionName === 'changeRole' && onChangeRole?.()}
         accessibilityRole="button"
-        accessibilityLabel={`${member.name}, ${member.roleId}${
-          scans ? `, ${scans} escaneos` : ''
-        }. Ver detalle`}
+        accessibilityLabel={`${member.name}, ${member.roleId}, ${permsLine}. Ver detalle`}
         style={styles.card}>
-        <View style={styles.top}>
-          <MemberAvatar member={member} />
-          <View style={styles.grow}>
+        <MemberAvatar member={member} size={48} />
+        <View style={styles.grow}>
+          <View style={styles.line}>
             <View style={styles.nameRow}>
               <Text style={styles.name} numberOfLines={1}>
                 {member.name}
@@ -158,46 +150,35 @@ export function MemberCard({
                 </View>
               ) : null}
             </View>
-            <Text style={styles.email} numberOfLines={1}>
-              {member.email}
-            </Text>
           </View>
-          {scans > 0 ? (
-            <View style={styles.scans}>
-              <Text style={styles.scansValue}>{formatInt(scans)}</Text>
-              <Text style={styles.scansLabel}>escaneos</Text>
-            </View>
-          ) : (
-            <Icon name="chevronRight" size={12} color={colors.textMuted} />
-          )}
+          <View style={styles.perms}>
+            {all ? (
+              <View style={[styles.perm, styles.permAll]}>
+                <Icon name="checkmark" size={10} color={colors.onInk} />
+                <Text style={[styles.permText, { color: colors.onInk }]}>Todos los permisos</Text>
+              </View>
+            ) : perms.length === 0 ? (
+              <View style={styles.perm}>
+                <Text style={styles.permText}>Sin permisos</Text>
+              </View>
+            ) : (
+              <>
+                {shown.map((p) => (
+                  <View key={p} style={styles.perm}>
+                    <Icon name={PERMISSION_ICON[p]} size={10} color={colors.textSecondary} />
+                    <Text style={styles.permText}>{PERMISSION_SHORT[p]}</Text>
+                  </View>
+                ))}
+                {extra > 0 ? (
+                  <View style={styles.perm}>
+                    <Text style={styles.permText}>+{extra}</Text>
+                  </View>
+                ) : null}
+              </>
+            )}
+          </View>
         </View>
-
-        <View style={styles.perms}>
-          {all ? (
-            <View style={[styles.perm, styles.permAll]}>
-              <Icon name="checkmark" size={10} color={colors.onInk} />
-              <Text style={[styles.permText, { color: colors.onInk }]}>Todos los permisos</Text>
-            </View>
-          ) : perms.length === 0 ? (
-            <View style={styles.perm}>
-              <Text style={styles.permText}>Sin permisos</Text>
-            </View>
-          ) : (
-            <>
-              {shown.map((p) => (
-                <View key={p} style={styles.perm}>
-                  <Icon name={PERMISSION_ICON[p]} size={10} color={colors.textSecondary} />
-                  <Text style={styles.permText}>{PERMISSION_SHORT[p]}</Text>
-                </View>
-              ))}
-              {extra > 0 ? (
-                <View style={styles.perm}>
-                  <Text style={styles.permText}>+{extra}</Text>
-                </View>
-              ) : null}
-            </>
-          )}
-        </View>
+        <Icon name="chevronRight" size={13} color={colors.textMuted} />
       </Pressable>
       </PreviewLink>
     </Animated.View>
@@ -207,36 +188,33 @@ export function MemberCard({
 
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
+    // Igual que OperationCard: blanco y sombra difusa.
     card: {
-      gap: 12,
-      padding: 14,
-      borderRadius: Radius.xl,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 24,
+      paddingLeft: 20,
+      paddingRight: 18,
+      borderRadius: CARD_RADIUS,
       borderCurve: 'continuous',
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
       backgroundColor: c.surface,
-      boxShadow: c.cardShadowSubtle,
+      boxShadow: c.cardShadowSmooth,
     },
-    top: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    grow: { flex: 1, gap: 2 },
-    avatar: { alignItems: 'center', justifyContent: 'center', backgroundColor: c.raised },
-    avatarAdmin: { backgroundColor: c.ink },
-    avatarText: { color: c.textSecondary, fontWeight: '700' },
-    avatarTextAdmin: { color: c.onInk },
-    nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    name: { flexShrink: 1, color: c.text, fontSize: 15, fontFamily: DisplayFont.semibold },
-    email: { color: c.textMuted, fontSize: 12 },
+    grow: { flex: 1, gap: 8 },
+    line: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    nameRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
+    name: { flexShrink: 1, color: c.text, fontSize: 18, letterSpacing: -0.2, ...uiFont('500') },
     you: {
-      paddingHorizontal: 6,
-      height: 18,
+      paddingHorizontal: 7,
+      height: 20,
       justifyContent: 'center',
       borderRadius: Radius.pill,
       backgroundColor: c.brandMuted,
     },
-    youText: { color: c.brandText, fontSize: 10, fontWeight: '700' },
-    scans: { alignItems: 'flex-end' },
-    scansValue: { color: c.text, fontSize: 16, fontFamily: DisplayFont.bold, fontVariant: ['tabular-nums'] },
-    scansLabel: { color: c.textMuted, fontSize: 11 },
+    youText: { color: c.brandText, fontSize: 11, ...uiFont('600') },
 
     perms: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     perm: {

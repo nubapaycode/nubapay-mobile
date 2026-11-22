@@ -106,8 +106,37 @@ export function CardListSkeleton({
           {variant === 'operation' ? <Block w={70} h={12} /> : null}
         </View>
         {Array.from({ length: count }, (_, i) => (
-          <View key={i} style={[styles.card, { opacity: 1 - i * 0.12 }]}>
-            {variant === 'event' ? (
+          <View
+            key={i}
+            style={[styles.card, variant !== 'event' && styles.opCard, { opacity: 1 - i * 0.12 }]}>
+            {variant === 'operation' ? (
+              <View style={[styles.cardRow, { gap: 14 }]}>
+                <View style={{ marginVertical: -6 }}>
+                  <Block w={52} h={64} r={15} />
+                </View>
+                <View style={{ flex: 1, gap: 14 }}>
+                  <View style={[styles.cardRow, { justifyContent: 'space-between' }]}>
+                    <Block w={i % 2 ? 80 : 96} h={11} />
+                    <Block w={16} h={16} r={8} />
+                  </View>
+                  <View style={[styles.cardRow, { justifyContent: 'space-between' }]}>
+                    <Block w={i % 2 ? '45%' : '58%'} h={16} r={6} />
+                    <Block w={70} h={16} r={6} />
+                  </View>
+                </View>
+              </View>
+            ) : variant === 'member' ? (
+              <View style={[styles.cardRow, { gap: 14 }]}>
+                <Block w={48} h={48} r={24} />
+                <View style={{ flex: 1, gap: 10 }}>
+                  <Block w={i % 2 ? '45%' : '58%'} h={16} r={6} />
+                  <View style={[styles.cardRow, { gap: 6 }]}>
+                    <Block w={64} h={22} r={11} />
+                    <Block w={72} h={22} r={11} />
+                  </View>
+                </View>
+              </View>
+            ) : (
               <View style={styles.cardRow}>
                 <View style={{ flex: 1, gap: 10 }}>
                   <Block w="60%" h={16} r={6} />
@@ -118,26 +147,6 @@ export function CardListSkeleton({
                 </View>
                 <Block w={22} h={22} r={11} />
               </View>
-            ) : (
-              <>
-                <View style={styles.cardRow}>
-                  <Block w={42} h={42} r={21} />
-                  <View style={{ flex: 1, gap: 8 }}>
-                    <Block w={i % 2 ? '50%' : '64%'} h={14} r={6} />
-                    <Block w={i % 2 ? '72%' : '58%'} h={11} />
-                  </View>
-                  {variant === 'operation' ? (
-                    <View style={{ alignItems: 'flex-end', gap: 8 }}>
-                      <Block w={64} h={15} r={6} />
-                      <Block w={34} h={11} />
-                    </View>
-                  ) : null}
-                </View>
-                <View style={styles.cardRow}>
-                  <Block w={variant === 'operation' ? 76 : 64} h={22} r={11} />
-                  <Block w={variant === 'operation' ? 58 : 72} h={22} r={11} />
-                </View>
-              </>
             )}
           </View>
         ))}
@@ -212,6 +221,16 @@ const useStyles = makeStyles((c) =>
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: c.border,
       boxShadow: c.cardShadowSubtle,
+    },
+    // Igual que OperationCard y MemberCard (estilo Fuse).
+    opCard: {
+      paddingVertical: 28,
+      paddingHorizontal: 20,
+      borderRadius: 28,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
+      boxShadow: c.cardShadowSmooth,
     },
     cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     tile: {

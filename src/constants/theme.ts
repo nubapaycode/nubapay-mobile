@@ -24,6 +24,16 @@ export const DisplayFont = {
   extrabold: 'BricolageGrotesque-ExtraBold',
 } as const;
 
+/**
+ * Texto de cards y detalle: SF Pro (sistema) en iOS con su peso; en Android, Bricolage Grotesque.
+ * Bricolage no tiene medium cargado: en Android 500 cae en la semibold, la más cercana.
+ */
+export function uiFont(weight: '500' | '600' | '700') {
+  return Platform.OS === 'android'
+    ? { fontFamily: weight === '700' ? DisplayFont.bold : DisplayFont.semibold }
+    : { fontWeight: weight };
+}
+
 export const Spacing = {
   one: 4,
   two: 8,

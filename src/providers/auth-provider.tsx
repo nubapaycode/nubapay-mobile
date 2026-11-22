@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { suppressBiometricAutoPrompt } from '@/lib/biometrics';
 import { unregisterPush } from '@/lib/push';
 import { apiFetch, authPaths, setApiToken, setUnauthorizedHandler } from '@/lib/api';
 import { resetSelectedEvent } from '@/features/dashboard/selected-event';
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   const signOut = useCallback(async () => {
+    suppressBiometricAutoPrompt();
     // Antes de borrar la sesión (hace falta el token para avisarle al backend).
     // Con tope de tiempo: si el token de APNs o la red no responden, no debe bloquear el cierre.
     await Promise.race([

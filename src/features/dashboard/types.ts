@@ -5,7 +5,8 @@
  * - `GET /api/events/<id>/dashboard/insights`      → DashboardInsights (routes/event_insights.py)
  */
 
-export type PaymentKey = 'mp' | 'cash' | 'transfer';
+/** Canal de cobro como lo manda el backend (`_payment_channel`). */
+export type PaymentKey = 'mp' | 'cash' | 'transfer' | 'sipago' | 'mobbex';
 export type EventPhase = 'upcoming' | 'live' | 'ended' | 'unscheduled';
 
 export type EventSummary = {

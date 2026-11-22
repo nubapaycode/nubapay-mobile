@@ -12,12 +12,11 @@ import { MoodMascot } from '@/components/illustrations/mood-mascot';
 import { Icon } from '@/components/dashboard/icon';
 import { TabPage } from '@/components/navigation/tab-page';
 import { OperationCard } from '@/components/operations/operation-card';
-import { DisplayFont, Radius } from '@/constants/theme';
+import { DisplayFont, Radius, uiFont } from '@/constants/theme';
 import { NoAccess } from '@/components/ui/no-access';
 import { CoachTip } from '@/components/ui/coach-tip';
 import { useEventAccess } from '@/features/access/access';
 import { useSelectedEventId } from '@/features/dashboard/selected-event';
-import { useEvents } from '@/features/dashboard/use-event-dashboard';
 import { formatInt, formatMoney } from '@/features/dashboard/format';
 import {
   activeOperationFilters,
@@ -33,6 +32,7 @@ import { listOrders, type Order } from '@/lib/api/organizer';
 import { setQueryData, useQuery } from '@/lib/query';
 import { makeStyles, useTheme } from '@/theme';
 import { awaitingCash, hasPending } from '@/features/operations/scan';
+import { useProductPhotos } from '@/features/operations/product-photos';
 import { useFirstTip } from '@/features/tips/tips';
 import { ErrorState } from '@/components/ui/error-state';
 import { toast } from '@/components/ui/toast';
@@ -67,7 +67,7 @@ function OperationsContent() {
   const styles = useStyles();
   const { colors } = useTheme();
   const eventId = useSelectedEventId();
-  const { events } = useEvents();
+  const photos = useProductPhotos();
   const filters = useOperationFilters();
   // Para los títulos "Hoy" / "Ayer" (se recalculan al cambiar de día).
   const now = useNow(60_000);
@@ -139,7 +139,6 @@ function OperationsContent() {
 
   const pull = usePullRefresh(orders.refresh);
 
-  const event = events?.find((e) => e.id === eventId);
   const active = activeOperationFilters(filters);
   const list = orders.data?.orders ?? [];
   const groups = groupByDay(list, now);
@@ -166,31 +165,31 @@ function OperationsContent() {
   return (
     <TabPage
       title="Operaciones"
-      subtitle={event?.name ?? 'Elegí un evento'}
-      onSubtitlePress={() => router.push('/switch-event')}
-      right={filterButton}
       refreshing={pull.refreshing}
       onRefresh={pull.onRefresh}>
       <Animated.View entering={enter(1)} style={{ gap: 12 }}>
-        <View style={styles.search}>
-          <Icon name="search" size={16} color={colors.textMuted} />
-          <TextInput
-            maxFontSizeMultiplier={1.3}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Buscar por nombre, email o pedido"
-            placeholderTextColor={colors.textMuted}
-            autoCorrect={false}
-            autoCapitalize="none"
-            returnKeyType="search"
-            style={styles.input}
-            accessibilityLabel="Buscar operaciones"
-          />
-          {query ? (
-            <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Borrar búsqueda">
-              <Icon name="clearCircle" size={17} color={colors.textMuted} />
-            </Pressable>
-          ) : null}
+        <View style={styles.searchRow}>
+          <View style={styles.search}>
+            <Icon name="search" size={16} color={colors.textMuted} />
+            <TextInput
+              maxFontSizeMultiplier={1.3}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Buscar por nombre, email o pedido"
+              placeholderTextColor={colors.textMuted}
+              autoCorrect={false}
+              autoCapitalize="none"
+              returnKeyType="search"
+              style={styles.input}
+              accessibilityLabel="Buscar operaciones"
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Borrar búsqueda">
+                <Icon name="clearCircle" size={17} color={colors.textMuted} />
+              </Pressable>
+            ) : null}
+          </View>
+          {filterButton}
         </View>
 
         {orders.data ? (
@@ -222,8 +221,11 @@ function OperationsContent() {
       ) : list.length === 0 && !debounced.trim() && !active ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
           <Ticky size={128} onLight={colors.scheme === 'light'} />
-          <Text style={styles.emptyTitle}>Todavía no hay pedidos</Text>
-          <Text style={styles.emptyText}>Cuando alguien compre una entrada o un producto, aparece acá al instante.</Text>
+          <Text style={styles.emptyTitle}>Todavía no hay pedidos pagados</Text>
+          <Text style={styles.emptyText}>
+            Cuando alguien pague una entrada o un producto, aparece acá al instante. Los pendientes de pago y
+            cancelados están en Filtros.
+          </Text>
         </Animated.View>
       ) : list.length === 0 ? (
         <Animated.View entering={FadeIn.duration(300)} style={styles.emptyBox}>
@@ -254,6 +256,7 @@ function OperationsContent() {
                   layout={LinearTransition.duration(260)}>
                   <OperationCard
                     order={o}
+                    photos={photos}
                     fresh={fresh.has(o.id)}
                     href={{ pathname: '/operation/[key]', params: { key: o.id } }}
                     onPress={() => router.push({ pathname: '/operation/[key]', params: { key: o.id } })}
@@ -325,27 +328,27 @@ function groupByDay(list: Order[], now: number) {
 const useStyles = makeStyles((c) =>
   StyleSheet.create({
     pressed: { opacity: 0.7 },
+    searchRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     search: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
-      height: 46,
-      paddingHorizontal: 14,
-      borderRadius: Radius.lg,
-      borderCurve: 'continuous',
-      backgroundColor: c.raised,
+      height: 48,
+      paddingHorizontal: 16,
+      borderRadius: Radius.pill,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
+      backgroundColor: c.surfaceSoft,
     },
     input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 0 },
     filterBtn: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
-      boxShadow: c.cardShadowSubtle,
+      backgroundColor: c.raised,
     },
     badge: {
       position: 'absolute',
@@ -364,7 +367,7 @@ const useStyles = makeStyles((c) =>
     badgeText: { color: c.onPrimary, fontSize: 10, fontWeight: '700' },
 
     resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4 },
-    resultText: { color: c.textSecondary, fontSize: 13, fontWeight: '500', fontVariant: ['tabular-nums'] },
+    resultText: { color: c.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
     tag: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -372,21 +375,24 @@ const useStyles = makeStyles((c) =>
       height: 24,
       paddingHorizontal: 10,
       borderRadius: Radius.pill,
-      backgroundColor: c.raised,
+      backgroundColor: c.surfaceSoft,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
     },
     tagText: { color: c.textSecondary, fontSize: 12, fontWeight: '600' },
 
-    groups: { gap: 28 },
-    group: { gap: 14 },
+    groups: { gap: 32 },
+    group: { gap: 10 },
     groupHead: {
       flexDirection: 'row',
       alignItems: 'baseline',
       justifyContent: 'space-between',
       paddingHorizontal: 4,
-      marginBottom: 2,
+      marginBottom: 6,
     },
-    groupTitle: { color: c.text, fontSize: 17, fontFamily: DisplayFont.semibold },
-    groupSum: { color: c.textSecondary, fontSize: 13, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    // Títulos de sección como Fuse ("Current positions"): oscuros, medium, sin mayúsculas.
+    groupTitle: { color: c.text, fontSize: 19, letterSpacing: -0.3, ...uiFont('500') },
+    groupSum: { color: c.textMuted, fontSize: 15, fontVariant: ['tabular-nums'] },
 
     empty: { color: c.textMuted, fontSize: 13, textAlign: 'center', paddingVertical: 32 },
     emptyBox: {
@@ -394,12 +400,11 @@ const useStyles = makeStyles((c) =>
       paddingVertical: 28,
       paddingHorizontal: 20,
       alignItems: 'center',
-      borderRadius: Radius.xl,
+      borderRadius: 28,
       borderCurve: 'continuous',
-      backgroundColor: c.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: c.border,
-      boxShadow: c.cardShadowSubtle,
+      backgroundColor: c.surfaceSoft,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
     },
     emptyIcon: {
       width: 44,
@@ -413,14 +418,15 @@ const useStyles = makeStyles((c) =>
     emptyTitle: { color: c.text, fontSize: 16, fontFamily: DisplayFont.semibold },
     emptyText: { color: c.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 18 },
     more: {
-      height: 48,
-      borderRadius: Radius.xl,
-      borderCurve: 'continuous',
+      height: 50,
+      borderRadius: Radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: c.raised,
+      backgroundColor: c.surfaceSoft,
+      borderWidth: 1,
+      borderColor: c.borderSubtle,
     },
-    moreText: { color: c.text, fontSize: 15, fontWeight: '600', fontVariant: ['tabular-nums'] },
+    moreText: { color: c.text, fontSize: 15, fontVariant: ['tabular-nums'], ...uiFont('500') },
   }),
 );
 

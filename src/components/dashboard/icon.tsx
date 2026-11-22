@@ -80,6 +80,8 @@ const ICONS = {
   wifi: { ios: 'wifi', android: 'wifi' },
   send: { ios: 'paperplane.fill', android: 'send' },
   grip: { ios: 'line.3.horizontal', android: 'drag_handle' },
+  ellipsis: { ios: 'ellipsis', android: 'more_vert' },
+  link: { ios: 'link', android: 'link' },
 } as const;
 
 export type IconName = keyof typeof ICONS;

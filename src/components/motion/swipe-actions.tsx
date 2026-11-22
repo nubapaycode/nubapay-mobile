@@ -38,10 +38,13 @@ export type SwipeAction = {
 export function SwipeActions({
   start,
   end,
+  radius = Radius.xl,
   children,
 }: {
   start?: SwipeAction;
   end?: SwipeAction;
+  /** Radio de la card que envuelve (el fondo de la acción lo copia). */
+  radius?: number;
   children: ReactNode;
 }) {
   const tx = useSharedValue(0);
@@ -94,8 +97,8 @@ export function SwipeActions({
 
   return (
     <View onLayout={(e) => width.set(e.nativeEvent.layout.width || 1)}>
-      {start ? <Track action={start} side="start" tx={tx} width={width} past={past} pop={pop} /> : null}
-      {end ? <Track action={end} side="end" tx={tx} width={width} past={past} pop={pop} /> : null}
+      {start ? <Track action={start} side="start" radius={radius} tx={tx} width={width} past={past} pop={pop} /> : null}
+      {end ? <Track action={end} side="end" radius={radius} tx={tx} width={width} past={past} pop={pop} /> : null}
       <GestureDetector gesture={pan}>
         <Animated.View style={move}>{children}</Animated.View>
       </GestureDetector>
@@ -108,6 +111,7 @@ type SV = SharedValue<number>;
 function Track({
   action,
   side,
+  radius,
   tx,
   width,
   past,
@@ -115,6 +119,7 @@ function Track({
 }: {
   action: SwipeAction;
   side: 'start' | 'end';
+  radius: number;
   tx: SV;
   width: SV;
   past: SV;
@@ -140,7 +145,7 @@ function Track({
 
   return (
     <Animated.View
-      style={[styles.track, side === 'start' ? styles.start : styles.end, track]}
+      style={[styles.track, { borderRadius: radius }, side === 'start' ? styles.start : styles.end, track]}
       importantForAccessibility="no-hide-descendants"
       accessibilityElementsHidden>
       <Animated.View style={[styles.content, content]}>

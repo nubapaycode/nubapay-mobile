@@ -10,6 +10,7 @@ import {
   disableBiometricLogin,
   getBiometricEmail,
   getBiometricKind,
+  isBiometricAutoPromptSuppressed,
   readBiometricCredentials,
 } from '@/lib/biometrics';
 import { useAuth } from '@/providers/auth-provider';
@@ -68,7 +69,7 @@ export default function LoginScreen() {
         setEmail(savedEmail);
         setKind(k);
         setMode('biometric');
-        if (!autoPrompted.current) {
+        if (!autoPrompted.current && !isBiometricAutoPromptSuppressed()) {
           autoPrompted.current = true;
           biometricLogin(k);
         }

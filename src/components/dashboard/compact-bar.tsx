@@ -18,12 +18,13 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { BlurView } from '@/components/fx/blur';
 import { CountBadge } from '@/components/motion/count-badge';
 import { DisplayFont } from '@/constants/theme';
-import { formatMoney, initials } from '@/features/dashboard/format';
+import { formatMoney } from '@/features/dashboard/format';
 import { makeStyles, useTheme } from '@/theme';
 import { Text } from '@/components/ui/text';
 
 import { Icon } from './icon';
 import { RollingNumber } from './rolling-number';
+import { FaceAvatar } from '@/components/ui/face-avatar';
 
 /** Desde qué scroll empieza a aparecer y en cuántos px termina (el hero ya se fue de pantalla). */
 const START = 150;
@@ -198,7 +199,7 @@ export function CompactBar({
               accessibilityRole="button"
               accessibilityLabel="Perfil: cuenta, apariencia y cerrar sesión"
               style={({ pressed }) => [styles.fill, pressed && styles.pressed]}>
-              <Text style={styles.avatarText}>{userName ? initials(userName) : '·'}</Text>
+              <FaceAvatar seed={userName ?? ''} size={ROUND - 6} />
             </Pressable>
           </Island>
         </Animated.View>
@@ -280,7 +281,6 @@ const useStyles = makeStyles((c) =>
     spacer: { width: ROUND, height: ROUND },
     fill: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     pressed: { opacity: 0.6 },
-    avatarText: { color: c.text, fontSize: 15, fontWeight: '700' },
     centerSlot: { flex: 1, alignItems: 'center' },
     capsule: { height: ROUND + 4, borderRadius: (ROUND + 4) / 2, maxWidth: '100%' },
     capsuleRow: { flexDirection: 'row', gap: 7, paddingHorizontal: 20 },
