@@ -12,6 +12,9 @@
       "bundleIdentifier": "com.nubapay-business.ios",
       "supportsTablet": true,
       "requireFullScreen": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "CFBundleDisplayName": "NB Business"
       }
